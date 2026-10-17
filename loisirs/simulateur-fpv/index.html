@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Simulateur FPV</title>
+<meta name="description" content="Simulateur de drone FPV réaliste : mode acro, rates Betaflight, propwash, tunnels, bando, portes de course et zone de suivi de voitures en drift.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Chakra+Petch:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../assets/site.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="view"></canvas>
+
+<!-- ═══════════ OSD (incrusté comme sur un vrai retour vidéo) ═══════════ -->
+<div id="osd" aria-hidden="true">
+  <div class="osd-safe">
+    <div class="osd tl"><span id="oBat">25.2V</span><span id="oMah">0 MAH</span></div>
+    <div class="osd tr"><span id="oLq">LQ 100</span><span id="oRssi">▮▮▮▮▮</span></div>
+    <div class="osd tc" id="oWarn"></div>
+    <div class="osd cross" id="oCross">-─┼─-</div>
+    <div class="osd bl"><span id="oSpd">0 KM/H</span><span id="oAlt">ALT 0.0M</span></div>
+    <div class="osd bc"><span id="oMode">ACRO</span></div>
+    <div class="osd br"><span id="oThr">THR 0%</span><span id="oTime">00:00</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ HUD jeu ═══════════ -->
+<div id="hud">
+  <div id="hudTop"></div>
+  <div id="hudMsg"></div>
+  <div id="mark" class="mark"><i></i><span></span></div>
+  <div id="arrow" class="arrow"></div>
+  <button id="pauseBtn" class="pause-btn" title="Menu (Échap)" aria-label="Menu">❚❚</button>
+</div>
+
+<!-- ═══════════ Sticks tactiles ═══════════ -->
+<div id="touch" hidden>
+  <div class="stick" id="stickL"><i></i></div>
+  <div class="stick" id="stickR"><i></i></div>
+  <div class="touch-btns">
+    <button id="tArm">ARM</button>
+    <button id="tReset">RESET</button>
+    <button id="tCam">CAM</button>
+  </div>
+</div>
+
+<!-- ═══════════ Menu ═══════════ -->
+<div id="menu">
+  <div class="panel">
+    <header class="m-head">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><svg viewBox="0 0 40 40"><g fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="9" cy="9" r="6"/><circle cx="31" cy="9" r="6"/><circle cx="9" cy="31" r="6"/><circle cx="31" cy="31" r="6"/><path d="M13 13l14 14M27 13L13 27"/></g><rect x="16" y="16" width="8" height="8" rx="2" fill="currentColor"/></svg></span>
+        <div><h1>FPV SIM</h1><p>Acro réaliste · rates Betaflight · propwash · vidéo analogique</p></div>
+      </div>
+      <div class="pad-status" id="padStatus">Aucune manette</div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab on" data-tab="fly">Vol</button>
+      <button class="tab" data-tab="ctrl">Contrôles</button>
+      <button class="tab" data-tab="rates">Rates</button>
+      <button class="tab" data-tab="quad">Drone & caméra</button>
+      <button class="tab" data-tab="video">Vidéo & son</button>
+      <button class="tab" data-tab="help">Aide</button>
+    </nav>
+
+    <!-- VOL -->
+    <section class="pane on" data-pane="fly">
+      <h3>Session</h3>
+      <div class="cards" id="modeCards">
+        <button class="card" data-mode="free"><b>Vol libre</b><span>Toute la carte : bando, tunnels, conteneurs, tour de dive, forêt, éolienne.</span></button>
+        <button class="card" data-mode="race"><b>Course</b><span>9 checkpoints : portes, tunnel en S, dive, conteneurs, fenêtre du bando. Chrono au tour.</span></button>
+        <button class="card" data-mode="track"><b>Suivi de cible</b><span>Voitures en donut, en huit et sur circuit. Garde-les cadrées et proches.</span></button>
+      </div>
+      <h3>Drone</h3>
+      <div class="cards quads" id="quadCards"></div>
+      <h3>Mode de vol</h3>
+      <div class="seg" id="fmodeSeg">
+        <button data-v="acro">Acro <small>réaliste, aucune auto-stabilisation</small></button>
+        <button data-v="angle">Angle <small>auto-level, pour débuter au clavier</small></button>
+      </div>
+      <div class="m-actions">
+        <button class="go" id="goBtn">Décoller</button>
+        <span class="hint" id="goHint"></span>
+      </div>
+      <div class="keys">
+        <div><kbd>Z</kbd><kbd>S</kbd> gaz <small>(W/S en QWERTY)</small></div>
+        <div><kbd>Q</kbd><kbd>D</kbd> lacet</div>
+        <div><kbd>↑</kbd><kbd>↓</kbd> tangage · <kbd>←</kbd><kbd>→</kbd> roulis</div>
+        <div><kbd>Espace</kbd> armer / désarmer</div>
+        <div><kbd>R</kbd> reset · <kbd>C</kbd> caméra · <kbd>T</kbd> cible</div>
+        <div><kbd>H</kbd> OSD · <kbd>Échap</kbd> menu</div>
+      </div>
+    </section>
+
+    <!-- CONTRÔLES -->
+    <section class="pane" data-pane="ctrl">
+      <div class="row">
+        <label>Préréglage manette</label>
+        <select id="padPreset">
+          <option value="radio">Radiocommande USB (EdgeTX / OpenTX)</option>
+          <option value="xbox">Manette Xbox / PlayStation</option>
+        </select>
+      </div>
+      <p class="note">Branche ta radio en mode <b>Joystick (HID)</b>. Clique sur <b>Apprendre</b> puis bouge le stick demandé à fond (gaz vers le haut, lacet/roulis vers la droite, tangage vers l'avant). Pour l'armement, bascule ton interrupteur.</p>
+      <div class="chan-table" id="chanTable"></div>
+      <div class="row">
+        <button class="btn" id="calBtn">Calibrer les axes</button>
+        <span class="note" id="calNote">Calibrage : bouge tous les sticks dans les coins, puis reclique.</span>
+      </div>
+      <div class="row"><label>Zone morte <output id="dbOut"></output></label><input type="range" id="deadband" min="0" max="0.1" step="0.005"></div>
+      <div class="row"><label>Sensibilité clavier <output id="kbOut"></output></label><input type="range" id="kbSens" min="0.2" max="1" step="0.05"></div>
+      <div class="row"><label>Sticks tactiles</label><select id="touchMode"><option value="auto">Auto (écran tactile)</option><option value="on">Toujours</option><option value="off">Jamais</option></select></div>
+    </section>
+
+    <!-- RATES -->
+    <section class="pane" data-pane="rates">
+      <div class="row">
+        <label>Profil</label>
+        <select id="ratePreset">
+          <option value="bf">Betaflight par défaut (667°/s)</option>
+          <option value="free">Freestyle (850°/s)</option>
+          <option value="race">Race linéaire (700°/s)</option>
+          <option value="cine">Cinématique (400°/s)</option>
+          <option value="custom">Personnalisé</option>
+        </select>
+      </div>
+      <canvas id="rateCurve" width="560" height="220"></canvas>
+      <div class="rate-grid" id="rateGrid"></div>
+      <div class="row"><label>Expo gaz <output id="teOut"></output></label><input type="range" id="thrExpo" min="0" max="0.8" step="0.05"></div>
+      <div class="row"><label>Limite gaz <output id="tlOut"></output></label><input type="range" id="thrLimit" min="0.5" max="1" step="0.05"></div>
+      <div class="row"><label>Angle max (mode Angle) <output id="amOut"></output></label><input type="range" id="angleMax" min="20" max="80" step="5"></div>
+    </section>
+
+    <!-- DRONE & CAMÉRA -->
+    <section class="pane" data-pane="quad">
+      <div class="row"><label>Inclinaison caméra (uptilt) <output id="upOut"></output></label><input type="range" id="uptilt" min="0" max="50" step="1"></div>
+      <div class="row"><label>Champ de vision horizontal <output id="fovOut"></output></label><input type="range" id="fov" min="80" max="150" step="1"></div>
+      <div class="row"><label>Collisions</label><select id="crash"><option value="real">Réalistes (crash au-delà d'un choc violent)</option><option value="bounce">Indestructible (rebonds)</option></select></div>
+      <div class="row"><label>Batterie</label><select id="battery"><option value="real">Réaliste (chute de tension, autonomie)</option><option value="inf">Infinie</option></select></div>
+      <div class="row"><label>Vent moyen <output id="windOut"></output></label><input type="range" id="wind" min="0" max="12" step="0.5"></div>
+      <div class="row"><label>Propwash / turbulences <output id="pwOut"></output></label><input type="range" id="propwash" min="0" max="1.5" step="0.05"></div>
+      <div class="row"><label>Vibrations caméra <output id="vibOut"></output></label><input type="range" id="vib" min="0" max="2" step="0.1"></div>
+      <div class="row"><label>Air mode</label><select id="airmode"><option value="1">Activé (autorité à gaz nul)</option><option value="0">Désactivé</option></select></div>
+    </section>
+
+    <!-- VIDÉO -->
+    <section class="pane" data-pane="video">
+      <div class="row"><label>Transmission vidéo</label><select id="video"><option value="analog">Analogique 5.8 GHz (neige, parasites)</option><option value="hd">Numérique HD (net, macro-blocs en perte)</option></select></div>
+      <div class="row"><label>Distorsion grand-angle <output id="disOut"></output></label><input type="range" id="distort" min="0" max="0.6" step="0.02"></div>
+      <div class="row"><label>Perte de signal réaliste</label><select id="signalLoss"><option value="1">Oui (distance, murs, tunnels)</option><option value="0">Non</option></select></div>
+      <div class="row"><label>Ombres</label><select id="shadows"><option value="1">Oui</option><option value="0">Non (plus rapide)</option></select></div>
+      <div class="row"><label>Résolution de rendu <output id="scOut"></output></label><input type="range" id="scale" min="0.4" max="1" step="0.05"></div>
+      <div class="row"><label>OSD</label><select id="osdOn"><option value="1">Affiché</option><option value="0">Masqué</option></select></div>
+      <div class="row"><label>Volume moteurs <output id="volOut"></output></label><input type="range" id="volume" min="0" max="1" step="0.05"></div>
+    </section>
+
+    <!-- AIDE -->
+    <section class="pane help" data-pane="help">
+      <h3>Piloter en acro</h3>
+      <p>En mode <b>Acro</b>, les sticks commandent une <b>vitesse de rotation</b>, pas un angle : le drone garde l'inclinaison que tu lui donnes. Pour avancer, incline-le vers l'avant puis ajoute des gaz pour compenser la perte de portance. Les gaz ne reviennent pas au centre : environ 30 % suffisent pour tenir en l'air en 5".</p>
+      <h3>Ce qui est simulé</h3>
+      <ul>
+        <li>Rates Betaflight (RC rate, super rate, expo) et retard des moteurs.</li>
+        <li>Poussée qui baisse avec la vitesse d'avancement, traînée différente de face et de dessus.</li>
+        <li><b>Propwash</b> : en redescendant dans ton propre flux d'air, le drone vibre et perd de la poussée (vortex). Garde de la vitesse horizontale en sortie de dive.</li>
+        <li>Batterie : la tension chute sous forte charge et le drone devient mou en fin de pack.</li>
+        <li>Vent avec rafales (regarde la manche à air près de la tente).</li>
+        <li>Signal vidéo : la neige augmente avec la distance et derrière les murs, surtout dans les tunnels.</li>
+      </ul>
+      <h3>Zone de suivi</h3>
+      <p>Une cible est sélectionnée automatiquement (<kbd>T</kbd> pour changer). Le score monte quand la voiture est cadrée près du centre de l'image, entre 3 et 20 m.</p>
+      <h3>Caméras</h3>
+      <p><kbd>C</kbd> alterne entre FPV, vue poursuite et vue du pilote au sol (LOS, avec zoom auto).</p>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/input.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/world.js"></script>
+<script src="js/targets.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
