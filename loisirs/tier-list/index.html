@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tier List Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">
+      <i class="fas fa-list-ol"></i>
+      <span>Tier List Maker</span>
+    </div>
+    <p class="header-sub">Glissez les éléments dans votre classement</p>
+    <div class="header-actions">
+      <button class="hdr-btn" id="btn-reset"><i class="fas fa-rotate-left"></i> Reset</button>
+      <button class="hdr-btn hdr-btn-primary" id="btn-export"><i class="fas fa-image"></i> Exporter PNG</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- Tier list (main) -->
+    <div class="tier-list-area" id="tier-list-area">
+      <!-- rows injected by JS -->
+    </div>
+
+    <!-- Item pool -->
+    <div class="item-pool-area">
+      <div class="pool-header">
+        <span class="pool-title"><i class="fas fa-inbox"></i> Éléments disponibles</span>
+        <div class="pool-actions">
+          <input type="text" id="new-item-input" class="new-item-input" placeholder="Nom du nouvel élément..." maxlength="30" />
+          <button class="pool-btn" id="btn-add-item"><i class="fas fa-plus"></i></button>
+          <label class="pool-btn" title="Ajouter depuis image">
+            <i class="fas fa-image"></i>
+            <input type="file" id="img-import" accept="image/*" multiple style="display:none" />
+          </label>
+        </div>
+      </div>
+      <div class="item-pool" id="item-pool">
+        <!-- items injected by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Rename modal -->
+  <div class="modal-overlay" id="rename-modal" style="display:none;">
+    <div class="modal-box">
+      <h3>Renommer l'élément</h3>
+      <input type="text" id="rename-input" class="rename-input" maxlength="30" />
+      <div class="modal-actions">
+        <button class="modal-btn" id="rename-cancel">Annuler</button>
+        <button class="modal-btn modal-btn-primary" id="rename-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

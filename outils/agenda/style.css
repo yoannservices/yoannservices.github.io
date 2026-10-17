@@ -1,0 +1,290 @@
+:root {
+  --bg: var(--ui-bg);
+  --ink: var(--ui-text);
+  --muted: var(--ui-muted);
+  --panel: var(--ui-surface);
+  --line: var(--ui-border);
+  --highlight: var(--ui-accent);
+  --highlight-strong: var(--ui-accent-2);
+  --ok: var(--ui-ok);
+  --danger: var(--ui-danger);
+  --shadow: var(--ui-shadow);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: calc(100vh - var(--ui-bar-h, 0px));
+  font-family: var(--ui-font);
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.app-shell {
+  width: min(1050px, 94vw);
+  margin: 2rem auto 3rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hero {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--shadow);
+  padding: 1.3rem 1.4rem;
+  animation: rise 0.65s ease;
+}
+
+.eyebrow {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--highlight-strong);
+  font-size: 0.78rem;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.6rem, 2.7vw, 2.35rem);
+}
+
+.hero-text {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  animation: rise 0.65s ease;
+}
+
+#event-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.three-col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.62rem 0.7rem;
+  background: var(--ui-surface-2);
+  color: var(--ink);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--highlight);
+  box-shadow: 0 0 0 3px rgba(var(--ui-accent-rgb), 0.18);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  border-radius: var(--ui-radius-sm);
+  padding: 0.68rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--highlight);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.feedback {
+  min-height: 1.2rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ok);
+}
+
+.feedback.error {
+  color: var(--danger);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.filter-tabs {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.2rem;
+  background: var(--ui-surface-2);
+}
+
+.filter-btn {
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.45rem 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  background: var(--highlight);
+  color: #fff;
+}
+
+.table-wrap {
+  margin-top: 0.95rem;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.agenda-table {
+  width: 100%;
+  min-width: 840px;
+  border-collapse: collapse;
+  background: var(--ui-surface-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.agenda-table th,
+.agenda-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.agenda-table th {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: var(--ui-surface-3);
+}
+
+.agenda-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.agenda-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.event-title {
+  font-weight: 700;
+}
+
+.tag {
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tag-a,
+.tag-b,
+.tag-ab {
+  background: var(--ui-accent-soft);
+  color: var(--highlight-strong);
+}
+
+.muted-cell {
+  color: var(--muted);
+}
+
+.delete-btn {
+  border: 1px solid rgba(239,68,68,.35);
+  color: var(--danger);
+  background: rgba(239,68,68,.08);
+  border-radius: 10px;
+  padding: 0.33rem 0.6rem;
+  cursor: pointer;
+}
+
+.empty-state {
+  margin: 0.95rem 0 0;
+  color: var(--muted);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 780px) {
+  .two-col,
+  .three-col {
+    grid-template-columns: 1fr;
+  }
+
+  .agenda-table {
+    min-width: 720px;
+  }
+}
+

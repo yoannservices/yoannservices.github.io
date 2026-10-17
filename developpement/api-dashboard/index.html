@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="dev">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1><i class="fas fa-satellite-dish"></i> API <span class="accent">Dashboard</span></h1>
+      <p class="subtitle">Données en temps réel depuis des APIs publiques</p>
+    </div>
+    <div class="header-right">
+      <span class="status-dot" id="status-dot"></span>
+      <span class="status-text" id="status-text">Connexion...</span>
+      <button class="btn-refresh" id="btn-refresh"><i class="fas fa-rotate"></i> Actualiser</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="dashboard-grid">
+
+      <!-- Weather Widget -->
+      <div class="widget widget-lg" id="w-weather">
+        <div class="widget-header">
+          <h3><i class="fas fa-cloud-sun"></i> Météo</h3>
+          <select id="city-select">
+            <option value="48.8566,2.3522">Paris</option>
+            <option value="43.6047,3.8807">Montpellier</option>
+            <option value="45.764,4.8357">Lyon</option>
+            <option value="43.2965,5.3698">Marseille</option>
+            <option value="47.2184,-1.5536">Nantes</option>
+            <option value="44.8378,-0.5792">Bordeaux</option>
+            <option value="43.6109,1.4544">Toulouse</option>
+          </select>
+        </div>
+        <div class="weather-content" id="weather-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Date/Time Widget -->
+      <div class="widget" id="w-clock">
+        <div class="widget-header"><h3><i class="fas fa-clock"></i> Horloge</h3></div>
+        <div class="clock-content">
+          <div class="clock-time" id="clock-time">--:--:--</div>
+          <div class="clock-date" id="clock-date"></div>
+          <div class="clock-extras">
+            <div class="clock-extra"><span class="label">Semaine</span><span id="clock-week">--</span></div>
+            <div class="clock-extra"><span class="label">Jour de l'année</span><span id="clock-day">--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crypto Widget -->
+      <div class="widget widget-lg" id="w-crypto">
+        <div class="widget-header"><h3><i class="fab fa-bitcoin"></i> Crypto</h3><span class="widget-badge" id="crypto-update"></span></div>
+        <div class="crypto-grid" id="crypto-grid">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Quote Widget -->
+      <div class="widget" id="w-quote">
+        <div class="widget-header"><h3><i class="fas fa-quote-left"></i> Citation du jour</h3></div>
+        <div class="quote-content" id="quote-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- IP Info Widget -->
+      <div class="widget" id="w-ip">
+        <div class="widget-header"><h3><i class="fas fa-network-wired"></i> Mon IP</h3></div>
+        <div class="ip-content" id="ip-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Forecast Chart -->
+      <div class="widget widget-full" id="w-forecast">
+        <div class="widget-header"><h3><i class="fas fa-chart-line"></i> Prévisions 7 jours</h3></div>
+        <div class="chart-container">
+          <canvas id="forecast-chart" height="220"></canvas>
+        </div>
+      </div>
+
+      <!-- NASA APOD Widget -->
+      <div class="widget widget-lg" id="w-nasa">
+        <div class="widget-header"><h3><i class="fas fa-meteor"></i> NASA  -  Image du jour</h3></div>
+        <div id="nasa-content" class="nasa-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- ISS Tracker Widget -->
+      <div class="widget" id="w-iss">
+        <div class="widget-header"><h3><i class="fas fa-shuttle-space"></i> ISS en direct</h3></div>
+        <div id="iss-content" class="iss-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Random Fact Widget -->
+      <div class="widget" id="w-fact">
+        <div class="widget-header"><h3><i class="fas fa-lightbulb"></i> Le saviez-vous ?</h3><button class="btn-mini" onclick="loadRandomFact()"><i class="fas fa-dice"></i></button></div>
+        <div id="fact-content" class="fact-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- GitHub Stats Widget -->
+      <div class="widget widget-lg" id="w-github">
+        <div class="widget-header"><h3><i class="fab fa-github"></i> GitHub Stats</h3>
+          <div class="github-search">
+            <input type="text" id="github-user" placeholder="Username GitHub" value="slayzbs" />
+            <button class="btn-mini" onclick="loadGitHub()"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div id="github-content" class="github-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- Currency Converter Widget -->
+      <div class="widget widget-lg" id="w-currency">
+        <div class="widget-header"><h3><i class="fas fa-coins"></i> Convertisseur devises</h3><span class="widget-badge" id="currency-update"></span></div>
+        <div id="currency-content">
+          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <input type="number" id="currency-amount" value="100" style="width:90px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:.95rem" />
+            <select id="currency-from" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--ui-surface-3);color:var(--ui-text);font-size:.9rem"></select>
+            <span style="color:var(--muted)">→</span>
+            <select id="currency-to" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:var(--ui-surface-3);color:var(--ui-text);font-size:.9rem"></select>
+            <button class="btn-mini" onclick="convertCurrency()"><i class="fas fa-arrows-rotate"></i></button>
+          </div>
+          <div id="currency-result" style="font-size:1.4rem;font-weight:700;color:var(--accent);margin-bottom:12px"> - </div>
+          <div id="currency-rates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Air Quality Widget -->
+      <div class="widget" id="w-air">
+        <div class="widget-header"><h3><i class="fas fa-wind"></i> Qualité de l'air</h3></div>
+        <div id="air-content">
+          <div class="weather-loading"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <!-- World Clocks Widget -->
+      <div class="widget widget-lg" id="w-worldclock">
+        <div class="widget-header"><h3><i class="fas fa-earth-americas"></i> Horloges mondiales</h3></div>
+        <div id="worldclock-content" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

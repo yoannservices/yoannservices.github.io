@@ -1,0 +1,12 @@
+#memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:360px;width:100%;margin:1rem 0}
+.mem-card{
+  aspect-ratio:1;background:var(--surface2);border:2px solid #ffffff0a;border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;
+  transition:transform .25s,border-color .25s;user-select:none;
+}
+.mem-card.flipped,.mem-card.matched{background:var(--surface);border-color:var(--accent)}
+.mem-card.matched{border-color:var(--green);cursor:default}
+.mem-card:not(.flipped):not(.matched):hover{border-color:#ffffff22;transform:scale(1.04)}
+#memory-info{display:flex;gap:2rem;margin:.8rem 0;font-size:.95rem}
+#memory-info span{color:var(--muted)}
+#memory-info strong{color:var(--text)}

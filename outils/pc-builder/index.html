@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PC Builder Pro  -  Configurateur Intelligent</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient a1"></div>
+  <div class="ambient a2"></div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <p class="eyebrow"><i class="fas fa-microchip"></i> Configurateur Intelligent</p>
+      <h1>PC Builder <span class="accent">Pro</span></h1>
+      <p class="subtitle">Choisis ton profil, définis ton budget  -  l'outil recommande la config idéale avec vérification de compatibilité et benchmarks.</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-reset" class="btn btn-ghost"><i class="fas fa-rotate-right"></i> Réinitialiser</button>
+      <button id="btn-export" class="btn btn-ghost"><i class="fas fa-download"></i> Exporter</button>
+      <button id="btn-amazon-cart" class="btn btn-amazon"><i class="fab fa-amazon"></i> Panier Amazon</button>
+      <button id="btn-save" class="btn btn-solid"><i class="fas fa-bookmark"></i> Sauvegarder</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: WIZARD -->
+    <section class="panel wizard-panel">
+      <h2><i class="fas fa-wand-magic-sparkles"></i> Assistant de configuration</h2>
+
+      <!-- USAGE PROFILE -->
+      <div class="wizard-block">
+        <p class="block-label">Profil d'utilisation</p>
+        <div class="profile-grid" id="profile-grid">
+          <button class="profile-btn active" data-profile="gaming">
+            <i class="fas fa-gamepad"></i>
+            <span>Gaming</span>
+            <small>Jeux AAA, FPS élevés</small>
+          </button>
+          <button class="profile-btn" data-profile="streaming">
+            <i class="fas fa-video"></i>
+            <span>Streaming</span>
+            <small>Stream + jeu simultané</small>
+          </button>
+          <button class="profile-btn" data-profile="creation">
+            <i class="fas fa-film"></i>
+            <span>Création</span>
+            <small>Montage, rendu, 3D</small>
+          </button>
+          <button class="profile-btn" data-profile="bureautique">
+            <i class="fas fa-briefcase"></i>
+            <span>Bureautique</span>
+            <small>Multi-tâche, productivité</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- BUDGET SLIDER -->
+      <div class="wizard-block">
+        <div class="block-header">
+          <p class="block-label">Budget maximum</p>
+          <strong id="budget-display" class="budget-value">1500 €</strong>
+        </div>
+        <input type="range" id="budget-slider" min="300" max="5000" step="50" value="1500" class="range-slider" />
+        <div class="range-labels">
+          <span>300 €</span>
+          <span>1500 €</span>
+          <span>3000 €</span>
+          <span>5000 €</span>
+        </div>
+      </div>
+
+      <!-- BRAND PRESET -->
+      <div class="wizard-block">
+        <p class="block-label">Ensemble par marque</p>
+        <div class="brand-grid" id="brand-grid">
+          <button class="brand-btn active" data-brand="any">
+            <i class="fas fa-shuffle"></i>
+            <span>Toutes</span>
+          </button>
+          <button class="brand-btn" data-brand="amd-full">
+            <i class="fas fa-fire"></i>
+            <span>Full AMD</span>
+          </button>
+          <button class="brand-btn" data-brand="intel-full">
+            <i class="fas fa-bolt"></i>
+            <span>Full Intel</span>
+          </button>
+          <button class="brand-btn" data-brand="amd-nvidia">
+            <i class="fas fa-microchip"></i>
+            <span>AMD + NVIDIA</span>
+          </button>
+          <button class="brand-btn" data-brand="intel-nvidia">
+            <i class="fas fa-desktop"></i>
+            <span>Intel + NVIDIA</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- AUTO RECOMMEND -->
+      <button id="btn-recommend" class="btn btn-accent full-width"><i class="fas fa-bolt"></i> Recommandation auto</button>
+
+      <!-- MANUAL PICKERS -->
+      <div class="wizard-block">
+        <p class="block-label">Sélection manuelle des composants</p>
+        <div class="picker-grid" id="picker-grid">
+          <div class="picker-field">
+            <span><i class="fas fa-microchip"></i> Processeur (CPU)</span>
+            <div class="picker-row"><select id="sel-cpu"></select><a class="amazon-link hidden" id="amz-cpu" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-tv"></i> Carte graphique (GPU)</span>
+            <div class="picker-row"><select id="sel-gpu"></select><a class="amazon-link hidden" id="amz-gpu" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-server"></i> Carte mère</span>
+            <div class="picker-row"><select id="sel-mb"></select><a class="amazon-link hidden" id="amz-motherboard" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-memory"></i> Mémoire RAM</span>
+            <div class="picker-row"><select id="sel-ram"></select><a class="amazon-link hidden" id="amz-ram" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-hard-drive"></i> Stockage</span>
+            <div class="picker-row"><select id="sel-storage"></select><a class="amazon-link hidden" id="amz-storage" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-fan"></i> Refroidissement CPU</span>
+            <div class="picker-row"><select id="sel-cooler"></select><a class="amazon-link hidden" id="amz-cooler" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-plug"></i> Alimentation (PSU)</span>
+            <div class="picker-row"><select id="sel-psu"></select><a class="amazon-link hidden" id="amz-psu" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-box"></i> Boîtier</span>
+            <div class="picker-row"><select id="sel-case"></select><a class="amazon-link hidden" id="amz-pcCase" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-desktop"></i> Écran / Moniteur</span>
+            <div class="picker-row"><select id="sel-monitor"></select><a class="amazon-link hidden" id="amz-monitor" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-wind"></i> Ventilateurs boîtier</span>
+            <div class="picker-row"><select id="sel-casefan"></select><a class="amazon-link hidden" id="amz-caseFan" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-keyboard"></i> Clavier</span>
+            <div class="picker-row"><select id="sel-keyboard"></select><a class="amazon-link hidden" id="amz-keyboard" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-computer-mouse"></i> Souris</span>
+            <div class="picker-row"><select id="sel-mouse"></select><a class="amazon-link hidden" id="amz-mouse" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+          <div class="picker-field">
+            <span><i class="fas fa-headphones"></i> Casque audio</span>
+            <div class="picker-row"><select id="sel-headset"></select><a class="amazon-link hidden" id="amz-headset" target="_blank" rel="noreferrer" title="Rechercher sur Amazon"><i class="fab fa-amazon"></i></a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: DASHBOARD -->
+    <div class="dashboard">
+      <!-- SUMMARY CARDS -->
+      <div class="summary-row">
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+          <div>
+            <p>Prix total</p>
+            <strong id="total-price">0 €</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+          <div>
+            <p>Consommation</p>
+            <strong id="total-power">0 W</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div>
+            <p>Compatibilité</p>
+            <strong id="compat-status"> - </strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+          <div>
+            <p>Reste budget</p>
+            <strong id="budget-left"> - </strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-gauge-high"></i></div>
+          <div>
+            <p>Score global</p>
+            <strong id="global-score"> - </strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div>
+            <p>Score valeur</p>
+            <strong id="value-score"> - </strong>
+          </div>
+        </article>
+      </div>
+
+      <!-- SCORE BARS -->
+      <section class="panel score-panel">
+        <h2><i class="fas fa-chart-bar"></i> Scores par catégorie</h2>
+        <div class="score-bars" id="score-bars">
+          <div class="score-row">
+            <span class="score-label">Gaming</span>
+            <div class="bar-track"><div class="bar-fill" id="bar-gaming" style="width: 0%"></div></div>
+            <span class="score-val" id="val-gaming">0</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Productivité</span>
+            <div class="bar-track"><div class="bar-fill bar-blue" id="bar-productivity" style="width: 0%"></div></div>
+            <span class="score-val" id="val-productivity">0</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Création</span>
+            <div class="bar-track"><div class="bar-fill bar-purple" id="bar-creation" style="width: 0%"></div></div>
+            <span class="score-val" id="val-creation">0</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Streaming</span>
+            <div class="bar-track"><div class="bar-fill bar-warm" id="bar-streaming" style="width: 0%"></div></div>
+            <span class="score-val" id="val-streaming">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPATIBILITY -->
+      <section class="panel compat-panel">
+        <h2><i class="fas fa-shield-halved"></i> Contrôle de compatibilité</h2>
+        <ul id="compat-list" class="compat-list">
+          <li class="compat-empty">Sélectionnez des composants pour lancer l'analyse.</li>
+        </ul>
+      </section>
+
+      <!-- BENCHMARKS -->
+      <section class="panel bench-panel">
+        <div class="bench-head">
+          <h2><i class="fas fa-fire"></i> Estimation FPS en jeu</h2>
+          <label class="res-picker">
+            <span>Résolution</span>
+            <select id="sel-resolution">
+              <option value="1080">1080p</option>
+              <option value="1440">1440p</option>
+              <option value="2160">4K UHD</option>
+            </select>
+          </label>
+        </div>
+        <p class="muted-note">Estimations indicatives basées sur des profils de performance relatifs.</p>
+        <div id="bench-grid" class="bench-grid"></div>
+      </section>
+
+      <!-- SAVED BUILDS -->
+      <section class="panel saves-panel">
+        <h2><i class="fas fa-folder-open"></i> Builds sauvegardées</h2>
+        <div id="saves-list" class="saves-list">
+          <p class="compat-empty">Aucune build sauvegardée.</p>
+        </div>
+      </section>
+
+      <!-- COMPARE BUILDS -->
+      <section class="panel compare-panel">
+        <h2><i class="fas fa-code-compare"></i> Comparer des builds</h2>
+        <div class="compare-controls">
+          <select id="compare-a" class="compare-select"><option value=""> -  Build A  - </option></select>
+          <span style="font-weight:700;opacity:.4">VS</span>
+          <select id="compare-b" class="compare-select"><option value=""> -  Build B  - </option></select>
+          <button id="btn-compare" class="btn btn-accent" style="padding:8px 18px"><i class="fas fa-scale-balanced"></i> Comparer</button>
+        </div>
+        <div id="compare-result" class="compare-result"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 Yoann  -  PC Builder Pro</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

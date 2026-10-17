@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Trottinette Freestyle – Skatepark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="gl" tabindex="0" aria-label="Skatepark en 3D"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" hidden>
+    <div class="hud-tl panel">
+      <span class="lbl" id="hud-mode">Ride libre</span>
+      <strong id="hud-score">0</strong>
+      <span class="sub" id="hud-best"></span>
+    </div>
+    <div class="hud-tr panel">
+      <span class="timer" id="hud-timer" hidden>2:00</span>
+      <span class="spd"><b id="hud-speed">0</b> km/h</span>
+    </div>
+    <div id="hud-live"></div>
+    <div id="hud-trick" aria-live="polite"></div>
+    <div id="hud-balance"><span>Équilibre</span><div class="bar"><i></i></div></div>
+    <div id="hud-combo" class="panel">
+      <div id="combo-list"></div>
+      <div id="combo-total"></div>
+    </div>
+    <div id="hud-hint"></div>
+    <div id="toasts"></div>
+
+    <!-- Commandes tactiles -->
+    <div class="touch-ui">
+      <div id="stick"><i></i></div>
+      <div class="tbtns">
+        <button data-touch="whip">Whip</button>
+        <button data-touch="bar">Bar</button>
+        <button data-touch="grab">Grab</button>
+        <button data-touch="manual">Manual</button>
+        <button data-touch="jump" class="big">Saut</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Écran d'accueil -->
+  <div id="menu-start" class="overlay">
+    <div class="card hero">
+      <p class="eyebrow">Loisirs · Simulateur</p>
+      <h1>Trottinette<br><span>Freestyle</span></h1>
+      <p class="lede">Un skatepark en béton : quarters, vert de 3,2 m, mini rampe, funbox, kickers petit / moyen / gros, escalier avec main courante, rails et ledges. Enchaîne bunny hops, tailwhips, barspins, flips et grinds dans des combos.</p>
+      <label class="field">Point de départ
+        <select class="spawn-select"></select>
+      </label>
+      <div class="actions">
+        <button class="btn primary" data-act="free">Ride libre</button>
+        <button class="btn" data-act="session">Session 2 min</button>
+      </div>
+      <div class="actions small">
+        <button class="btn ghost" data-act="book">Livre des figures</button>
+        <button class="btn ghost" data-act="controls">Commandes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div id="menu-pause" class="overlay" hidden>
+    <div class="card">
+      <h2>Pause</h2>
+      <label class="field">Point de départ
+        <select class="spawn-select"></select>
+      </label>
+      <div class="stack">
+        <button class="btn primary" data-act="resume">Reprendre</button>
+        <button class="btn" data-act="respawn">Repartir du point de départ</button>
+        <button class="btn" data-act="camera">Caméra : Poursuite</button>
+        <button class="btn" data-act="book">Livre des figures &amp; défis</button>
+        <button class="btn" data-act="controls">Commandes</button>
+        <button class="btn ghost" data-act="menu">Menu principal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résultats de session -->
+  <div id="panel-results" class="overlay" hidden>
+    <div class="card">
+      <p class="eyebrow">Fin de la session</p>
+      <h2 id="res-score">0</h2>
+      <p class="sub" id="res-best"></p>
+      <dl class="stats">
+        <dt>Meilleur combo</dt><dd id="res-combo">0</dd>
+        <dt>Meilleure figure</dt><dd id="res-trick">—</dd>
+      </dl>
+      <div class="actions">
+        <button class="btn primary" data-act="again">Rejouer</button>
+        <button class="btn" data-act="free">Ride libre</button>
+        <button class="btn ghost" data-act="menu">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Livre des figures -->
+  <div id="panel-book" class="overlay top" hidden>
+    <div class="card wide">
+      <div class="head">
+        <h2>Livre des figures</h2>
+        <button class="x" data-act="close" aria-label="Fermer">✕</button>
+      </div>
+      <div class="book-tabs">
+        <button data-tab="tricks" class="on">Figures</button>
+        <button data-tab="challenges">Défis du park</button>
+      </div>
+      <p class="sub" id="book-count"></p>
+      <ul id="book-list"></ul>
+    </div>
+  </div>
+
+  <!-- Commandes -->
+  <div id="panel-controls" class="overlay top" hidden>
+    <div class="card wide">
+      <div class="head">
+        <h2>Commandes</h2>
+        <button class="x" data-act="close" aria-label="Fermer">✕</button>
+      </div>
+      <p class="sub">Touches indiquées en AZERTY (Z Q S D). En QWERTY : W A S D. Les flèches marchent aussi.</p>
+      <div class="cols">
+        <section>
+          <h3>Au sol</h3>
+          <ul class="keys">
+            <li><kbd>Z</kbd> pousser (sur le plat) / pumper (dans les courbes)</li>
+            <li><kbd>S</kbd> freiner</li>
+            <li><kbd>Q</kbd> <kbd>D</kbd> tourner</li>
+            <li><kbd>Espace</kbd> maintenir puis relâcher : saut</li>
+            <li><kbd>Maj.</kbd> manual (<kbd>Maj.</kbd>+<kbd>Z</kbd> nose manual)</li>
+            <li><kbd>E</kbd> revert (demi-tour, relie les combos)</li>
+          </ul>
+        </section>
+        <section>
+          <h3>En l’air</h3>
+          <ul class="keys">
+            <li><kbd>Q</kbd> <kbd>D</kbd> rotation 180 / 360 / 540…</li>
+            <li><kbd>S</kbd> backflip · <kbd>Z</kbd> frontflip (maintenir)</li>
+            <li><kbd>J</kbd> tailwhip · <kbd>U</kbd> heelwhip (répéter = double, triple)</li>
+            <li><kbd>K</kbd> barspin · <kbd>I</kbd> barspin inversé</li>
+            <li><kbd>L</kbd> no-hander · <kbd>L</kbd>+<kbd>Z</kbd> X-up · <kbd>L</kbd>+<kbd>S</kbd> superman · <kbd>L</kbd>+<kbd>Q</kbd> can-can · <kbd>L</kbd>+<kbd>D</kbd> tuck no-hander</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Grinds</h3>
+          <ul class="keys">
+            <li>Arriver dans l’axe d’un rail, d’un ledge ou d’un coping</li>
+            <li>Rien : 50-50 · <kbd>Z</kbd> nose · <kbd>S</kbd> feeble · <kbd>Q</kbd> smith · <kbd>D</kbd> crooked</li>
+            <li><kbd>Q</kbd> <kbd>D</kbd> équilibre · <kbd>Espace</kbd> sauter du rail</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Divers</h3>
+          <ul class="keys">
+            <li><kbd>C</kbd> caméra · <kbd>R</kbd> repartir · <kbd>T</kbd> tour de drop-in</li>
+            <li><kbd>B</kbd> livre des figures · <kbd>H</kbd> aide · <kbd>Échap</kbd> pause</li>
+          </ul>
+        </section>
+      </div>
+      <p class="sub tip">Combos : tant que tu ne poses pas les deux roues plus d’une demi-seconde, les figures s’additionnent et le multiplicateur grimpe. Un manual ou un revert juste après la réception prolonge le combo.</p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/park.js"></script>
+  <script src="js/rider.js"></script>
+  <script src="js/tricks.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

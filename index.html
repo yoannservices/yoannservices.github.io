@@ -1,0 +1,853 @@
+﻿<!DOCTYPE html>
+<html lang="fr" class="ui-hub">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes Projets – Yoann</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/theme.css" />
+  <script src="assets/site.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Palette issue du thème commun (assets/theme.css) */
+    :root {
+      --bg:       var(--ui-bg);
+      --surface:  var(--ui-surface);
+      --surface-2:var(--ui-surface-2);
+      --border:   var(--ui-border);
+      --accent-outils:   var(--cat-outils);
+      --accent-dev:      var(--cat-dev);
+      --accent-creatif:  var(--cat-creatif);
+      --accent-loisirs:  var(--cat-loisirs);
+      --accent-prog:     var(--cat-prog);
+      --accent-model:    var(--cat-model);
+      --accent-elec:     var(--cat-elec);
+      --accent-educ:     var(--cat-educ);
+      --accent-launch:   #38bdf8;
+      --text:     var(--ui-text);
+      --muted:    var(--ui-muted);
+      --radius:   var(--ui-radius);
+    }
+
+    body {
+      font-family: var(--ui-font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeUp .5s ease both;
+    }
+    header .ui-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      gap: 4px;
+      padding: 7px;
+      margin: 0 auto 18px;
+    }
+    header .ui-logo i { border-radius: 4px; }
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 1rem;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .category-group { display: contents; }
+    .featured-categories .project-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .category-group[hidden] { display: none !important; }
+
+    .category.outils { order: 1; grid-column: 1 / -1; }
+    .category.loisirs { order: 2; grid-column: 1 / -1; }
+    .category.dev { order: 3; }
+    .category.prog { order: 4; }
+    .category.elec { order: 5; }
+    .category.educ { order: 6; }
+    .category.creatif { order: 7; }
+    .category.model { order: 8; }
+
+    .category {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      animation: fadeUp .5s ease both;
+    }
+    .category:hover {
+      border-color: rgba(255,255,255,.12);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-header .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .category-header p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .outils   .icon { background: rgba(59,130,246,.15); }
+    .dev      .icon { background: rgba(168,85,247,.15); }
+    .creatif  .icon { background: rgba(249,115,22,.15); }
+    .loisirs  .icon { background: rgba(34,197,94,.15);  }
+    .prog     .icon { background: rgba(6,182,212,.15);  }
+    .model    .icon { background: rgba(236,72,153,.15); }
+    .elec     .icon { background: rgba(234,179,8,.15);  }
+    .educ     .icon { background: rgba(16,185,129,.15); }
+
+    .project-list { padding: 12px 0; }
+
+    .project-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background .15s, transform .15s;
+      border-radius: 8px;
+      margin: 2px 8px;
+    }
+    .project-item:hover { background: rgba(255,255,255,.05); transform: translateX(4px); }
+
+    .project-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .outils  .dot { background: var(--accent-outils); }
+    .dev     .dot { background: var(--accent-dev); }
+    .creatif .dot { background: var(--accent-creatif); }
+    .loisirs .dot { background: var(--accent-loisirs); }
+    .prog    .dot { background: var(--accent-prog); }
+    .model   .dot { background: var(--accent-model); }
+    .elec    .dot { background: var(--accent-elec); }
+    .educ    .dot { background: var(--accent-educ); }
+
+    .project-info { flex: 1; min-width: 0; }
+    .project-info strong { display: block; font-size: 0.9rem; font-weight: 600; }
+    .project-info span   { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .tag {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.07);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 64px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* // Search & Filters // */
+    .controls {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .search-bar {
+      position: relative;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-bar input:focus { border-color: #3b82f6; }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar::before {
+      content: '🔍';
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .filter-btn:hover { border-color: #3b82f6; color: var(--text); }
+    .filter-btn.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+    .status-badge {
+      font-size: 0.58rem;
+      padding: 1px 7px;
+      border-radius: 99px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      white-space: nowrap;
+    }
+    .status-badge.done { background: rgba(34,197,94,.15); color: #4ade80; }
+    .status-badge.wip  { background: rgba(251,191,36,.15); color: #fbbf24; }
+    .status-badge.idea { background: rgba(148,163,184,.15); color: #94a3b8; }
+    .recent-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .recent-row[hidden] { display: none; }
+    .recent-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+    .recent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: border-color .2s, transform .2s;
+    }
+    .recent-chip:hover { border-color: var(--chip, #3b82f6); transform: translateY(-1px); }
+    .recent-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--chip); }
+    .project-item[hidden] { display: none !important; }
+    .category[hidden] { display: none !important; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      body { padding: 36px 16px 64px; }
+      .grid,
+      .featured-categories .project-list { grid-template-columns: minmax(0, 1fr); }
+    }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="ui-logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <h1>Mes Projets</h1>
+  <p id="project-counter">Projets actifs · 8 catégories</p>
+</header>
+
+<!-- // Search & Filters // -->
+<div class="controls">
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Rechercher un projet, une techno, un mot-clé…" autocomplete="off" />
+  </div>
+  <div class="recent-row" id="recent-row" hidden>
+    <span class="recent-label">Récemment ouverts</span>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <button class="filter-btn" data-filter="JS">JavaScript</button>
+    <button class="filter-btn" data-filter="Node">Node.js</button>
+    <button class="filter-btn" data-filter="Python">Python</button>
+    <button class="filter-btn" data-filter="React">React</button>
+    <button class="filter-btn" data-filter="HTML">HTML/CSS</button>
+    <button class="filter-btn" data-filter="Tailwind">Tailwind</button>
+    <button class="filter-btn" data-filter="API">APIs</button>
+    <button class="filter-btn" data-filter="MediaPipe">MediaPipe</button>
+    <button class="filter-btn" data-filter="Arduino">Arduino</button>
+    <button class="filter-btn" data-filter="done">✅ Terminé</button>
+    <button class="filter-btn" data-filter="wip">🟡 En cours</button>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="featured-categories category-group">
+  <!-- OUTILS -->
+  <div class="category outils" id="outils">
+    <div class="category-header">
+      <div class="icon">🛠️</div>
+      <div>
+        <h2>Outils</h2>
+        <p>Outils et organisation</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <a class="project-item" href="outils/agenda/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Agenda Semaine A/B</strong>
+          <span>Planning interactif semaines alternées</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/pc-builder/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>PC Builder Pro</strong>
+          <span>Configurateur intelligent avec profils, budget auto & benchmarks</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/conjugator/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Conjugator</strong>
+          <span>Analyseur de formes verbales françaises</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/generateur-cv/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Générateur de CV</strong>
+          <span>Formulaire live – export PDF professionnel</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+
+      <a class="project-item" href="outils/unit-converter/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Unit Converter</strong>
+          <span>Convertisseur universel d'unités (8 catégories)</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/lieux-proches/index.html" data-tags="HTML JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Lieux Proches</strong>
+          <span>App de découverte de lieux avec carte & favoris</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">HTML/CSS</span>
+      </a>
+      <a class="project-item" href="outils/game-tools-lab/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Game Tools Lab</strong>
+          <span>Suite multi-outils gaming (tests, clickers, calculateurs)</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/css-animator/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>CSS Animator</strong>
+          <span>Éditeur visuel de @keyframes avec préréglages, prévisualisation & export CSS</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="outils/habit-tracker/index.html" data-tags="JS React" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Habit Tracker</strong>
+          <span>Suivi d'habitudes quotidiennes – graphiques Chart.js, streaks & vue mensuelle</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + React</span>
+      </a>
+      <a class="project-item" href="outils/pieces-detachees-tel/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Pièces Détachées Téléphone</strong>
+          <span>Meilleurs sites de pièces détachées par marque & modèle, classés par pertinence</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+    </div>
+  </div>
+
+  </div>
+  <div class="compact-categories category-group">
+  <!-- DEVELOPPEMENT -->
+  <div class="category dev" id="dev">
+    <div class="category-header">
+      <div class="icon">💻</div>
+      <div>
+        <h2>Développement</h2>
+        <p>Projets tech & apprentissage</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <a class="project-item" href="developpement/portfolio/index.html" data-tags="HTML JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Portfolio</strong>
+          <span>Portfolio interactif avec toggle 2D / 3D</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">HTML/CSS</span>
+      </a>
+      <a class="project-item" href="developpement/api-dashboard/index.html" data-tags="JS API" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>API Dashboard</strong>
+          <span>Dashboard temps réel (météo, crypto, IP, NASA, ISS…)</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + APIs</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CREATIF -->
+  <div class="category creatif" id="creatif">
+    <div class="category-header">
+      <div class="icon">🎨</div>
+      <div>
+        <h2>Créatif</h2>
+        <p>Design, e-commerce & concepts</p>
+      </div>
+    </div>
+    <div class="project-list">
+    </div>
+  </div>
+
+  </div>
+  <div class="featured-categories category-group">
+  <!-- LOISIRS -->
+  <div class="category loisirs" id="loisirs">
+    <div class="category-header">
+      <div class="icon">🎮</div>
+      <div>
+        <h2>Loisirs</h2>
+        <p>Jeux, collections et univers</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <a class="project-item" href="loisirs/univers/index.html" data-tags="HTML" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Univers</strong>
+          <span>Page d'accueil des univers Dragon et One Piece</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">HTML/CSS</span>
+      </a>
+      <a class="project-item" href="loisirs/tier-list/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Tier List Maker</strong>
+          <span>Classement drag-and-drop S/A/B/C/D/F avec import image &amp; export PNG</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="loisirs/quick-play/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>QuickPlay</strong>
+          <span>15 mini-jeux arcade avec scores & succès</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="loisirs/Essaie%20moteur.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Essaie moteur</strong>
+          <span>Simulateur automobile avec moteur, boîte et pédales interactives</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="loisirs/Drift%20King.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Drift King</strong>
+          <span>Jeu de conduite et de drift sur une route de montagne</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="loisirs/Simulateur%20Avion.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Simulateur Avion</strong>
+          <span>Vol libre en F-35B (Mach 2,9) ou en PV-40 à aile basculante, pistes, relief et météo</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + WebGL</span>
+      </a>
+      <a class="project-item" href="loisirs/Simulateur%20Moto.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Col Vitesse</strong>
+          <span>Simulateur de moto sur route de montagne et route ouverte</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + WebGL</span>
+      </a>
+      <a class="project-item" href="loisirs/Kukirin.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Kukirin</strong>
+          <span>Jeu de trottinette électrique avec livraisons, quêtes et garage</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + WebGL</span>
+      </a>
+      <a class="project-item" href="loisirs/trottinette-freestyle/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Trottinette Freestyle</strong>
+          <span>Simulateur de trottinette en skatepark : whips, barspins, flips, grinds et combos</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + WebGL</span>
+      </a>
+      <a class="project-item" href="loisirs/music-player/index.html" data-tags="JS API" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Music Player</strong>
+          <span>Lecteur audio avec visualisation & playlists</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + Web Audio</span>
+      </a>
+      <a class="project-item" href="loisirs/pokedex/index.html" data-tags="JS API" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Pokédex Complet</strong>
+          <span>1025 Pokémon avec stats, filtres & évolutions</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS + PokéAPI</span>
+      </a>
+    </div>
+  </div>
+
+  </div>
+  <div class="compact-categories category-group">
+
+  <!-- PROGRAMMATION -->
+  <div class="category prog" id="prog">
+    <div class="category-header">
+      <div class="icon">⌨️</div>
+      <div>
+        <h2>Programmation</h2>
+        <p>Scripts, apps &amp; bots</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="React" data-status="wip">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>QuestLife</strong>
+          <span>App mobile RPG de vie quotidienne</span>
+        </div>
+        <span class="status-badge wip">En cours</span>
+        <span class="tag">React Native</span>
+      </div>
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="Python" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>IA Image</strong>
+          <span>Classification d'images TensorFlow</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Python</span>
+      </div>
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Roboprog</strong>
+          <span>Programmation robot</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Scratch</span>
+      </div>
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Scratch</strong>
+          <span>Projets Scratch</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Scratch</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉLECTRONIQUE / TINKERCAD -->
+  <div class="category elec" id="elec">
+    <div class="category-header">
+      <div class="icon">⚡</div>
+      <div>
+        <h2>Électronique</h2>
+        <p>Circuits Arduino – Tinkercad</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <a class="project-item" href="https://www.tinkercad.com/things/cdZFdnbTa4a-radar-de-recul" target="_blank" rel="noreferrer" data-tags="Arduino" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Radar de proximité</strong>
+          <span>5 capteurs ultrasoniques + 4 buzzers + 3 LEDs</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Arduino</span>
+      </a>
+      <a class="project-item" href="https://www.tinkercad.com/things/5ecQEKIR8Wr-suiveur-solaire-" target="_blank" rel="noreferrer" data-tags="Arduino" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Suiveur de lumière</strong>
+          <span>Servo + 2 photorésistances – orientation automatique</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Arduino</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ÉDUCATION -->
+  <div class="category educ" id="educ">
+    <div class="category-header">
+      <div class="icon">📚</div>
+      <div>
+        <h2>Éducation</h2>
+        <p>Révision & apprentissage interactif</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <a class="project-item" href="education/tableau-periodique/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Tableau Périodique</strong>
+          <span>118 éléments interactifs avec 3 modes de coloration & fiches</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+      <a class="project-item" href="education/revision/index.html" data-tags="JS" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Révision Lycée – Seconde & Première</strong>
+          <span>Fiches, quiz & flashcards – toutes matières de Seconde à Première</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">JS</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- MODÉLISATION -->
+  <div class="category model" id="model">
+    <div class="category-header">
+      <div class="icon">🏗️</div>
+      <div>
+        <h2>Modélisation</h2>
+        <p>Designs 3D &amp; plans</p>
+      </div>
+    </div>
+    <div class="project-list">
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>SketchUp</strong>
+          <span>Maison Montpellier</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">SketchUp</span>
+      </div>
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Studio 2.0</strong>
+          <span>10 modèles 3D (véhicules, robots…)</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">Studio 2.0</span>
+      </div>
+      <div class="project-item" style="cursor:default; opacity:.6;" data-tags="" data-status="done">
+        <div class="dot"></div>
+        <div class="project-info">
+          <strong>Sweet Home 3D</strong>
+          <span>7 plans d'intérieur</span>
+        </div>
+        <span class="status-badge done">Terminé</span>
+        <span class="tag">SH3D</span>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Yoann · 2026</p>
+</footer>
+
+<script>
+(function(){
+  const search = document.getElementById('search-input');
+  const btns = document.querySelectorAll('.filter-btn');
+  const items = document.querySelectorAll('.project-item');
+  const categories = document.querySelectorAll('.category');
+  const categoryGroups = document.querySelectorAll('.category-group');
+  const counter = document.getElementById('project-counter');
+  let activeFilter = 'all';
+
+  function escapeHtml(value){
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function updateCounter(){
+    const visible = [...items].filter(i => !i.hidden).length;
+    counter.textContent = visible + ' projet' + (visible > 1 ? 's' : '') + ' · 8 catégories';
+  }
+
+  function applyFilters(){
+    const q = search.value.toLowerCase().trim();
+    let visible = 0;
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      const tags = (item.dataset.tags || '').toLowerCase();
+      const status = item.dataset.status || '';
+      let show = true;
+      if(q && !text.includes(q) && !tags.includes(q)) show = false;
+      if(activeFilter !== 'all'){
+        if(activeFilter === 'done' || activeFilter === 'wip'){
+          if(status !== activeFilter) show = false;
+        } else {
+          if(!tags.toLowerCase().includes(activeFilter.toLowerCase())) show = false;
+        }
+      }
+      item.hidden = !show;
+      if(show) visible++;
+    });
+    categories.forEach(cat => {
+      const hasVisible = [...cat.querySelectorAll('.project-item')].some(i => !i.hidden);
+      cat.hidden = !hasVisible;
+    });
+    categoryGroups.forEach(group => {
+      group.hidden = ![...group.querySelectorAll('.category')].some(cat => !cat.hidden);
+    });
+    updateCounter();
+  }
+
+
+
+  search.addEventListener('input', applyFilters);
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+  updateCounter();
+
+  // Projets récemment ouverts (enregistrés par assets/site.js)
+  (function renderRecent(){
+    const row = document.getElementById('recent-row');
+    const site = window.MesProjets;
+    if (!row || !site) return;
+    let paths = [];
+    try { paths = JSON.parse(localStorage.getItem(site.recentKey) || '[]'); } catch (e) { return; }
+    const list = paths.map(p => site.projects.find(x => x.path === p)).filter(Boolean).slice(0, 5);
+    if (!list.length) return;
+    list.forEach(p => {
+      const a = document.createElement('a');
+      a.className = 'recent-chip';
+      a.href = p.path.endsWith('.html') ? encodeURI(p.path) : p.path + 'index.html';
+      a.style.setProperty('--chip', 'var(--cat-' + p.cat + ')');
+      a.innerHTML = '<span class="dot"></span>' + escapeHtml(p.name);
+      row.appendChild(a);
+    });
+    row.hidden = false;
+  })();
+})();
+</script>
+</body>
+</html>

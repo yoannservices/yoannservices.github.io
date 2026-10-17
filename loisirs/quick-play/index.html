@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Mini-Jeux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/theme.css" />
+<script src="../../assets/site.js" defer></script>
+<link rel="stylesheet" href="css/shared.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div id="stars"></div>
+
+
+<div id="hub" class="screen active">
+  <h1 class="hub-title">QUICKPLAY</h1>
+  <p class="hub-sub">Mini-jeux rapides  -  choisis et joue.</p>
+
+  <!-- Player Profile Bar -->
+  <div id="player-bar" style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 24px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toggleProfile()">
+      <span style="font-size:1.6rem">👤</span>
+      <div>
+        <div style="font-weight:700;font-size:.95rem" id="player-name">Joueur</div>
+        <div style="font-size:.75rem;opacity:.6" id="player-level">Niveau 1 • 0 XP</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 24px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleScores()">
+      <span style="font-size:1.4rem">🏆</span>
+      <div>
+        <div style="font-weight:700;font-size:.95rem">Scores</div>
+        <div style="font-size:.75rem;opacity:.6" id="total-games">0 parties</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 24px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleAchievements()">
+      <span style="font-size:1.4rem">🎖️</span>
+      <div>
+        <div style="font-weight:700;font-size:.95rem">Succès</div>
+        <div style="font-size:.75rem;opacity:.6" id="achievements-count">0 / 10</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Panel (hidden) -->
+  <div id="profile-panel" style="display:none;max-width:500px;margin:0 auto 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px">
+    <h3 style="margin-bottom:10px">Profil Joueur</h3>
+    <input type="text" id="name-input" placeholder="Ton pseudo" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#fff;font-size:.95rem;margin-bottom:10px" oninput="savePlayerName(this.value)">
+    <div id="xp-bar-container" style="background:rgba(255,255,255,.08);border-radius:10px;height:20px;overflow:hidden;position:relative">
+      <div id="xp-bar" style="height:100%;background:linear-gradient(90deg,var(--ui-accent),var(--ui-accent-2));border-radius:10px;width:0%;transition:width .5s"></div>
+      <span id="xp-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700">0 / 100 XP</span>
+    </div>
+  </div>
+
+  <!-- Scores Panel (hidden) -->
+  <div id="scores-panel" style="display:none;max-width:600px;margin:0 auto 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px">
+    <h3 style="margin-bottom:10px">🏆 Meilleurs scores</h3>
+    <div id="scores-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px"></div>
+  </div>
+
+  <!-- Achievements Panel (hidden) -->
+  <div id="achievements-panel" style="display:none;max-width:600px;margin:0 auto 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px">
+    <h3 style="margin-bottom:10px">🎖️ Succès</h3>
+    <div id="achievements-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+  </div>
+
+  <div class="hub-search-row">
+    <input id="game-search" type="text" placeholder="Rechercher un jeu..." autocomplete="off" />
+    <select id="game-filter">
+      <option value="all">Toutes catégories</option>
+      <option value="reflex">Réflexe</option>
+      <option value="puzzle">Puzzle</option>
+      <option value="speed">Vitesse</option>
+      <option value="arcade">Arcade</option>
+      <option value="cards">Cartes</option>
+      <option value="survival">Survie</option>
+      <option value="action">Action</option>
+      <option value="strategy">Stratégie</option>
+      <option value="idle">Idle</option>
+    </select>
+    <span id="game-counter">15 jeux</span>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card" data-cat="reflex" onclick="showGame('reaction')">
+      <div class="card-icon">⚡</div>
+      <div class="card-name">Réaction</div>
+      <div class="card-desc">Clique dès que le cercle devient vert. Bats ton record en ms.</div>
+      <span class="badge badge-reflex">Réflexe</span>
+    </div>
+    <div class="card" data-cat="idle" onclick="showGame('clicker')">
+      <div class="card-icon">🚀</div>
+      <div class="card-name">Space Clicker</div>
+      <div class="card-desc">Conquiers l'espace, achète satellites et colonies, progression sauvegardée.</div>
+      <span class="badge badge-idle">Idle</span>
+    </div>
+    <div class="card" data-cat="puzzle" onclick="showGame('memory')">
+      <div class="card-icon">🧠</div>
+      <div class="card-name">Mémoire</div>
+      <div class="card-desc">Retourne les cartes et retrouve les 8 paires d'emojis.</div>
+      <span class="badge badge-puzzle">Puzzle</span>
+    </div>
+    <div class="card" data-cat="puzzle" onclick="showGame('guess')">
+      <div class="card-icon">🔢</div>
+      <div class="card-name">Devinette</div>
+      <div class="card-desc">Trouve le nombre secret entre 1 et 100 en 10 essais.</div>
+      <span class="badge badge-puzzle">Puzzle</span>
+    </div>
+    <div class="card" data-cat="speed" onclick="showGame('typing')">
+      <div class="card-icon">⌨️</div>
+      <div class="card-name">Typing Rush</div>
+      <div class="card-desc">Tape un max de mots en 30 secondes.</div>
+      <span class="badge badge-speed">Vitesse</span>
+    </div>
+    <div class="card" data-cat="reflex" onclick="showGame('aim')">
+      <div class="card-icon">🎯</div>
+      <div class="card-name">Aim Trainer</div>
+      <div class="card-desc">30 cibles à toucher le plus vite possible. Précision + vitesse.</div>
+      <span class="badge badge-reflex">Réflexe</span>
+    </div>
+    <div class="card" data-cat="puzzle" onclick="showGame('anagram')">
+      <div class="card-icon">🔤</div>
+      <div class="card-name">Anagramme</div>
+      <div class="card-desc">Un mot mélangé s'affiche, retrouve le mot original. 60 secondes.</div>
+      <span class="badge badge-puzzle">Puzzle</span>
+    </div>
+    <div class="card" data-cat="arcade" onclick="showGame('snake')">
+      <div class="card-icon">🐍</div>
+      <div class="card-name">Snake</div>
+      <div class="card-desc">Mange les pommes, grandis, ne te mords pas la queue.</div>
+      <span class="badge badge-arcade">Arcade</span>
+    </div>
+    <div class="card" data-cat="puzzle" onclick="showGame('2048')">
+      <div class="card-icon">🧩</div>
+      <div class="card-name">2048</div>
+      <div class="card-desc">Glisse les tuiles pour les fusionner. Objectif : 2048.</div>
+      <span class="badge badge-puzzle">Puzzle</span>
+    </div>
+    <div class="card" data-cat="puzzle" onclick="showGame('mines')">
+      <div class="card-icon">💣</div>
+      <div class="card-name">Démineur</div>
+      <div class="card-desc">Grille 9×9, 10 mines. Révèle tout sans exploser.</div>
+      <span class="badge badge-puzzle">Puzzle</span>
+    </div>
+    <div class="card" data-cat="cards" onclick="showGame('blackjack')">
+      <div class="card-icon">🃏</div>
+      <div class="card-name">Blackjack</div>
+      <div class="card-desc">Atteins 21 sans dépasser. Bats le croupier.</div>
+      <span class="badge badge-cards">Cartes</span>
+    </div>
+    <div class="card" data-cat="arcade" onclick="showGame('dino')">
+      <div class="card-icon">🦖</div>
+      <div class="card-name">Dino Run</div>
+      <div class="card-desc">Runner infini. Saute les obstacles, bats ton record.</div>
+      <span class="badge badge-arcade">Arcade</span>
+    </div>
+    <div class="card" data-cat="survival" onclick="showGame('dodgezone')">
+      <div class="card-icon">🌀</div>
+      <div class="card-name">Dodge Zone</div>
+      <div class="card-desc">Esquive des formes de plus en plus agressives et tiens le plus longtemps possible.</div>
+      <span class="badge badge-survival">Survie</span>
+    </div>
+    <div class="card" data-cat="action" onclick="showGame('hunterzone')">
+      <div class="card-icon">💥</div>
+      <div class="card-name">Hunter Zone</div>
+      <div class="card-desc">Détruis les blocs avant qu'ils quittent l'écran et enchaîne les combos.</div>
+      <span class="badge badge-action">Action</span>
+    </div>
+    <div class="card" data-cat="strategy" onclick="showGame('towerdefense')">
+      <div class="card-icon">🛸</div>
+      <div class="card-name">Space TD</div>
+      <div class="card-desc">Place des tourelles futuristes pour défendre ta planète contre les vagues d'aliens.</div>
+      <span class="badge badge-strategy">Stratégie</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/shared.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
+

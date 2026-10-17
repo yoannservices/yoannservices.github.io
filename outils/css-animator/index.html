@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Animator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">
+      <i class="fas fa-wand-magic-sparkles"></i>
+      <span>CSS Animator</span>
+    </div>
+    <p class="header-sub">Créez des animations CSS @keyframes visuellement</p>
+  </header>
+
+  <main class="app-layout">
+
+    <!-- LEFT: Controls -->
+    <aside class="panel panel-controls">
+
+      <!-- Element selector -->
+      <section class="ctrl-section">
+        <h3 class="ctrl-title"><i class="fas fa-cube"></i> Élément de prévisualisation</h3>
+        <div class="form-row">
+          <label>Type</label>
+          <select id="el-type">
+            <option value="box">Boîte</option>
+            <option value="circle">Cercle</option>
+            <option value="text">Texte</option>
+            <option value="image">Image</option>
+          </select>
+        </div>
+        <div class="form-row" id="text-content-row" style="display:none">
+          <label>Texte</label>
+          <input type="text" id="el-text" value="Hello!" maxlength="40" />
+        </div>
+        <div class="form-row" id="img-url-row" style="display:none">
+          <label>URL image</label>
+          <input type="url" id="el-img-url" placeholder="https://..." />
+        </div>
+        <div class="form-row">
+          <label>Couleur fond</label>
+          <input type="color" id="el-bg" value="#3b82f6" />
+        </div>
+        <div class="form-row">
+          <label>Largeur (px)</label>
+          <input type="number" id="el-w" value="80" min="20" max="400" />
+        </div>
+        <div class="form-row">
+          <label>Hauteur (px)</label>
+          <input type="number" id="el-h" value="80" min="20" max="400" />
+        </div>
+      </section>
+
+      <!-- Animation settings -->
+      <section class="ctrl-section">
+        <h3 class="ctrl-title"><i class="fas fa-film"></i> Animation</h3>
+        <div class="form-row">
+          <label>Nom</label>
+          <input type="text" id="anim-name" value="myAnimation" maxlength="30" />
+        </div>
+        <div class="form-row">
+          <label>Durée (s)</label>
+          <input type="number" id="anim-dur" value="1" min="0.1" max="60" step="0.1" />
+        </div>
+        <div class="form-row">
+          <label>Délai (s)</label>
+          <input type="number" id="anim-delay" value="0" min="0" max="30" step="0.1" />
+        </div>
+        <div class="form-row">
+          <label>Répétitions</label>
+          <div class="iter-row">
+            <input type="number" id="anim-iter-n" value="1" min="1" max="999" />
+            <label class="chk-label"><input type="checkbox" id="anim-iter-inf" /> Infini</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Direction</label>
+          <select id="anim-direction">
+            <option value="normal">Normal</option>
+            <option value="reverse">Reverse</option>
+            <option value="alternate">Alternate</option>
+            <option value="alternate-reverse">Alternate-reverse</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Fill mode</label>
+          <select id="anim-fill">
+            <option value="none">None</option>
+            <option value="forwards" selected>Forwards</option>
+            <option value="backwards">Backwards</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Timing</label>
+          <select id="anim-timing">
+            <option value="ease">Ease</option>
+            <option value="ease-in">Ease-in</option>
+            <option value="ease-out">Ease-out</option>
+            <option value="ease-in-out" selected>Ease-in-out</option>
+            <option value="linear">Linear</option>
+            <option value="steps(4)">Steps(4)</option>
+            <option value="cubic-bezier(0.68,-0.55,0.27,1.55)">Spring</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Presets -->
+      <section class="ctrl-section">
+        <h3 class="ctrl-title"><i class="fas fa-bolt"></i> Préréglages</h3>
+        <div class="presets-grid">
+          <button class="preset-btn" data-preset="fadeIn">Fade In</button>
+          <button class="preset-btn" data-preset="slideUp">Slide Up</button>
+          <button class="preset-btn" data-preset="slideLeft">Slide Left</button>
+          <button class="preset-btn" data-preset="zoomIn">Zoom In</button>
+          <button class="preset-btn" data-preset="bounce">Bounce</button>
+          <button class="preset-btn" data-preset="shake">Shake</button>
+          <button class="preset-btn" data-preset="spin">Spin 360</button>
+          <button class="preset-btn" data-preset="pulse">Pulse</button>
+          <button class="preset-btn" data-preset="flip">Flip</button>
+          <button class="preset-btn" data-preset="rubber">Rubber</button>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- CENTER: Keyframe editor + preview -->
+    <div class="panel panel-main">
+
+      <!-- Preview box -->
+      <div class="preview-area">
+        <div class="preview-label">Aperçu</div>
+        <div class="preview-stage" id="preview-stage">
+          <div id="preview-el" class="preview-element"></div>
+        </div>
+        <div class="preview-controls">
+          <button class="icon-btn" id="btn-play-anim" title="Lancer"><i class="fas fa-play"></i></button>
+          <button class="icon-btn" id="btn-pause-anim" title="Pause"><i class="fas fa-pause"></i></button>
+          <button class="icon-btn" id="btn-reset-anim" title="Réinitialiser"><i class="fas fa-rotate-left"></i></button>
+        </div>
+      </div>
+
+      <!-- Keyframe editor -->
+      <div class="keyframe-editor">
+        <div class="kf-header">
+          <h3 class="ctrl-title"><i class="fas fa-key"></i> Keyframes</h3>
+          <button class="btn-add-kf" id="btn-add-kf"><i class="fas fa-plus"></i> Ajouter keyframe</button>
+        </div>
+        <div class="kf-list" id="kf-list">
+          <!-- keyframes rendered here -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Output CSS -->
+    <aside class="panel panel-output">
+      <div class="output-header">
+        <h3 class="ctrl-title"><i class="fas fa-code"></i> CSS généré</h3>
+        <div class="output-btns">
+          <button class="icon-btn" id="btn-copy-css" title="Copier"><i class="fas fa-copy"></i></button>
+          <button class="icon-btn" id="btn-dl-css" title="Télécharger"><i class="fas fa-download"></i></button>
+        </div>
+      </div>
+      <pre id="css-output" class="css-output"></pre>
+    </aside>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Space Clicker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/clicker.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-clicker" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🚀 Space Clicker</h2>
+
+  <div id="clicker-area">
+    <!-- Stats -->
+    <div id="clicker-stats">
+      <div class="stat"><div class="stat-val" id="c-points">0</div><div class="stat-lbl">⭐ Énergie stellaire</div></div>
+      <div class="stat"><div class="stat-val" id="c-ppc">1</div><div class="stat-lbl">Par clic</div></div>
+      <div class="stat"><div class="stat-val" id="c-pps">0</div><div class="stat-lbl">Par seconde</div></div>
+      <div class="stat"><div class="stat-val" id="c-total">0</div><div class="stat-lbl">Total généré</div></div>
+    </div>
+
+    <!-- Main button -->
+    <div id="clicker-planet-wrap">
+      <div id="clicker-orbit"><div id="orbit-moon"></div></div>
+      <button id="clicker-btn" onclick="clickerClick(event)">🪐</button>
+    </div>
+
+    <!-- Milestone -->
+    <div id="milestone-bar-wrap">
+      <div id="milestone-bar"></div>
+      <span id="milestone-label">Prochain palier : 100 ⭐</span>
+    </div>
+
+    <!-- Tabs -->
+    <div id="upgrade-tabs">
+      <button class="tab-btn active" data-tab="click" onclick="switchTab('click')">👆 Clic</button>
+      <button class="tab-btn" data-tab="passive" onclick="switchTab('passive')">⏱️ Passif</button>
+    </div>
+
+    <!-- Upgrades -->
+    <div id="upgrades"></div>
+
+    <!-- Actions -->
+    <div id="clicker-actions">
+      <button class="btn btn-small btn-outline" onclick="resetSave()">🗑️ Reset</button>
+    </div>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/clicker.js"></script>
+</body>
+</html>
+

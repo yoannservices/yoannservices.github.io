@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Anagramme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/anagram.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-anagram" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🔤 Anagramme</h2>
+  <div id="anagram-area">
+    <div id="anagram-stats">
+      <div class="stat"><div class="stat-val" id="ana-score">0</div><div class="stat-lbl">Score</div></div>
+      <div class="stat"><div class="stat-val" id="ana-time">60</div><div class="stat-lbl">Secondes</div></div>
+    </div>
+    <div class="progress-wrap" style="max-width:450px"><div class="progress-bar" id="ana-progress" style="width:100%"></div></div>
+    <div id="anagram-scrambled"> - </div>
+    <input id="anagram-input" class="game-input" placeholder="Tape le mot..." autocomplete="off" disabled>
+    <div id="anagram-feedback"></div>
+    <button class="btn btn-green" id="ana-skip" style="display:none" onclick="anaSkip()">Passer -</button>
+    <div id="ana-start"><button class="btn btn-accent" onclick="anaStart()">Commencer</button></div>
+    <div id="ana-final" style="display:none;flex-direction:column;align-items:center;gap:1rem">
+      <p style="color:var(--muted)">Temps écoulé !</p>
+      <div class="final-score" id="ana-final-score">0</div>
+      <p style="color:var(--muted)">mots trouvés</p>
+      <button class="btn btn-accent" onclick="anaReset()">Rejouer</button>
+    </div>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/anagram.js"></script>
+</body>
+</html>
+

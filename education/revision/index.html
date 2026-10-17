@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="educ">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Révision Lycée – Seconde & Première</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1><i class="fas fa-graduation-cap"></i> Révision <span class="accent">Lycée</span></h1>
+    <p class="subtitle">Fiches, quiz & flashcards – toutes matières de Seconde à Première</p>
+  </header>
+
+  <main>
+    <!-- Level groups + level selection -->
+    <div class="level-groups" id="level-groups"></div>
+
+    <!-- Subject selection -->
+    <div class="selector-bar subject-bar" id="subject-bar"></div>
+
+    <!-- Stats -->
+    <div class="stats-banner" id="stats-banner"></div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="fiches"><i class="fas fa-book-open"></i> Fiches</button>
+      <button class="mode-tab" data-mode="quiz"><i class="fas fa-brain"></i> Quiz</button>
+      <button class="mode-tab" data-mode="flashcards"><i class="fas fa-clone"></i> Flashcards</button>
+    </div>
+
+    <!-- Content area -->
+    <section id="content-area">
+      <!-- Dynamically filled -->
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+

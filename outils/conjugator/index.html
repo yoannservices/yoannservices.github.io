@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analyseur de verbes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="label">Conjugator</p>
+      <h1>Analyseur de verbes</h1>
+      <p>Entrez une forme verbale en français pour identifier le mode, le temps et la personne.</p>
+    </header>
+
+    <div class="app">
+      <div style="position:relative">
+        <input type="text" id="inputVerbe" placeholder="Ex: mangions" autocomplete="off">
+        <div id="autocomplete-list" style="position:absolute;top:100%;left:0;right:0;background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;display:none;z-index:10"></div>
+      </div>
+      <button id="analyser">Analyser</button>
+      <button id="btn-conjugate" style="background:var(--ui-accent-soft);color:var(--ui-accent-2);border:1px solid rgba(var(--ui-accent-rgb),.3);border-radius:var(--ui-radius-sm);padding:10px 18px;cursor:pointer;font:inherit;font-weight:600">Conjuguer tout</button>
+    </div>
+
+    <div id="resultat" class="resultat" aria-live="polite"></div>
+
+    <!-- Favoris -->
+    <div id="favorites-section" style="margin-top:20px">
+      <h3 style="font-size:.9rem;opacity:.5;margin-bottom:8px">⭐ Favoris</h3>
+      <div id="favorites-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+
+    <!-- Historique -->
+    <div id="history-section" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <h3 style="font-size:.9rem;opacity:.5;margin:0">🕐 Historique</h3>
+        <button id="btn-clear-history" style="font-size:.75rem;opacity:.4;background:none;border:none;color:inherit;cursor:pointer;padding:0">Effacer</button>
+      </div>
+      <div id="history-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+  </main>
+
+  <div class="hint">Astuce: appuie sur Entrée pour lancer l'analyse.</div>
+  <div class="footer-note">Base locale: conjugaisons.json</div>
+
+  <script src="script.js"></script>
+
+  <noscript>JavaScript est requis pour analyser les verbes.</noscript>
+
+  <script>
+    document.getElementById("inputVerbe")?.focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LieuxProche  -  Trouvez des lieux à proximité</title>
+  <meta name="description" content="LieuxProche vous aide à découvrir des lieux et des événements proches selon votre profil." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <header class="banner">
+    <div class="banner-inner">
+      <div class="banner-header">
+        <div class="logo">
+          <h1 class="site-title">LieuxProche</h1>
+        </div>
+        <nav class="banner-nav">
+          <a href="index.html" class="nav-link active">Accueil</a>
+          <a href="about.html" class="nav-link">À propos</a>
+        </nav>
+      </div>
+      <p class="tagline">Trouvez les lieux et événements les plus proches de chez vous  -  adaptés à vos envies.</p>
+      <p class="banner-footer">LieuxProche</p>
+    </div>
+  </header>
+  <main class="container">
+    <section class="intro card">
+      <h2>À propos</h2>
+      <p>
+        <strong>LieuxProche</strong> est votre assistant pour découvrir les lieux et événements intéressants près de chez vous. En quelques informations simples sur vos préférences et votre localisation, la plateforme vous recommande des endroits adaptés à votre profil : lieux de culture, événements sociaux, espaces de loisir, etc.
+      </p>
+      <p>Remplissez le formulaire ci-dessous pour démarrer et découvrir ce qui vous attend près de vous !</p>
+    </section>
+    <section class="form-section card">
+      <h2>Parlez-nous de vous</h2>
+      <div class="form-wrapper">
+        <label>Nom
+          <input id="name" type="text" placeholder="Ton nom" autocomplete="name" />
+        </label>
+        <label>Sexe
+          <select id="sexe">
+            <option value="">--</option>
+            <option value="Homme">Homme</option>
+            <option value="Femme">Femme</option>
+            <option value="Non-binaire">Non-binaire</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </label>
+        <label>Année de naissance
+          <input id="annee" type="number" min="1900" max="2026" placeholder="Ex: 2000" />
+        </label>
+        <label>Type de rencontre souhaitée
+          <input id="typeRencontre" type="text" placeholder="Ex : amitié, sans prise de tête, ..." />
+        </label>
+        <label>Présentation
+          <textarea id="presentation" placeholder="Parle-nous de toi..." rows="4"></textarea>
+        </label>
+        <button id="collect-btn" class="btn">Valider</button>
+        <pre id="output-pre" class="output-pre"></pre>
+      </div>
+    </section>
+
+    <!-- Filtres par catégorie -->
+    <section class="card filter-section">
+      <h2>Filtrer les lieux</h2>
+      <div class="filter-row">
+        <button class="filter-btn active" data-cat="all">Tous</button>
+        <button class="filter-btn" data-cat="culture">Culture</button>
+        <button class="filter-btn" data-cat="social">Social</button>
+        <button class="filter-btn" data-cat="nature">Nature</button>
+        <button class="filter-btn" data-cat="food">Food</button>
+        <button class="filter-btn" data-cat="sport">Sport</button>
+      </div>
+      <div class="distance-filter">
+        <label>Distance max : <strong id="dist-val">10</strong> km</label>
+        <input type="range" id="dist-range" min="1" max="50" value="10" />
+      </div>
+    </section>
+
+    <!-- Carte interactive -->
+    <section class="card map-section">
+      <h2>Carte des lieux</h2>
+      <div id="map" style="height:400px;border-radius:14px;overflow:hidden;"></div>
+    </section>
+
+    <!-- Favoris -->
+    <section class="card favorites-section">
+      <h2>⭐ Mes favoris</h2>
+      <div id="favorites-list" class="cards-row"></div>
+      <p id="no-fav" style="color:var(--ink-soft);font-size:.9rem;">Aucun favori  -  cliquez ❤️ sur un lieu pour l'ajouter.</p>
+    </section>
+
+    <section class="cards-row" id="places-grid">
+      <article class="place-card" data-cat="culture" data-lat="48.8584" data-lng="2.2945" data-dist="5">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="tour-eiffel.png" alt="Tour Eiffel" />
+        <h3>Tour Eiffel</h3>
+        <span class="place-tag"> Culture</span>
+        <p>Rencontres et balades au pied de la dame de fer.</p>
+        <small class="place-dist">~5 km</small>
+      </article>
+      <article class="place-card" data-cat="social" data-lat="48.8566" data-lng="2.3522" data-dist="3">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="concert.png" alt="Salle de concert" />
+        <h3>Salle de concert</h3>
+        <span class="place-tag"> Social</span>
+        <p>Partagez une soirée, échangez vos playlists et vos coups de coeur live.</p>
+        <small class="place-dist">~3 km</small>
+      </article>
+      <article class="place-card" data-cat="culture" data-lat="48.8606" data-lng="2.3376" data-dist="4">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="musee.png" alt="Musée" />
+        <h3>Musée</h3>
+        <span class="place-tag"> Culture</span>
+        <p>Rencontres culturelles et visites commentées improvisées.</p>
+        <small class="place-dist">~4 km</small>
+      </article>
+      <article class="place-card" data-cat="nature" data-lat="48.8462" data-lng="2.3372" data-dist="6">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="tour-eiffel.png" alt="Jardin du Luxembourg" />
+        <h3>Jardin du Luxembourg</h3>
+        <span class="place-tag">Nature</span>
+        <p>Promenades au calme, lecture et rencontres dans un cadre verdoyant.</p>
+        <small class="place-dist">~6 km</small>
+      </article>
+      <article class="place-card" data-cat="food" data-lat="48.8530" data-lng="2.3499" data-dist="2">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="concert.png" alt="Café Quartier Latin" />
+        <h3>Café Quartier Latin</h3>
+        <span class="place-tag">Food</span>
+        <p>Petits brunchs et discussions autour d'un bon café.</p>
+        <small class="place-dist">~2 km</small>
+      </article>
+      <article class="place-card" data-cat="sport" data-lat="48.8414" data-lng="2.2530" data-dist="8">
+        <button class="fav-btn" title="Ajouter aux favoris">❤️</button>
+        <img src="musee.png" alt="Parc des Princes" />
+        <h3>Parc des Princes</h3>
+        <span class="place-tag">Sport</span>
+        <p>Vivez les matchs ensemble et partagez la passion du sport.</p>
+        <small class="place-dist">~8 km</small>
+      </article>
+    </section>
+
+    <!-- Historique des profils -->
+    <section class="card history-section">
+      <h2>Historique des profils</h2>
+      <div id="history-list"></div>
+      <p id="no-history" style="color:var(--ink-soft);font-size:.9rem;">Aucun profil enregistré.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    &copy; 2026 LieuxProche - Tous droits réservés
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+

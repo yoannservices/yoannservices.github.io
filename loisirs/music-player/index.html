@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h1><i class="fas fa-headphones"></i> Wave<span class="accent">Player</span></h1>
+      </div>
+      <div class="sidebar-section">
+        <p class="section-label">Bibliothèque</p>
+        <button class="sidebar-btn active" data-view="playlist"><i class="fas fa-list"></i> Playlist</button>
+        <button class="sidebar-btn" data-view="favorites"><i class="fas fa-heart"></i> Favoris</button>
+      </div>
+      <div class="sidebar-section import-section">
+        <p class="section-label">Importer</p>
+        <label class="import-btn">
+          <i class="fas fa-folder-open"></i> Charger des fichiers
+          <input type="file" id="file-input" accept="audio/*" multiple hidden />
+        </label>
+        <div class="drop-zone" id="drop-zone">
+          <i class="fas fa-cloud-arrow-up"></i>
+          <span>Glisser-déposer ici</span>
+        </div>
+      </div>
+      <div class="sidebar-stats">
+        <span id="track-count">0 pistes</span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main-area">
+      <!-- Visualizer -->
+      <div class="viz-container">
+        <canvas id="visualizer"></canvas>
+        <div class="now-playing" id="now-playing">
+          <div class="np-art" id="np-art"><i class="fas fa-music"></i></div>
+          <div class="np-info">
+            <div class="np-title" id="np-title">Aucune piste</div>
+            <div class="np-artist" id="np-artist">Chargez de la musique</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <div class="progress-row">
+          <span class="time" id="time-current">0:00</span>
+          <input type="range" id="progress" class="progress-bar" min="0" max="100" value="0" step="0.1" />
+          <span class="time" id="time-total">0:00</span>
+        </div>
+        <div class="buttons-row">
+          <button class="ctrl-btn" id="btn-shuffle" title="Aléatoire"><i class="fas fa-shuffle"></i></button>
+          <button class="ctrl-btn" id="btn-prev" title="Précédent"><i class="fas fa-backward-step"></i></button>
+          <button class="ctrl-btn play-btn" id="btn-play" title="Lecture"><i class="fas fa-play"></i></button>
+          <button class="ctrl-btn" id="btn-next" title="Suivant"><i class="fas fa-forward-step"></i></button>
+          <button class="ctrl-btn" id="btn-repeat" title="Répéter"><i class="fas fa-repeat"></i></button>
+          <div class="vol-group">
+            <button class="ctrl-btn" id="btn-vol"><i class="fas fa-volume-high"></i></button>
+            <input type="range" id="volume" class="vol-slider" min="0" max="1" step="0.01" value="0.8" />
+          </div>
+          <button class="ctrl-btn" id="btn-eq-toggle" title="Égaliseur"><i class="fas fa-sliders"></i></button>
+        </div>
+      </div>
+
+      <!-- Equalizer -->
+      <div class="eq-panel" id="eq-panel" style="display:none;">
+        <div class="eq-header">
+          <span class="eq-title"><i class="fas fa-sliders"></i> Égaliseur</span>
+          <div class="eq-presets">
+            <button class="eq-preset" data-preset="flat">Plat</button>
+            <button class="eq-preset" data-preset="bass">Bass Boost</button>
+            <button class="eq-preset" data-preset="rock">Rock</button>
+            <button class="eq-preset" data-preset="jazz">Jazz</button>
+            <button class="eq-preset" data-preset="vocal">Vocal</button>
+          </div>
+        </div>
+        <div class="eq-bands">
+          <div class="eq-band">
+            <span class="eq-db" id="eq-db-0">0dB</span>
+            <input type="range" class="eq-slider" id="eq-0" min="-15" max="15" value="0" step="0.5" orient="vertical" />
+            <span class="eq-freq">60Hz</span>
+          </div>
+          <div class="eq-band">
+            <span class="eq-db" id="eq-db-1">0dB</span>
+            <input type="range" class="eq-slider" id="eq-1" min="-15" max="15" value="0" step="0.5" orient="vertical" />
+            <span class="eq-freq">250Hz</span>
+          </div>
+          <div class="eq-band">
+            <span class="eq-db" id="eq-db-2">0dB</span>
+            <input type="range" class="eq-slider" id="eq-2" min="-15" max="15" value="0" step="0.5" orient="vertical" />
+            <span class="eq-freq">1kHz</span>
+          </div>
+          <div class="eq-band">
+            <span class="eq-db" id="eq-db-3">0dB</span>
+            <input type="range" class="eq-slider" id="eq-3" min="-15" max="15" value="0" step="0.5" orient="vertical" />
+            <span class="eq-freq">4kHz</span>
+          </div>
+          <div class="eq-band">
+            <span class="eq-db" id="eq-db-4">0dB</span>
+            <input type="range" class="eq-slider" id="eq-4" min="-15" max="15" value="0" step="0.5" orient="vertical" />
+            <span class="eq-freq">16kHz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Track List -->
+      <div class="track-list-area">
+        <div class="tl-header">
+          <input type="text" id="search" placeholder="Rechercher une piste..." />
+        </div>
+        <div class="track-list" id="track-list">
+          <p class="empty-msg">Importez des fichiers audio pour commencer</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audio"></audio>
+  <script src="script.js"></script>
+</body>
+</html>
+

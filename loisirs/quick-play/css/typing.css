@@ -1,0 +1,3 @@
+#typing-area{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:500px}
+#typing-word{font-size:2.2rem;font-weight:800;letter-spacing:.02em;min-height:3rem}
+#typing-final{display:none;flex-direction:column;align-items:center;gap:1rem}

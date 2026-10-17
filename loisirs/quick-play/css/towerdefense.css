@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════
+   SPACE TOWER DEFENSE — CSS
+══════════════════════════════════════ */
+
+/* ── Start / End panels ── */
+.td-panel{display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:2rem}
+.td-intro{text-align:center;color:var(--muted);font-size:.95rem;line-height:1.6;max-width:420px}
+#td-best{font-size:.82rem;color:var(--muted);margin-top:.5rem}
+#td-best strong{color:var(--text)}
+
+/* ── Shell ── */
+#td-shell{width:100%;max-width:1060px;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+
+/* ── HUD ── */
+#td-hud{width:100%;max-width:780px;display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 .2rem}
+#td-hud .val{display:block;margin-top:.15rem;font-size:1.25rem;font-weight:800;letter-spacing:normal;text-transform:none;color:var(--text)}
+
+/* ── Main layout ── */
+#td-main{display:flex;gap:.8rem;width:100%;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+
+/* ── Canvas wrap ── */
+#td-wrap{position:relative;flex-shrink:0}
+#td-canvas{display:block;border:1px solid #ffffff12;border-radius:14px;box-shadow:0 0 40px rgba(var(--ui-accent-rgb),0.10);background:#0c0c14}
+#td-hit-flash{position:absolute;inset:0;border-radius:14px;background:transparent;pointer-events:none;z-index:2;transition:background .08s}
+
+/* ── Sidebar ── */
+#td-sidebar{width:220px;display:flex;flex-direction:column;gap:.6rem;flex-shrink:0}
+.td-sb-title{font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:.3rem 0;border-bottom:1px solid #ffffff0a}
+
+/* ── Turret buttons ── */
+#td-turret-list{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.td-turret-btn{
+  background:var(--surface2);border:2px solid #ffffff12;border-radius:10px;padding:.55rem .4rem;
+  cursor:pointer;text-align:center;transition:border-color .15s,background .15s;color:var(--text);
+  font-size:.72rem;line-height:1.3;
+}
+.td-turret-btn:hover{border-color:var(--accent);background:#ffffff08}
+.td-turret-btn.active{border-color:var(--accent);background:rgba(var(--ui-accent-rgb),0.09)}
+.td-turret-btn.locked{opacity:.4;cursor:not-allowed}
+.td-turret-icon{font-size:1.3rem;display:block;margin-bottom:.2rem}
+.td-turret-cost{font-size:.65rem;color:var(--muted)}
+
+/* ── Info panel ── */
+#td-info-panel{background:var(--surface);border:1px solid #ffffff0a;border-radius:10px;padding:.6rem;font-size:.78rem;line-height:1.5}
+#td-info-content{color:var(--muted)}
+#td-info-content strong{color:var(--text)}
+#td-info-content .td-stat-row{display:flex;justify-content:space-between;margin:.2rem 0}
+#td-info-content .td-stat-label{color:var(--muted)}
+#td-info-content .td-stat-val{color:var(--text);font-weight:600}
+
+/* ── Actions ── */
+#td-actions{display:flex;flex-direction:column;gap:.4rem}
+#td-actions .btn{width:100%;font-size:.82rem;padding:.55rem}
+
+/* ── Powers ── */
+#td-powers{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+#td-powers .td-sb-title{width:100%}
+.td-power-btn{
+  width:46px;height:46px;border-radius:10px;border:2px solid #ffffff12;
+  background:var(--surface2);cursor:pointer;font-size:1.3rem;position:relative;
+  display:flex;align-items:center;justify-content:center;transition:border-color .15s;
+}
+.td-power-btn:hover{border-color:var(--pink)}
+.td-power-btn.on-cd{opacity:.45;cursor:not-allowed}
+.td-pow-cd{position:absolute;bottom:2px;right:4px;font-size:.55rem;color:var(--pink);font-weight:700}
+
+/* ── Game Over ── */
+#td-end{display:none;flex-direction:column;align-items:center;gap:.6rem;margin-top:2rem;text-align:center}
+#td-end.show{display:flex}
+.td-end-title{font-size:.82rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#ef4444}
+#td-end-label{font-size:.72rem;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+#td-end-stats{display:grid;grid-template-columns:repeat(2,minmax(110px,1fr));gap:.5rem;width:100%;max-width:360px;margin:.5rem 0}
+.td-end-stat{background:#ffffff08;border:1px solid #ffffff12;border-radius:10px;padding:.6rem}
+.td-end-stat strong{display:block;font-size:1.1rem;color:var(--text)}
+.td-end-stat span{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+#td-end-record{font-size:.82rem;color:var(--muted)}
+#td-end-record strong{color:var(--text)}
+
+/* ── Wave banner ── */
+#td-wave-banner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.4rem;font-weight:900;letter-spacing:.25em;color:#f59e0b;text-shadow:0 0 30px #f59e0b88;opacity:0;pointer-events:none;z-index:5;transition:opacity .3s;white-space:nowrap}
+
+/* ── Tooltip on canvas hover ── */
+.td-range-circle{pointer-events:none}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  #td-main{flex-direction:column;align-items:center}
+  #td-sidebar{width:100%;max-width:780px;flex-direction:row;flex-wrap:wrap;gap:.4rem}
+  #td-turret-list{grid-template-columns:repeat(3,1fr)}
+  #td-info-panel{flex:1;min-width:200px}
+  #td-actions{flex-direction:row}
+  #td-actions .btn{flex:1}
+  #td-powers{flex:0 0 auto}
+}
+@media(max-width:520px){
+  #td-canvas{width:100%;height:auto}
+  #td-hud .val{font-size:1rem}
+}

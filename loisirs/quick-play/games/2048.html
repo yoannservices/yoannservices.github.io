@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  2048</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/2048.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-2048" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title"> 2048</h2>
+  <div id="game2048-stats">
+    <div class="stat"><div class="stat-val" id="g2048-score">0</div><div class="stat-lbl">Score</div></div>
+    <div class="stat"><div class="stat-val" id="g2048-best">0</div><div class="stat-lbl">Meilleur</div></div>
+  </div>
+  <div id="game2048-board"></div>
+  <div id="game2048-over" style="display:none;text-align:center;margin-top:.5rem">
+    <p style="font-size:1.2rem;font-weight:600;margin-bottom:.8rem" id="g2048-msg"></p>
+    <button class="btn btn-accent" onclick="g2048Init()">Rejouer</button>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/2048.js"></script>
+</body>
+</html>
+

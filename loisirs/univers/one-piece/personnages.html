@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece - Personnages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../assets/theme.css" />
+    <script src="../../../assets/site.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="list">
+    <div class="ocean-bg" aria-hidden="true"></div>
+
+    <header class="list-head">
+        <a class="back-btn" href="index.html">Retour One Piece</a>
+        <h1>Personnages One Piece</h1>
+        <p>Recherche rapide, fiches detaillees et liste wiki complete.</p>
+        <label class="search-wrap" for="searchInput">
+            <span>Recherche</span>
+            <input id="searchInput" type="search" placeholder="Ex: Luffy, Law, Shanks...">
+        </label>
+    </header>
+
+    <main class="content-wrap">
+        <section>
+            <div class="section-head">
+                <h2>Fiches detaillees (prime evolutive + equipage + caracteristiques)</h2>
+                <span id="featuredCount" class="counter"></span>
+            </div>
+            <div id="featuredGrid" class="card-grid"></div>
+        </section>
+
+        <section class="wiki-section">
+            <div class="section-head">
+                <h2>Autres personnages depuis la categorie Fandom</h2>
+                <span id="wikiCount" class="counter">Chargement...</span>
+            </div>
+            <p class="hint">Clique sur un nom pour ouvrir directement la page wiki correspondante.</p>
+            <div id="wikiList" class="wiki-list"></div>
+            <button id="loadMoreBtn" class="load-more" type="button">Charger plus de personnages</button>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+

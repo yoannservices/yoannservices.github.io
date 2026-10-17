@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Devinette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/guess.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-guess" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🔢 Devinette de nombre</h2>
+  <div id="guess-area">
+    <div id="guess-attempts">Essais restants : <strong id="g-remaining">10</strong></div>
+    <div id="heat-bar-wrap"><div id="heat-bar"></div></div>
+    <div id="guess-input-row">
+      <input id="guess-input" type="number" min="1" max="100" placeholder="1  -  100" autocomplete="off">
+      <button class="btn btn-accent" id="guess-btn" onclick="guessSubmit()">Valider</button>
+    </div>
+    <div id="guess-feedback"></div>
+    <div id="guess-history"></div>
+    <button class="btn btn-green" id="guess-restart" style="display:none" onclick="guessInit()">Nouvelle partie</button>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/guess.js"></script>
+</body>
+</html>
+

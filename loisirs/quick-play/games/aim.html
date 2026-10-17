@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Aim Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/aim.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-aim" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🎯 Aim Trainer</h2>
+  <div id="aim-stats">
+    <div class="stat"><div class="stat-val" id="aim-hit">0</div><div class="stat-lbl">Touchées</div></div>
+    <div class="stat"><div class="stat-val" id="aim-remain">30</div><div class="stat-lbl">Restantes</div></div>
+    <div class="stat"><div class="stat-val" id="aim-avg"> - </div><div class="stat-lbl">Moy. (ms)</div></div>
+  </div>
+  <div id="aim-arena">
+    <div id="aim-start-overlay"><button class="btn btn-accent" onclick="aimStart()">Commencer</button></div>
+  </div>
+  <div id="aim-final" style="display:none;text-align:center;margin-top:1rem">
+    <p style="font-size:1.2rem;font-weight:600;margin-bottom:.4rem" id="aim-final-msg"></p>
+    <button class="btn btn-accent" onclick="aimReset()">Rejouer</button>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/aim.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,6 @@
+#dino-canvas{border:1px solid #ffffff12;border-radius:var(--radius);background:var(--surface);margin:1rem 0;touch-action:none;cursor:pointer}
+#dino-msg{font-size:1rem;color:var(--muted);min-height:1.4rem}
+#dino-stats{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;margin:.5rem 0}
+@media(max-width:600px){
+  #dino-canvas{width:100%;height:auto}
+}

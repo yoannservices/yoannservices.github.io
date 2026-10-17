@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Space Tower Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/towerdefense.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-towerdefense" class="screen active">
+  <button class="btn-back" onclick="tdBackToHub()">← Retour</button>
+  <h2 class="game-title">🛸 Space Tower Defense</h2>
+
+  
+  <div id="td-start" class="td-panel">
+    <p class="td-intro">Défends ta planète contre les vagues d'aliens&nbsp;!<br>Place des tourelles le long du chemin pour les éliminer.</p>
+    <button class="btn btn-accent" onclick="TD.startGame()">▶ Lancer la partie</button>
+    <div id="td-best">Record : Vague <strong id="td-best-val">0</strong></div>
+  </div>
+
+  
+  <div id="td-shell" style="display:none">
+    <div id="td-hud">
+      <div>VAGUE<span class="val" id="td-hud-wave">1</span></div>
+      <div>CRÉDITS<span class="val" id="td-hud-credits">100</span></div>
+      <div>VIES<span class="val" id="td-hud-lives">20</span></div>
+      <div>SCORE<span class="val" id="td-hud-score">0</span></div>
+    </div>
+
+    <div id="td-main">
+      <div id="td-wrap">
+        <canvas id="td-canvas" width="780" height="520"></canvas>
+        <div id="td-hit-flash"></div>
+      </div>
+
+      <!-- Turret panel -->
+      <div id="td-sidebar">
+        <div class="td-sb-title">TOURELLES</div>
+        <div id="td-turret-list"></div>
+        <div id="td-info-panel">
+          <div class="td-sb-title">INFO</div>
+          <div id="td-info-content">Sélectionne une tourelle à placer.</div>
+        </div>
+        <div id="td-actions">
+          <button class="btn btn-green" id="td-btn-wave" onclick="TD.sendWave()">Envoyer vague</button>
+          <button class="btn btn-pink" id="td-btn-sell" onclick="TD.sellSelected()" style="display:none">Vendre</button>
+          <button class="btn btn-accent" id="td-btn-upgrade" onclick="TD.upgradeSelected()" style="display:none">Améliorer</button>
+        </div>
+        <div id="td-powers">
+          <div class="td-sb-title">POUVOIRS</div>
+          <button class="td-power-btn" id="td-pow-strike" onclick="TD.usePower('strike')" title="Frappe orbitale">e~"️<span class="td-pow-cd"></span></button>
+          <button class="td-power-btn" id="td-pow-shield" onclick="TD.usePower('shield')" title="Bouclier planétaire"><span class="td-pow-cd"></span></button>
+          <button class="td-power-btn" id="td-pow-slow" onclick="TD.usePower('slow')" title="Ralentissement temporel">⏳<span class="td-pow-cd"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="td-sub"></div>
+  </div>
+
+  
+  <div id="td-end" style="display:none">
+    <div class="td-end-title">PLANe^TE PERDUE</div>
+    <div class="final-score" id="td-end-score">0</div>
+    <div id="td-end-label">Points</div>
+    <div id="td-end-stats"></div>
+    <div id="td-end-record">Record : Vague <strong id="td-end-best">0</strong></div>
+    <button class="btn btn-accent" onclick="TD.restart()">Rejouer</button>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/towerdefense.js"></script>
+</body>
+</html>
+

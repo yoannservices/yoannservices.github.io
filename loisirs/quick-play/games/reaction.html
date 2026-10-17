@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Réaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/reaction.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-reaction" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">⚡ Réaction</h2>
+  <div id="reaction-circle" class="idle" onclick="reactionClick()">Cliquez pour commencer</div>
+  <div id="reaction-msg" style="font-size:1.2rem;font-weight:600;min-height:1.8rem;margin-top:.4rem"></div>
+  <div id="reaction-stats">
+    <span>Dernier : <strong id="r-last"> - </strong></span>
+    <span>Meilleur : <strong id="r-best"> - </strong></span>
+  </div>
+  <div id="reaction-history"></div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/reaction.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,14 @@
+#mines-board{display:grid;gap:2px;margin:1rem 0}
+.mine-cell{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);border:1px solid #ffffff0a;border-radius:4px;
+  font-size:.85rem;font-weight:700;cursor:pointer;user-select:none;transition:background .1s;
+}
+.mine-cell.revealed{background:var(--surface);cursor:default}
+.mine-cell.flagged{background:#f59e0b22}
+.mine-cell.boom{background:#ef444466}
+#mines-msg{font-size:1.1rem;font-weight:600;min-height:1.6rem;margin-top:.3rem}
+#mines-stats{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;margin:.5rem 0}
+@media(max-width:600px){
+  .mine-cell{width:28px;height:28px;font-size:.75rem}
+}

@@ -1,0 +1,9 @@
+#guess-area{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:420px}
+#heat-bar-wrap{width:100%;height:14px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:.3rem 0}
+#heat-bar{height:100%;width:0;border-radius:99px;transition:width .4s,background .4s}
+#guess-input-row{display:flex;gap:.6rem;width:100%}
+#guess-input{flex:1;padding:.6rem 1rem;border-radius:8px;border:1px solid #ffffff18;background:var(--surface);color:var(--text);font-size:1.1rem;outline:none}
+#guess-input:focus{border-color:var(--accent)}
+#guess-feedback{font-size:1.1rem;font-weight:600;min-height:1.6rem}
+#guess-history{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;max-width:420px}
+#guess-attempts{color:var(--muted);font-size:.9rem}

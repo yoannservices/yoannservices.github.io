@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="outils">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker d'Habitudes Quotidiennes</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <style>
+        :root {
+            --primary: var(--ui-accent);
+            --primary-dark: var(--ui-accent-2);
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --info: #0891b2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--ui-font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme variables */
+        body.light-mode {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode {
+            --bg-primary: var(--ui-bg);
+            --bg-secondary: var(--ui-surface);
+            --bg-tertiary: var(--ui-surface-3);
+            --bg-hover: var(--ui-border);
+            --text-primary: var(--ui-text);
+            --text-secondary: #b4bdcb;
+            --text-muted: var(--ui-muted);
+            --border-color: var(--ui-border);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .header-title .icon {
+            font-size: 36px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        .export-btn:hover { background: var(--bg-hover); }
+
+        .category-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .streak-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #f59e0b;
+            margin-left: 4px;
+        }
+
+        .cat-select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 12px;
+            padding: 4px 6px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .month-nav button {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .month-nav button:hover {
+            background: var(--bg-hover);
+        }
+
+        .month-nav span {
+            font-weight: 600;
+            font-size: 16px;
+            min-width: 200px;
+            text-align: center;
+            text-transform: capitalize;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-hover);
+            transform: scale(1.05);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: 40px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--ui-accent) 0%, var(--ui-accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .subtext {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Main Content */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Tasks Panel */
+        .tasks-panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .task-count {
+            background: var(--bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .add-task-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-task-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .task-item.dragging {
+            opacity: 0.5;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+        }
+
+        .color-picker {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.1);
+        }
+
+        .task-input {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: border-color 0.2s;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* Tracker Table */
+        .tracker-panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tracker-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 900px;
+        }
+
+        .tracker-table th,
+        .tracker-table td {
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .tracker-table th {
+            background: var(--bg-tertiary);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tracker-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+
+        .tracker-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        .tracker-table td {
+            background: var(--bg-secondary);
+        }
+
+        .task-name-cell {
+            text-align: left;
+            font-weight: 600;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: sticky;
+            left: 0;
+            background: var(--bg-tertiary);
+            z-index: 5;
+        }
+
+        .task-color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .checkbox-cell {
+            position: relative;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            border-radius: 6px;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header-title h1 {
+                font-size: 24px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .month-nav span {
+                min-width: 150px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Initial tasks - professional formulation
+        const INITIAL_TASKS = [
+            { id: "1", name: "Sommeil (8h)", color: "#3b82f6", category: "santé" },
+            { id: "2", name: "Soin du visage", color: "#8b5cf6", category: "santé" },
+            { id: "3", name: "Travail concentré (1h)", color: "#0891b2", category: "productivité" },
+            { id: "4", name: "Lecture enrichissante (1h)", color: "#f59e0b", category: "productivité" },
+            { id: "5", name: "Réseaux sociaux < 2h", color: "#ec4899", category: "bien-être" },
+            { id: "6", name: "Activité sportive", color: "#10b981", category: "santé" },
+            { id: "7", name: "Alimentation saine", color: "#84cc16", category: "santé" },
+            { id: "8", name: "Divertissement modéré", color: "#f97316", category: "bien-être" },
+            { id: "9", name: "Hygiène dentaire", color: "#06b6d4", category: "santé" }
+        ];
+
+        const CATEGORIES = ["santé", "productivité", "bien-être", "social", "autre"];
+        const CAT_COLORS = { "santé": "#10b981", "productivité": "#3b82f6", "bien-être": "#ec4899", "social": "#f59e0b", "autre": "#94a3b8" };
+
+        // Utility functions
+        const getDaysInMonth = (year, month) => {
+            return new Date(year, month + 1, 0).getDate();
+        };
+
+        const getMonthName = (year, month) => {
+            return new Date(year, month).toLocaleDateString('fr-FR', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        };
+
+        // Main App Component
+        function App() {
+            const [theme, setTheme] = useState('dark-mode');
+            const [currentDate, setCurrentDate] = useState(new Date());
+            const [tasks, setTasks] = useState([]);
+            const [completions, setCompletions] = useState({});
+            const [draggedTask, setDraggedTask] = useState(null);
+            const [initialized, setInitialized] = useState(false);
+
+            const dailyChartRef = useRef(null);
+            const taskChartRef = useRef(null);
+            const dailyChartInstance = useRef(null);
+            const taskChartInstance = useRef(null);
+
+            // Initialize data
+            useEffect(() => {
+                try {
+                    const savedTasks = localStorage.getItem('habitTasks');
+                    const savedCompletions = localStorage.getItem('habitCompletions');
+                    const savedTheme = localStorage.getItem('habitTheme');
+
+                    if (savedTasks) {
+                        setTasks(JSON.parse(savedTasks));
+                    } else {
+                        setTasks(INITIAL_TASKS);
+                    }
+
+                    if (savedCompletions) {
+                        setCompletions(JSON.parse(savedCompletions));
+                    } else {
+                        setCompletions({});
+                    }
+
+                    if (savedTheme) {
+                        setTheme(savedTheme);
+                        document.body.className = savedTheme;
+                    }
+
+                    setInitialized(true);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    setTasks(INITIAL_TASKS);
+                    setCompletions({});
+                    setInitialized(true);
+                }
+            }, []);
+
+            // Save data
+            useEffect(() => {
+                if (initialized && tasks.length > 0) {
+                    try {
+                        localStorage.setItem('habitTasks', JSON.stringify(tasks));
+                    } catch (error) {
+                        console.error('Error saving tasks:', error);
+                    }
+                }
+            }, [tasks, initialized]);
+
+            useEffect(() => {
+                if (initialized) {
+                    try {
+                        localStorage.setItem('habitCompletions', JSON.stringify(completions));
+                    } catch (error) {
+                        console.error('Error saving completions:', error);
+                    }
+                }
+            }, [completions, initialized]);
+
+            useEffect(() => {
+                try {
+                    localStorage.setItem('habitTheme', theme);
+                    document.body.className = theme;
+                } catch (error) {
+                    console.error('Error saving theme:', error);
+                }
+            }, [theme]);
+
+            // Update charts
+            useEffect(() => {
+                if (initialized && tasks.length > 0) {
+                    updateCharts();
+                }
+            }, [tasks, completions, currentDate, theme, initialized]);
+
+            const toggleTheme = () => {
+                setTheme(prev => prev === 'light-mode' ? 'dark-mode' : 'light-mode');
+            };
+
+            const addTask = () => {
+                if (tasks.length >= 20) {
+                    alert('Limite de 20 habitudes atteinte');
+                    return;
+                }
+                const newTask = {
+                    id: Date.now().toString(),
+                    name: `Nouvelle habitude ${tasks.length + 1}`,
+                    color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'),
+                    category: 'autre'
+                };
+                setTasks([...tasks, newTask]);
+            };
+
+            const updateTask = (id, field, value) => {
+                setTasks(tasks.map(task => 
+                    task.id === id ? { ...task, [field]: value } : task
+                ));
+            };
+
+            const deleteTask = (id) => {
+                if (confirm('Etes-vous sur de vouloir supprimer cette habitude ?')) {
+                    setTasks(tasks.filter(task => task.id !== id));
+                    const newCompletions = { ...completions };
+                    Object.keys(newCompletions).forEach(key => {
+                        if (key.startsWith(`${id}-`)) {
+                            delete newCompletions[key];
+                        }
+                    });
+                    setCompletions(newCompletions);
+                }
+            };
+
+            const toggleCompletion = (taskId, day) => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const key = `${taskId}-${year}-${month}-${day}`;
+                
+                setCompletions(prev => ({
+                    ...prev,
+                    [key]: !prev[key]
+                }));
+            };
+
+            const isCompleted = (taskId, day) => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const key = `${taskId}-${year}-${month}-${day}`;
+                return !!completions[key];
+            };
+
+            const changeMonth = (delta) => {
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() + delta);
+                setCurrentDate(newDate);
+            };
+
+            const handleDragStart = (taskId) => {
+                setDraggedTask(taskId);
+            };
+
+            const handleDragOver = (e, taskId) => {
+                e.preventDefault();
+                if (draggedTask === taskId) return;
+
+                const draggedIndex = tasks.findIndex(t => t.id === draggedTask);
+                const targetIndex = tasks.findIndex(t => t.id === taskId);
+                
+                if (draggedIndex !== -1 && targetIndex !== -1) {
+                    const newTasks = [...tasks];
+                    const [removed] = newTasks.splice(draggedIndex, 1);
+                    newTasks.splice(targetIndex, 0, removed);
+                    setTasks(newTasks);
+                }
+            };
+
+            const handleDragEnd = () => {
+                setDraggedTask(null);
+            };
+
+            const getStats = () => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const daysInMonth = getDaysInMonth(year, month);
+                
+                let totalCompleted = 0;
+                let maxDay = 0;
+                let maxDayCount = 0;
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    let dayCount = 0;
+                    tasks.forEach(task => {
+                        if (isCompleted(task.id, day)) {
+                            dayCount++;
+                            totalCompleted++;
+                        }
+                    });
+                    if (dayCount > maxDayCount) {
+                        maxDayCount = dayCount;
+                        maxDay = day;
+                    }
+                }
+
+                const average = daysInMonth > 0 ? (totalCompleted / daysInMonth).toFixed(1) : 0;
+                const completionRate = tasks.length > 0 && daysInMonth > 0 
+                    ? ((totalCompleted / (tasks.length * daysInMonth)) * 100).toFixed(0)
+                    : 0;
+
+                return {
+                    total: totalCompleted,
+                    average,
+                    maxDay: maxDay > 0 ? `${maxDay}` : 'N/A',
+                    maxDayCount,
+                    completionRate
+                };
+            };
+
+            // Streak calculation (current consecutive days from today backward)
+            const getStreak = (taskId) => {
+                const today = new Date();
+                let streak = 0;
+                for (let i = 0; i < 365; i++) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    const key = `${taskId}-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    if (completions[key]) streak++;
+                    else if (i > 0) break; // allow today to be unchecked
+                }
+                return streak;
+            };
+
+            const getBestStreak = () => {
+                let best = 0;
+                tasks.forEach(t => { const s = getStreak(t.id); if (s > best) best = s; });
+                return best;
+            };
+
+            // Export
+            const exportData = (format) => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const daysInMonth = getDaysInMonth(year, month);
+
+                if (format === 'json') {
+                    const data = { tasks, completions, exported: new Date().toISOString() };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    downloadBlob(blob, `habits-${year}-${month+1}.json`);
+                } else {
+                    let csv = 'Habitude,Catégorie,' + Array.from({length: daysInMonth}, (_, i) => i+1).join(',') + ',Streak\n';
+                    tasks.forEach(t => {
+                        const row = [t.name, t.category || 'autre'];
+                        for (let d = 1; d <= daysInMonth; d++) {
+                            row.push(isCompleted(t.id, d) ? '1' : '0');
+                        }
+                        row.push(getStreak(t.id));
+                        csv += row.join(',') + '\n';
+                    });
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    downloadBlob(blob, `habits-${year}-${month+1}.csv`);
+                }
+            };
+
+            const downloadBlob = (blob, filename) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const updateCharts = () => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                const daysInMonth = getDaysInMonth(year, month);
+
+                const dailyData = [];
+                for (let day = 1; day <= daysInMonth; day++) {
+                    let count = 0;
+                    tasks.forEach(task => {
+                        if (isCompleted(task.id, day)) count++;
+                    });
+                    dailyData.push(count);
+                }
+
+                const taskData = tasks.map(task => {
+                    let count = 0;
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        if (isCompleted(task.id, day)) count++;
+                    }
+                    return count;
+                });
+
+                const isDark = theme === 'dark-mode';
+                const textColor = isDark ? '#e2e8f0' : '#0f172a';
+                const gridColor = isDark ? '#2e2e40' : '#e2e8f0';
+
+                // Daily chart
+                if (dailyChartRef.current) {
+                    if (dailyChartInstance.current) {
+                        dailyChartInstance.current.destroy();
+                    }
+
+                    dailyChartInstance.current = new Chart(dailyChartRef.current, {
+                        type: 'bar',
+                        data: {
+                            labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
+                            datasets: [{
+                                label: 'Habitudes complétées',
+                                data: dailyData,
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                borderRadius: 8,
+                                borderSkipped: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    labels: { 
+                                        color: textColor,
+                                        font: { size: 13, weight: '600' }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { 
+                                        stepSize: 1,
+                                        color: textColor,
+                                        font: { size: 12 }
+                                    },
+                                    grid: { color: gridColor }
+                                },
+                                x: {
+                                    ticks: { 
+                                        color: textColor,
+                                        font: { size: 11 }
+                                    },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Task chart
+                if (taskChartRef.current && tasks.length > 0) {
+                    if (taskChartInstance.current) {
+                        taskChartInstance.current.destroy();
+                    }
+
+                    taskChartInstance.current = new Chart(taskChartRef.current, {
+                        type: 'bar',
+                        data: {
+                            labels: tasks.map(t => t.name),
+                            datasets: [{
+                                label: 'Jours complétés',
+                                data: taskData,
+                                backgroundColor: tasks.map(t => t.color),
+                                borderRadius: 8,
+                                borderSkipped: false,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: { 
+                                        stepSize: 1,
+                                        color: textColor,
+                                        font: { size: 12 }
+                                    },
+                                    grid: { color: gridColor }
+                                },
+                                y: {
+                                    ticks: { 
+                                        color: textColor,
+                                        font: { size: 12 }
+                                    },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+
+            if (!initialized) {
+                return <div className="loading">Chargement de vos données...</div>;
+            }
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = getDaysInMonth(year, month);
+            const stats = getStats();
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <div className="header-top">
+                            <div className="header-title">
+                                <span className="icon">📊</span>
+                                <h1>Tracker d'Habitudes</h1>
+                            </div>
+                            <div className="header-controls">
+                                <div className="month-nav">
+                                    <button onClick={() => changeMonth(-1)}>←</button>
+                                    <span>{getMonthName(year, month)}</span>
+                                    <button onClick={() => changeMonth(1)}>→</button>
+                                </div>
+                                <button className="theme-toggle" onClick={toggleTheme}>
+                                    {theme === 'light-mode' ? '🌙' : '☀️'}
+                                </button>
+                                <button className="export-btn" onClick={() => exportData('csv')}>⬇️ CSV</button>
+                                <button className="export-btn" onClick={() => exportData('json')}>⬇️ JSON</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <h3>Total réalisé</h3>
+                            <div className="value">{stats.total}</div>
+                            <div className="subtext">habitudes complétées</div>
+                        </div>
+                        <div className="stat-card">
+                            <h3>Moyenne journalière</h3>
+                            <div className="value">{stats.average}</div>
+                            <div className="subtext">habitudes par jour</div>
+                        </div>
+                        <div className="stat-card">
+                            <h3>Meilleur jour</h3>
+                            <div className="value">{stats.maxDay}</div>
+                            <div className="subtext">{stats.maxDayCount} habitudes complétées</div>
+                        </div>
+                        <div className="stat-card">
+                            <h3>Taux de réussite</h3>
+                            <div className="value">{stats.completionRate}%</div>
+                            <div className="subtext">du mois</div>
+                        </div>
+                        <div className="stat-card">
+                            <h3>🔥 Meilleur streak</h3>
+                            <div className="value">{getBestStreak()}j</div>
+                            <div className="subtext">jours consécutifs</div>
+                        </div>
+                    </div>
+
+                    <div className="content-grid">
+                        <div className="tasks-panel">
+                            <div className="panel-header">
+                                <h2>Mes Habitudes</h2>
+                                <span className="task-count">{tasks.length}/20</span>
+                            </div>
+                            <button className="add-task-btn" onClick={addTask}>
+                                <span>+</span> Ajouter une habitude
+                            </button>
+                            <div className="task-list">
+                                {tasks.map(task => (
+                                    <div
+                                        key={task.id}
+                                        className={`task-item ${draggedTask === task.id ? 'dragging' : ''}`}
+                                        draggable
+                                        onDragStart={() => handleDragStart(task.id)}
+                                        onDragOver={(e) => handleDragOver(e, task.id)}
+                                        onDragEnd={handleDragEnd}
+                                    >
+                                        <span className="drag-handle">⋮⋮</span>
+                                        <div className="color-picker-wrapper">
+                                            <input
+                                                type="color"
+                                                className="color-picker"
+                                                value={task.color}
+                                                onChange={(e) => updateTask(task.id, 'color', e.target.value)}
+                                            />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            className="task-input"
+                                            value={task.name}
+                                            onChange={(e) => updateTask(task.id, 'name', e.target.value)}
+                                        />
+                                        <select className="cat-select" value={task.category || 'autre'}
+                                            onChange={(e) => updateTask(task.id, 'category', e.target.value)}>
+                                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                        <button className="delete-btn" onClick={() => deleteTask(task.id)}>
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="tracker-panel">
+                            <h2 style={{marginBottom: '20px', fontSize: '20px', fontWeight: '700'}}>
+                                Suivi Mensuel
+                            </h2>
+                            <table className="tracker-table">
+                                <thead>
+                                    <tr>
+                                        <th className="task-name-cell">Habitude</th>
+                                        {Array.from({ length: daysInMonth }, (_, i) => (
+                                            <th key={i + 1}>{i + 1}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tasks.map(task => (
+                                        <tr key={task.id}>
+                                            <td className="task-name-cell">
+                                                <span 
+                                                    className="task-color-dot"
+                                                    style={{ backgroundColor: task.color }}
+                                                />
+                                                {task.name}
+                                                {task.category && <span className="category-badge" style={{background: CAT_COLORS[task.category]+'22', color: CAT_COLORS[task.category]}}>{task.category}</span>}
+                                                {getStreak(task.id) > 0 && <span className="streak-badge">🔥 {getStreak(task.id)}</span>}
+                                            </td>
+                                            {Array.from({ length: daysInMonth }, (_, i) => (
+                                                <td key={i + 1} className="checkbox-cell">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isCompleted(task.id, i + 1)}
+                                                        onChange={() => toggleCompletion(task.id, i + 1)}
+                                                    />
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="charts-grid">
+                        <div className="chart-card">
+                            <h3>
+                                <span>📈</span>
+                                Progression journalière
+                            </h3>
+                            <div className="chart-container">
+                                <canvas ref={dailyChartRef}></canvas>
+                            </div>
+                        </div>
+                        <div className="chart-card">
+                            <h3>
+                                <span>📊</span>
+                                Performance par habitude
+                            </h3>
+                            <div className="chart-container">
+                                <canvas ref={taskChartRef}></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+

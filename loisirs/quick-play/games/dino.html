@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Dino Run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/dino.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-dino" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🦖 Dino Run</h2>
+  <div id="dino-stats">
+    <div class="stat"><div class="stat-val" id="dino-score">0</div><div class="stat-lbl">Score</div></div>
+    <div class="stat"><div class="stat-val" id="dino-best">0</div><div class="stat-lbl">Meilleur</div></div>
+  </div>
+  <canvas id="dino-canvas" width="600" height="200"></canvas>
+  <div id="dino-msg">Appuie sur Espace ou clique pour sauter</div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/dino.js"></script>
+</body>
+</html>
+

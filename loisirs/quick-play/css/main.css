@@ -1,0 +1,42 @@
+/* ── Hub ── */
+.hub-title{font-size:2.6rem;font-weight:800;letter-spacing:-.04em;margin:2rem 0 .4rem;background:linear-gradient(135deg,var(--ui-accent),var(--ui-accent-2) 45%,var(--cat-prog));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hub-sub{color:var(--muted);margin-bottom:2.5rem;font-size:1.05rem}
+.hub-search-row{
+  width:100%;max-width:900px;
+  display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+  margin:0 auto 1rem;
+}
+.hub-search-row input,.hub-search-row select{
+  background:var(--surface);border:1px solid #ffffff14;color:var(--text);
+  border-radius:10px;padding:.65rem .8rem;font-size:.88rem;outline:none;
+}
+.hub-search-row input{flex:1;min-width:230px}
+.hub-search-row select{min-width:170px}
+.hub-search-row input:focus,.hub-search-row select:focus{border-color:var(--ui-accent)}
+#game-counter{font-size:.78rem;color:var(--muted);margin-left:auto}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem;width:100%;max-width:900px}
+.card{
+  background:var(--surface);border:1px solid #ffffff0a;border-radius:var(--radius);padding:1.6rem;
+  cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .3s;position:relative;overflow:hidden;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(var(--ui-accent-rgb),0.13);border-color:rgba(var(--ui-accent-rgb),0.20)}
+.card-icon{font-size:2.4rem;margin-bottom:.6rem}
+.card-name{font-size:1.25rem;font-weight:700;margin-bottom:.3rem}
+.card-desc{color:var(--muted);font-size:.88rem;line-height:1.4;margin-bottom:.8rem}
+.badge{display:inline-block;font-size:.7rem;font-weight:600;padding:.2em .7em;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.badge-reflex{background:rgba(var(--ui-accent-rgb),0.13);color:var(--accent)}
+.badge-idle{background:#10b98122;color:var(--green)}
+.badge-puzzle{background:#ec489922;color:var(--pink)}
+.badge-speed{background:#f59e0b22;color:#f59e0b}
+.badge-arcade{background:#06b6d422;color:#06b6d4}
+.badge-cards{background:#a855f722;color:#a855f7}
+.badge-survival{background:#378add22;color:#60a5fa}
+.badge-action{background:#1d9e7522;color:#34d399}
+.badge-strategy{background:#f59e0b22;color:#f59e0b}
+.card.hidden{display:none}
+
+@media(max-width:600px){
+  .hub-title{font-size:1.8rem}
+  .cards-grid{grid-template-columns:1fr}
+}
+

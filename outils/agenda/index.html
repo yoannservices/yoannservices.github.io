@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda Semaine A/B</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <p class="eyebrow">Organisation personnelle</p>
+      <h1>Agenda interactif semaine A / B</h1>
+      <p class="hero-text">
+        Ajoute tes evenements, choisis la semaine A, B ou les deux, puis retrouve ton planning en un coup d'oeil.
+      </p>
+    </section>
+
+    <section class="panel form-panel">
+      <h2>Nouvel evenement</h2>
+      <form id="event-form" novalidate>
+        <div class="grid two-col">
+          <label>
+            Nom
+            <input type="text" id="title" name="title" placeholder="Ex: Reunion projet" required maxlength="80" />
+          </label>
+          <label>
+            Semaine
+            <select id="week-target" name="weekTarget" required>
+              <option value="A">Semaine A</option>
+              <option value="B">Semaine B</option>
+              <option value="AB">A et B</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid three-col">
+          <label>
+            Jour
+            <select id="day" name="day" required>
+              <option value="Lundi">Lundi</option>
+              <option value="Mardi">Mardi</option>
+              <option value="Mercredi">Mercredi</option>
+              <option value="Jeudi">Jeudi</option>
+              <option value="Vendredi">Vendredi</option>
+              <option value="Samedi">Samedi</option>
+              <option value="Dimanche">Dimanche</option>
+            </select>
+          </label>
+          <label>
+            Heure debut
+            <input type="time" id="start-time" name="startTime" required />
+          </label>
+          <label>
+            Heure fin
+            <input type="time" id="end-time" name="endTime" required />
+          </label>
+        </div>
+
+        <div class="grid two-col">
+          <label>
+            Lieu
+            <input type="text" id="location" name="location" placeholder="Ex: Salle 204" maxlength="100" />
+          </label>
+          <label>
+            Description
+            <input type="text" id="description" name="description" placeholder="Details de l'evenement" maxlength="180" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Ajouter l'evenement</button>
+          <p id="form-feedback" class="feedback" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel list-panel">
+      <div class="list-header">
+        <h2>Planning</h2>
+        <div class="filter-tabs" role="tablist" aria-label="Filtrer par semaine">
+          <button type="button" class="filter-btn active" data-filter="A" role="tab" aria-selected="true">Semaine A</button>
+          <button type="button" class="filter-btn" data-filter="B" role="tab" aria-selected="false">Semaine B</button>
+          <button type="button" class="filter-btn" data-filter="ALL" role="tab" aria-selected="false">Tout</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="agenda-table" aria-label="Tableau des evenements">
+          <thead>
+            <tr>
+              <th>Jour</th>
+              <th>Heure</th>
+              <th>Nom</th>
+              <th>Semaine</th>
+              <th>Lieu</th>
+              <th>Description</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="event-table-body"></tbody>
+        </table>
+      </div>
+      <p id="empty-state" class="empty-state">Aucun evenement pour ce filtre.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

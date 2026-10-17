@@ -1,0 +1,5 @@
+#snake-canvas{border:1px solid #ffffff12;border-radius:var(--radius);background:var(--surface);margin:1rem 0;touch-action:none}
+#snake-controls{display:none;margin-top:.8rem}
+@media(max-width:600px){#snake-controls{display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(2,50px);gap:4px;justify-content:center}}
+.snake-ctrl{background:var(--surface2);border:1px solid #ffffff18;color:var(--text);border-radius:8px;font-size:1.2rem;cursor:pointer}
+#snake-stats{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;margin:.5rem 0}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Snake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/snake.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-snake" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🐍 Snake</h2>
+  <div id="snake-stats">
+    <div class="stat"><div class="stat-val" id="snake-score">0</div><div class="stat-lbl">Score</div></div>
+    <div class="stat"><div class="stat-val" id="snake-best">0</div><div class="stat-lbl">Meilleur</div></div>
+  </div>
+  <canvas id="snake-canvas" width="400" height="400"></canvas>
+  <div id="snake-msg" style="color:var(--muted);min-height:1.4rem">Appuie sur une flèche pour jouer</div>
+  <div id="snake-controls">
+    <div></div><button class="snake-ctrl" onclick="snakeDir(0,-1)" aria-label="Haut">▲</button><div></div>
+    <button class="snake-ctrl" onclick="snakeDir(-1,0)" aria-label="Gauche">◀</button>
+    <button class="snake-ctrl" onclick="snakeDir(0,1)" aria-label="Bas">▼</button>
+    <button class="snake-ctrl" onclick="snakeDir(1,0)" aria-label="Droite">▶</button>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/snake.js"></script>
+</body>
+</html>
+

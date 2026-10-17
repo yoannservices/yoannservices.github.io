@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Dodge Zone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/dodgezone.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-dodgezone" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title" id="dz-title">Dodge Zone</h2>
+  <div id="dz-shell">
+    <div id="dz-hud">
+      <div>SCORE<span class="val" id="dz-score">0</span></div>
+      <div style="text-align:center">
+        <div id="dz-mode-pill" class="dodge">DODGE</div>
+        <span class="val" id="dz-level">1</span>
+      </div>
+      <div style="text-align:right">VIES<span class="val" id="dz-lives">♥ ♥ ♥</span></div>
+    </div>
+    <div id="dz-wrap">
+      <canvas id="dz-canvas" width="520" height="420"></canvas>
+      <div id="dz-hit-flash"></div>
+      <div id="dz-level-flash"></div>
+      <div id="dz-crosshair">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+          <circle cx="15" cy="15" r="11" fill="none" stroke="#34d399" stroke-width="1.5" opacity="0.85"></circle>
+          <circle cx="15" cy="15" r="2.5" fill="#34d399"></circle>
+          <line x1="15" y1="0" x2="15" y2="9" stroke="#34d399" stroke-width="1.5"></line>
+          <line x1="15" y1="21" x2="15" y2="30" stroke="#34d399" stroke-width="1.5"></line>
+          <line x1="0" y1="15" x2="9" y2="15" stroke="#34d399" stroke-width="1.5"></line>
+          <line x1="21" y1="15" x2="30" y2="15" stroke="#34d399" stroke-width="1.5"></line>
+        </svg>
+      </div>
+      <div id="dz-end">
+        <div id="dz-end-title" class="dodge">Game Over</div>
+        <div id="dz-end-score">0</div>
+        <div id="dz-end-label">Points</div>
+        <div id="dz-end-stats"></div>
+        <div id="dz-record">Record : <strong id="dz-record-value">0</strong></div>
+        <button class="btn btn-accent" id="dz-retry" onclick="dzRestartActive()">Rejouer</button>
+      </div>
+    </div>
+    <div id="dz-sub"></div>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/dodgezone.js"></script>
+<script>dzOpen('dodge');</script>
+</body>
+</html>
+

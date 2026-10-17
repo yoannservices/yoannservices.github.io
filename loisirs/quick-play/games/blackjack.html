@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Blackjack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/blackjack.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-blackjack" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">🃏 Blackjack</h2>
+  <div id="bj-area">
+    <div id="bj-record">
+      <span>Victoires : <strong id="bj-wins">0</strong></span>
+      <span>Défaites : <strong id="bj-losses">0</strong></span>
+    </div>
+    <div class="bj-label">Croupier</div>
+    <div class="bj-score" id="bj-dealer-score">?</div>
+    <div class="bj-hand" id="bj-dealer-hand"></div>
+    <div style="width:60%;height:1px;background:#ffffff12;margin:.5rem 0"></div>
+    <div class="bj-hand" id="bj-player-hand"></div>
+    <div class="bj-score" id="bj-player-score">0</div>
+    <div class="bj-label">Vous</div>
+    <div id="bj-msg"></div>
+    <div id="bj-actions">
+      <button class="btn btn-accent" id="bj-hit" onclick="bjHit()">Hit</button>
+      <button class="btn btn-green" id="bj-stand" onclick="bjStand()">Stand</button>
+      <button class="btn btn-pink" id="bj-new" style="display:none" onclick="bjInit()">Nouvelle main</button>
+    </div>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/blackjack.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="fr" data-cat="educ">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tableau Périodique Interactif</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1><i class="fas fa-atom"></i> Tableau <span class="accent">Périodique</span></h1>
+    <p class="subtitle">Explore les 118 éléments chimiques</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Rechercher un élément..." autocomplete="off" />
+      <select id="filter-category">
+        <option value="">Toutes les catégories</option>
+        <option value="nonmetal">Non-métaux</option>
+        <option value="noble-gas">Gaz nobles</option>
+        <option value="alkali-metal">Métaux alcalins</option>
+        <option value="alkaline-earth">Métaux alcalino-terreux</option>
+        <option value="metalloid">Métalloïdes</option>
+        <option value="halogen">Halogènes</option>
+        <option value="transition-metal">Métaux de transition</option>
+        <option value="post-transition">Métaux pauvres</option>
+        <option value="lanthanide">Lanthanides</option>
+        <option value="actinide">Actinides</option>
+      </select>
+            <select id="filter-block">
+        <option value="">Tous les blocs</option>
+        <option value="s">Bloc s</option>
+        <option value="p">Bloc p</option>
+        <option value="d">Bloc d</option>
+        <option value="f">Bloc f</option>
+      </select>
+      <select id="filter-period">
+        <option value="">Toutes les périodes</option>
+        <option value="1">Période 1</option>
+        <option value="2">Période 2</option>
+        <option value="3">Période 3</option>
+        <option value="4">Période 4</option>
+        <option value="5">Période 5</option>
+        <option value="6">Période 6</option>
+        <option value="7">Période 7</option>
+      </select>
+      <select id="color-mode">
+        <option value="category">Couleur : Catégorie</option>
+        <option value="phase">Couleur : État physique</option>
+        <option value="electronegativity">Couleur : Électronégativité</option>
+      </select>
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <div class="table-wrapper">
+      <div class="periodic-table" id="periodic-table"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-overlay" id="detail-overlay">
+      <div class="detail-panel" id="detail-panel">
+        <button class="detail-close" id="detail-close"><i class="fas fa-xmark"></i></button>
+        <div class="detail-header" id="detail-header">
+          <div class="detail-symbol" id="detail-symbol"></div>
+          <div>
+            <h2 id="detail-name"></h2>
+            <span class="detail-number" id="detail-number"></span>
+          </div>
+        </div>
+        <div class="atom-visual-wrap">
+          <canvas id="atom-canvas" width="420" height="220"></canvas>
+        </div>
+        <div class="detail-grid" id="detail-grid"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

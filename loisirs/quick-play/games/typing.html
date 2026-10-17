@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUICKPLAY  -  Typing Rush</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../../assets/theme.css" />
+<script src="../../../assets/site.js" defer></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/typing.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="game-typing" class="screen active">
+  <button class="btn-back" onclick="backToHub()">← Retour</button>
+  <h2 class="game-title">⌨️ Typing Rush</h2>
+  <div id="typing-area">
+    <div id="typing-stats">
+      <div class="stat"><div class="stat-val" id="t-score">0</div><div class="stat-lbl">Score</div></div>
+      <div class="stat"><div class="stat-val" id="t-time">30</div><div class="stat-lbl">Secondes</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="typing-progress" style="width:100%"></div></div>
+    <div id="typing-word">Appuie sur Entrée pour démarrer</div>
+    <input id="typing-input" class="game-input" placeholder="Tape ici..." autocomplete="off" disabled>
+    <div id="typing-final">
+      <p style="color:var(--muted)">Temps écoulé !</p>
+      <div class="final-score" id="t-final-score">0</div>
+      <p style="color:var(--muted)">mots tapés</p>
+      <button class="btn btn-accent" onclick="typingInit()">Rejouer</button>
+    </div>
+  </div>
+</div>
+<script src="../js/shared.js"></script>
+<script src="../js/typing.js"></script>
+</body>
+</html>
+
