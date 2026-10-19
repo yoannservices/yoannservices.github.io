@@ -1,0 +1,88 @@
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/theme.css" />
+<script src="../../assets/site.js"></script>
+<title>Kuki City</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<canvas id="gl"></canvas>
+
+<div id="hud" hidden>
+  <div class="corner tl">
+    <div class="chip"><div id="money">0 €</div></div>
+    <div class="chip"><div id="scName">KUKIRIN G2</div><div class="lab" style="margin-bottom:4px">Batterie <span id="battTxt" class="mono"></span></div><div class="bar"><i id="battBar"></i></div></div>
+  </div>
+  <div class="corner tr">
+    <div id="miniWrap"><canvas id="mini" width="352" height="352"></canvas></div>
+    <div id="stars"><b id="starLab">Recherché</b><span>★</span><span>★</span><span>★</span></div>
+    <div id="radar"></div>
+  </div>
+  <div id="quests" class="chip"></div>
+  <div id="toasts"></div>
+  <div id="arrest" hidden><div class="lab">Arrestation en cours</div><div class="bar"><i id="arrestBar" style="width:0"></i></div></div>
+  <div id="prompt"></div>
+  <div id="speedBox"><div id="limit" class="mono">30</div><div id="speed">0</div><div id="unit">km/h</div></div>
+  <div id="deliv" class="chip"></div>
+  <div id="navTarget" class="chip" hidden></div>
+</div>
+
+<div id="touch">
+  <button id="tL" style="left:16px;bottom:100px">◀</button>
+  <button id="tR" style="left:100px;bottom:100px">▶</button>
+  <button id="tB" style="right:16px;bottom:200px">FREIN</button>
+  <button id="tA" style="right:16px;bottom:120px">GAZ</button>
+</div>
+
+<div id="ovStart" class="ov">
+  <div class="card narrow"><div class="cb start">
+    <div class="lab">Jeu de trottinette électrique</div>
+    <h1>Kuki City</h1>
+    <p>Explore la ville, livre des colis, ramasse des pièces et améliore ta KUKIRIN. Utilise ton téléphone pour les livraisons, la carte et tes trottinettes. Un feu grillé ou un excès de vitesse vu par une patrouille met la police à tes trousses.</p>
+    <div class="sp" id="startBtns"><button class="btn" disabled id="btnPlay">Chargement de la ville…</button></div>
+    <div class="keys" style="margin-top:20px;font-size:14px">
+      <span><kbd>Z</kbd> <kbd>S</kbd> <kbd>Q</kbd> <kbd>D</kbd></span><span>Accélérer, freiner / reculer, tourner (flèches possibles)</span>
+      <span><kbd>Maj</kbd></span><span>Activer ou arrêter le wheelie ; accélérer pour lever l’avant, freiner pour le baisser</span>
+      <span><kbd>Espace</kbd></span><span>Frein arrière (dérapage)</span>
+      <span><kbd>E</kbd></span><span>Garage : boutique, atelier, repos</span>
+      <span><kbd>T</kbd></span><span>Ouvrir le téléphone et ses applications</span>
+      <span><kbd>C</kbd> <kbd>M</kbd> <kbd>Tab</kbd></span><span>Caméra, carte, quêtes et aide</span>
+    </div>
+    <p class="fine" style="margin-top:16px">Fan game non officiel. Les caractéristiques des trottinettes sont ajustées pour le jeu.</p>
+  </div></div>
+</div>
+
+<div id="ovMenu" class="ov" hidden><div class="card">
+  <div class="ch"><h2>Pause</h2><div class="tabs" id="menuTabs"></div></div>
+  <div class="cb" id="menuBody"></div>
+  <div class="cf"><span>Échap ou Tab pour reprendre</span><button class="btn" id="menuClose">Reprendre</button></div>
+</div></div>
+
+<div id="ovGarage" class="ov" hidden><div class="card">
+  <div class="ch"><h2 id="garTitle">Garage</h2><div class="tabs" id="garTabs"></div><div class="price" id="garMoney"></div></div>
+  <div class="cb" id="garBody"></div>
+  <div class="cf"><span>Les achats et réglages sont enregistrés automatiquement</span><button class="btn" id="garClose">Repartir</button></div>
+</div></div>
+
+<div id="ovBusted" class="ov" hidden><div class="card narrow"><div class="cb" style="text-align:center;padding:28px 18px">
+  <div class="lab" style="color:var(--red)">Police</div>
+  <h2 style="margin:6px 0 10px;font:700 54px/1 var(--display);letter-spacing:.05em;text-transform:uppercase">Arrêté</h2>
+  <p id="bustTxt" style="color:var(--mute);margin:0 0 18px"></p>
+  <button class="btn" id="bustBtn">Retour au garage</button>
+</div></div></div>
+
+<div id="ovPhone" class="ov phone-overlay" hidden>
+  <div class="phone">
+    <div class="phone-top"><span>KUKI CITY</span><span id="phoneClock">00:00</span></div>
+    <div class="phone-head"><h2 id="phoneTitle">Téléphone</h2><button class="btn ghost sm" id="phoneClose" aria-label="Fermer le téléphone">✕</button></div>
+    <div class="phone-content" id="phoneBody"></div>
+    <div class="phone-footer">T ou Échap pour fermer</div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/main.js"></script>

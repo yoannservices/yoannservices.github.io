@@ -1,0 +1,57 @@
+<!doctype html><html><head>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/theme.css" />
+<script src="../../assets/site.js"></script>
+<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="stylesheet" href="style.css"></head><body>
+<title>Col Vitesse</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@400;500;600&display=swap">
+
+<canvas id="c"></canvas>
+<canvas id="fx"></canvas>
+<div class="hud" id="top">
+  <div class="cams" id="cams">
+    <button data-cam="0" class="on" aria-label="Caméra troisième personne">3ᵉ pers.</button>
+    <button data-cam="1" aria-label="Caméra première personne">Pilote</button>
+    <button data-cam="2" aria-label="Caméra roue avant">Roue avant</button>
+  </div>
+  <div class="pill" id="info"></div>
+</div>
+<canvas id="mini" width="300" height="300" aria-label="Mini carte"></canvas>
+<div id="rec"><i></i>REC · CAM ROUE AVANT</div>
+<div id="msg"></div>
+<div id="touch">
+  <div class="g"><button id="tl">◀</button><button id="tr">▶</button></div>
+  <div class="g"><button id="tb">Frein</button><button id="tg">Gaz</button></div>
+</div>
+<div class="hud" id="bot">
+  <div id="dash">
+    <div><div id="spd">0</div><div id="unit">km/h</div></div>
+    <div id="gear">N</div>
+    <div id="rpmw"><div id="rpmb"><div id="rpmf"></div></div><div id="rpmt">0 tr/min</div></div>
+  </div>
+  <div class="pill" id="hint" style="font-size:12px;color:var(--mute);line-height:1.4">C : caméra · Clic gauche + glisser : tourner la caméra · R : retour route · Échap : menu</div>
+</div>
+<div id="menu"><div class="in">
+  <h1>Col <span>Vitesse</span></h1>
+  <p class="sub">Simulateur de moto sur route de montagne et route ouverte. Choisis ta machine, ton décor et fonce.</p>
+  <h2>Moto</h2>
+  <div class="grid" id="bikes"></div>
+  <h2>Décor</h2>
+  <div class="opt" id="optMode"></div>
+  <h2>Lumière</h2>
+  <div class="opt" id="optTime"></div>
+  <h2>Aides</h2>
+  <div class="opt" id="optAid"></div>
+  <button id="go">Démarrer</button>
+  <div class="keys">
+    <kbd>Z</kbd>/<kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> freins (le pilote se redresse) · <kbd>Q</kbd>/<kbd>A</kbd>/<kbd>←</kbd> gauche · <kbd>D</kbd>/<kbd>→</kbd> droite · <kbd>C</kbd> caméra · <kbd>R</kbd> remettre sur la route · <kbd>Échap</kbd> menu
+  </div>
+  <div class="note">Puissances et poids : valeurs constructeur arrondies. La Ninja H2R est une moto de circuit, non homologuée route. Le comportement est une simulation simplifiée, pas un modèle de course.</div>
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/main.js"></script>
+
+</body></html>

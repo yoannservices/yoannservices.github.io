@@ -1,43 +1,3 @@
-<!doctype html><html><head>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../assets/theme.css" />
-<script src="../assets/site.js"></script>
-<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Col du Drift</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{margin:0;height:100%;background:#1a1026;overflow:hidden;font-family:var(--ui-font);color:#fff;user-select:none}
-canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none;padding:inherit}
-.g{background:rgba(30,16,44,.42);backdrop-filter:blur(8px);border:1px solid rgba(255,220,190,.18);border-radius:16px}
-#tot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;padding:8px 16px}
-#tot small,#spd small{display:block;font-size:11px;letter-spacing:.18em;opacity:.7}
-#tot b{font-size:26px;font-weight:600}
-#drift{position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);left:50%;transform:translateX(-50%);text-align:center;font-size:30px;font-weight:700;letter-spacing:.06em;text-shadow:0 2px 16px rgba(255,140,90,.7);white-space:nowrap}
-#drift i{font-style:normal;color:#ffcf6b;margin-left:10px;font-size:22px}
-#drift.bad{color:#ff7a8a}#drift.ok{color:#9ff0c4}
-#spd{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding:10px 18px;text-align:right;min-width:130px}
-#spd b{font-size:44px;font-weight:600;line-height:1}
-#rpm{height:5px;border-radius:3px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}
-#rb{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffcf6b,#ff7a5c)}
-#help{position:absolute;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);font-size:12px;opacity:.75;max-width:50vw;line-height:1.5}
-#start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 90%,rgba(255,150,100,.35),rgba(20,10,35,.78));text-align:center;padding:24px}
-#start h1{font-size:clamp(36px,8vw,76px);margin:0;letter-spacing:.14em;font-weight:300;text-shadow:0 4px 30px rgba(255,150,100,.6)}
-#start p{max-width:460px;opacity:.85;line-height:1.6}
-#go{pointer-events:auto;margin-top:12px;font-size:17px;padding:13px 34px;border:0;border-radius:30px;background:linear-gradient(90deg,#ffcf6b,#ff7a5c);color:#2a1030;font-weight:600;cursor:pointer}
-</style></head><body>
-<div id="hud">
-<div id="tot" class="g"><small>SCORE</small><b id="tv">0</b><small id="best"></small></div>
-<div id="drift"></div>
-<div id="spd" class="g"><b id="sv">0</b><small>KM/H</small><div id="rpm"><i id="rb"></i></div></div>
-<div id="help">↑ / Z / W accélérer · ↓ / S freiner<br>← → / Q D direction · ESPACE frein à main · R replacer</div>
-</div>
-<div id="start"><h1>COL DU DRIFT</h1><p>Une route de montagne au coucher du soleil. Entre en virage avec de la vitesse, lâche le frein à main ou les gaz et tiens l'angle le plus longtemps possible. Touche la glissière et ton combo est perdu.</p><button id="go">Prendre la route</button></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
 (()=>{
 const T=THREE,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),sstep=(a,b,x)=>{x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
 const angD=(a,b)=>{let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d};
@@ -234,6 +194,3 @@ hud(spd,f1);renderer.render(scene,camera)}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();reset(0);requestAnimationFrame(frame);
 })();
-</script></body></html>
-
-</body></html>

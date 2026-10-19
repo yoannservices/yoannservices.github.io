@@ -1,0 +1,73 @@
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+
+/* Concept : cockpit plein écran, HUD vert phosphore, menu en panneau sombre. Un seul univers visuel (sombre) volontaire. */
+:root{--bg:var(--ui-bg);--panel:rgba(15,15,19,.88);--fg:#e8f0f6;--dim:#8fa3b3;--hud:#8dffcb;--warn:#ffb54a;--bad:#ff6b5e;--line:rgba(141,255,203,.28);--display:'Chakra Petch','Arial Narrow',sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;color-scheme:dark}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);-webkit-user-select:none;user-select:none;touch-action:none}
+canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hud{pointer-events:none}
+#cloudfx{position:fixed;inset:0;background:#e9eef3;opacity:0;pointer-events:none}
+#vig{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);opacity:0;transition:opacity .2s}
+#msg{position:fixed;left:0;right:0;top:22%;text-align:center;pointer-events:none;padding-inline:16px}
+#msg .big{display:inline-block;font-size:clamp(22px,4.4vw,44px);font-weight:700;letter-spacing:.04em;padding:10px 22px;background:var(--panel);border:1px solid var(--line);border-radius:4px}
+#msg .big.bad{color:var(--bad);border-color:var(--bad)}
+#msg .big.good{color:var(--hud)}
+#msg .sub{margin-top:8px;font-size:clamp(13px,2vw,17px);color:var(--fg);text-shadow:0 1px 4px #000}
+#cockpitHud{position:fixed;inset:0;z-index:4;pointer-events:none;color:var(--hud);font-family:var(--mono);text-shadow:0 1px 5px #000}
+#cockpitReadout{position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:clamp(14px,4vw,48px);align-items:center;padding:8px 18px;background:rgba(4,13,17,.72);border:1px solid rgba(141,255,203,.5);border-radius:4px;white-space:nowrap}
+#cockpitReadout .unit{font-size:10px;letter-spacing:.12em;color:#b4d8ca}
+#cockpitReadout strong{display:block;font-size:clamp(18px,3.2vw,28px);line-height:1.1}
+#cockpitMach.supersonic{color:#ffbd62}
+#cockpitPower{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(360px,58vw);padding:8px 12px;background:rgba(4,13,17,.76);border:1px solid rgba(141,255,203,.48);border-radius:4px}
+#cockpitPowerLabel{display:flex;justify-content:space-between;gap:12px;margin-bottom:5px;font-size:11px;letter-spacing:.08em}
+#cockpitPowerTrack{height:8px;background:#15252a;border:1px solid rgba(141,255,203,.45);overflow:hidden}
+#cockpitPowerFill{height:100%;width:0;background:linear-gradient(90deg,#42c997,#8dffcb);transition:width .12s linear}
+#cockpitPowerFill.boost{background:linear-gradient(90deg,#ff8a3d,#ffe080)}
+#mini{position:fixed;left:16px;bottom:16px;width:170px;height:170px;border-radius:50%;border:1px solid var(--line);background:#06101a;box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+#touch{position:fixed;right:12px;bottom:16px;display:none;gap:8px;align-items:flex-end}
+#touch .col{display:flex;flex-direction:column;gap:8px}
+#touch button{font:600 13px var(--display);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-width:64px}
+#thr{writing-mode:vertical-lr;direction:rtl;height:150px;width:34px}
+@media (pointer:coarse){#touch{display:flex}#mini{width:120px;height:120px}}
+.ov{position:fixed;inset:0;background:rgba(5,9,14,.82);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(20px,env(safe-area-inset-top,0px)) 16px 28px;touch-action:pan-y}
+.ov[hidden]{display:none}
+.wrap{width:min(980px,100%)}
+h1{margin:0;font-size:clamp(34px,7vw,64px);font-weight:700;letter-spacing:.18em;line-height:1}
+h1 span{color:var(--hud)}
+.tag{margin:8px 0 22px;color:var(--dim);font-size:clamp(14px,2vw,17px)}
+h2{margin:22px 0 10px;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--hud)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{text-align:left;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:12px 14px;color:var(--fg);font-family:var(--display);cursor:pointer;min-width:0}
+.card:hover{border-color:var(--line)}
+.card[aria-pressed="true"]{border-color:var(--hud);box-shadow:inset 0 0 0 1px var(--hud)}
+.card b{display:block;font-size:17px;margin-bottom:2px}
+.card .meta{font:400 12px var(--mono);color:var(--hud);margin-bottom:6px}
+.card p{margin:0;font-size:13px;color:var(--dim);line-height:1.35}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button,.go,.btn{font:600 15px var(--display);color:var(--fg);background:var(--panel);border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:10px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--hud);color:var(--hud)}
+.go{background:var(--hud);color:#04140d;border-color:var(--hud);font-size:18px;padding:13px 34px;letter-spacing:.1em}
+.go:hover{filter:brightness(1.08)}
+:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 24px;font-size:14px}
+.keys div{display:flex;gap:10px;align-items:baseline;min-width:0}
+kbd{font:500 12px var(--mono);background:#16222e;border:1px solid #2a3b4b;border-radius:4px;padding:2px 6px;color:var(--fg);white-space:nowrap}
+.keys span{color:var(--dim)}
+.tip{margin-top:14px;padding:10px 14px;border-left:3px solid var(--warn);background:var(--panel);font-size:14px;color:var(--fg);line-height:1.45}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:24px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--dim)}
+#mapov .mapbox{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;width:min(1080px,100%)}
+#mapc{width:100%;aspect-ratio:1;background:#06101a;border:1px solid var(--line);border-radius:4px;display:block}
+#aplist{display:flex;flex-direction:column;gap:8px;min-width:0}
+#aplist .card{cursor:default}
+#aplist .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#aplist .btns button{font:600 12px var(--display);padding:6px 9px;background:#16222e;color:var(--fg);border:1px solid #2a3b4b;border-radius:4px;cursor:pointer}
+@media (max-width:760px){#mapov .mapbox{grid-template-columns:1fr}}
+#pvColor{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:10px;padding:12px 14px;background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:6px}
+#pvColor[hidden]{display:none}
+#pvColor .ttl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hud);width:100%}
+#pvColor label{display:grid;gap:4px;font:500 12px var(--mono);color:var(--dim)}
+#pvColor input[type=range]{width:160px;accent-color:var(--hud)}
+#pvSwatch{width:44px;height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.3)}
+#pvColor .btn{font-size:13px;padding:8px 12px}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;letter-spacing:.2em;color:var(--hud);z-index:9}

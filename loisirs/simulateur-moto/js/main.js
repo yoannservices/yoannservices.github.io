@@ -1,133 +1,3 @@
-<!doctype html><html><head>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="../assets/theme.css" />
-<script src="../assets/site.js"></script>
-<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Col Vitesse</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@400;500;600&display=swap">
-<style>
-/* Plan : plein écran 3D, HUD en bas, menu de sélection en surimpression. Look instrument de bord, dark-first. */
-:root{
-  color-scheme:dark;
-  --bg:var(--ui-bg); --panel:rgba(15,15,19,.78); --line:rgba(255,255,255,.14);
-  --fg:#eef1f4; --mute:#8d97a3; --accent:#ff5a1f; --ok:#4ade80; --warn:#fbbf24;
-  --f-disp:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
-  --f-body:var(--ui-font);
-}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:dark}}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);overflow:hidden;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  box-sizing:border-box;user-select:none;-webkit-user-select:none;touch-action:none}
-#c{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
-#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.hud{position:fixed;left:0;right:0;pointer-events:none;z-index:2;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
-#top{top:env(safe-area-inset-top,0px);padding-top:10px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-#bot{bottom:env(safe-area-inset-bottom,0px);padding-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.pill{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;backdrop-filter:blur(6px);pointer-events:auto}
-.cams{display:flex;gap:6px;flex-wrap:wrap}
-.cams button{font:600 13px var(--f-body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
-.cams button.on{background:var(--accent);border-color:var(--accent);color:#120804}
-.cams button:focus-visible,.card:focus-visible,#go:focus-visible,.opt button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-#info{font:500 12px var(--f-body);color:var(--mute);text-align:right;line-height:1.35}
-#info b{color:var(--fg);font-weight:600}
-#dash{display:flex;align-items:flex-end;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 16px 12px}
-#spd{font:800 64px/0.9 var(--f-disp);font-variant-numeric:tabular-nums;min-width:3.2ch;text-align:right}
-#unit{font:600 12px var(--f-body);color:var(--mute);letter-spacing:.12em;text-transform:uppercase}
-#gear{font:800 40px/1 var(--f-disp);color:var(--accent);min-width:1ch;text-align:center}
-#rpmw{width:min(34vw,200px)}
-#rpmb{height:8px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
-#rpmf{height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--warn) 70%,#ef4444)}
-#rpmt{font:500 11px var(--f-body);color:var(--mute);margin-top:4px;font-variant-numeric:tabular-nums}
-#mini{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 66px);width:150px;height:150px;z-index:2;pointer-events:none;border-radius:50%;box-shadow:0 0 0 2px var(--line),0 6px 18px rgba(0,0,0,.45)}
-@media (max-width:560px){#mini{width:112px;height:112px;top:calc(env(safe-area-inset-top,0px) + 56px)}}
-body.menu #mini{visibility:hidden}
-#msg{position:fixed;left:50%;top:22%;transform:translateX(-50%);font:800 34px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .25s;z-index:3;pointer-events:none;text-align:center;padding:0 16px}
-#msg.show{opacity:1}
-#touch{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);display:none;justify-content:space-between;z-index:2;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box;pointer-events:none}
-#touch .g{display:flex;gap:10px;pointer-events:auto}
-#touch button{width:68px;height:68px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:700 14px var(--f-body)}
-#touch button:active,#touch button.p{background:var(--accent);color:#120804}
-@media (pointer:coarse){#touch{display:flex}}
-#menu{position:fixed;inset:0;z-index:5;background:linear-gradient(180deg,rgba(8,10,13,.94),rgba(8,10,13,.82));overflow:auto;touch-action:pan-y;
-  padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 24px);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
-body.menu .hud,body.menu #touch{visibility:hidden}
-#menu .in{max-width:980px;margin:0 auto}
-h1{font:800 clamp(40px,9vw,76px)/.92 var(--f-disp);margin:6px 0 4px;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
-h1 span{color:var(--accent)}
-.sub{color:var(--mute);margin:0 0 18px;max-width:60ch;line-height:1.45}
-h2{font:700 13px var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:20px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
-.card{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--fg);font:inherit;cursor:pointer;min-width:0}
-.card.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-.card .n{font:700 22px/1.05 var(--f-disp);letter-spacing:.02em;text-transform:uppercase}
-.card .e{font-size:12px;color:var(--mute);margin:2px 0 8px}
-.card .hp{font:800 30px/1 var(--f-disp);font-variant-numeric:tabular-nums}
-.card .hp small{font:600 12px var(--f-body);color:var(--mute);margin-left:4px}
-.bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent)}
-.card .s{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:6px;font-variant-numeric:tabular-nums}
-.opt{display:flex;gap:8px;flex-wrap:wrap}
-.opt button{font:600 14px var(--f-body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
-.opt button.on{background:var(--accent);border-color:var(--accent);color:#120804}
-#go{margin-top:22px;font:800 24px var(--f-disp);letter-spacing:.08em;text-transform:uppercase;color:#120804;background:var(--accent);border:0;border-radius:10px;padding:14px 34px;cursor:pointer}
-.keys{margin-top:16px;color:var(--mute);font-size:13px;line-height:1.7}
-.keys kbd{font:600 12px var(--f-body);background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--fg)}
-.note{color:var(--mute);font-size:12px;margin-top:14px;max-width:70ch;line-height:1.45}
-#rec{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 54px);font:700 12px var(--f-body);letter-spacing:.14em;color:#fff;z-index:2;display:none;pointer-events:none;text-shadow:0 1px 6px #000}
-#rec i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px;animation:bl 1s steps(2) infinite}
-@keyframes bl{50%{opacity:0}}
-@media (prefers-reduced-motion:reduce){#rec i{animation:none}}
-@media (max-width:560px){#spd{font-size:48px}#gear{font-size:32px}#dash{padding:8px 12px 10px;gap:10px}#info{display:none}}
-</style>
-<canvas id="c"></canvas>
-<canvas id="fx"></canvas>
-<div class="hud" id="top">
-  <div class="cams" id="cams">
-    <button data-cam="0" class="on" aria-label="Caméra troisième personne">3ᵉ pers.</button>
-    <button data-cam="1" aria-label="Caméra première personne">Pilote</button>
-    <button data-cam="2" aria-label="Caméra roue avant">Roue avant</button>
-  </div>
-  <div class="pill" id="info"></div>
-</div>
-<canvas id="mini" width="300" height="300" aria-label="Mini carte"></canvas>
-<div id="rec"><i></i>REC · CAM ROUE AVANT</div>
-<div id="msg"></div>
-<div id="touch">
-  <div class="g"><button id="tl">◀</button><button id="tr">▶</button></div>
-  <div class="g"><button id="tb">Frein</button><button id="tg">Gaz</button></div>
-</div>
-<div class="hud" id="bot">
-  <div id="dash">
-    <div><div id="spd">0</div><div id="unit">km/h</div></div>
-    <div id="gear">N</div>
-    <div id="rpmw"><div id="rpmb"><div id="rpmf"></div></div><div id="rpmt">0 tr/min</div></div>
-  </div>
-  <div class="pill" id="hint" style="font-size:12px;color:var(--mute);line-height:1.4">C : caméra · R : retour route · Échap : menu</div>
-</div>
-<div id="menu"><div class="in">
-  <h1>Col <span>Vitesse</span></h1>
-  <p class="sub">Simulateur de moto sur route de montagne et route ouverte. Choisis ta machine, ton décor et fonce.</p>
-  <h2>Moto</h2>
-  <div class="grid" id="bikes"></div>
-  <h2>Décor</h2>
-  <div class="opt" id="optMode"></div>
-  <h2>Lumière</h2>
-  <div class="opt" id="optTime"></div>
-  <h2>Aides</h2>
-  <div class="opt" id="optAid"></div>
-  <button id="go">Démarrer</button>
-  <div class="keys">
-    <kbd>Z</kbd>/<kbd>W</kbd>/<kbd>↑</kbd> gaz · <kbd>S</kbd>/<kbd>↓</kbd> freins · <kbd>Q</kbd>/<kbd>A</kbd>/<kbd>←</kbd> gauche · <kbd>D</kbd>/<kbd>→</kbd> droite · <kbd>C</kbd> caméra · <kbd>R</kbd> remettre sur la route · <kbd>Échap</kbd> menu
-  </div>
-  <div class="note">Puissances et poids : valeurs constructeur arrondies. La Ninja H2R est une moto de circuit, non homologuée route. Le comportement est une simulation simplifiée, pas un modèle de course.</div>
-</div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
 'use strict';
 /* ===== Utilitaires ===== */
 const DEG=Math.PI/180, TAU=Math.PI*2;
@@ -319,9 +189,9 @@ const powerShape=x=>x<.2?.4:x<1?1-.9*(1-x)*(1-x):Math.max(0,1-4*(x-1)*(x-1)*1.5)
 
 /* ===== Etat & physique ===== */
 function newState(){return{x:0,z:0,y:0,psi:0,v:0,u:0,kap:0,lean:0,pitch:0,gear:1,rpm:1300,ax:0,alat:0,s:0,idx:0,lat:0,
-  ang:0,crash:0,slide:0,off:0,wheelie:0,spin:0,steer:0,wob:0,hit:0,brkS:0}}
+  ang:0,crash:0,slide:0,off:0,wheelie:0,spin:0,steer:0,wob:0,hit:0,brkS:0,up:0,aT:0}}
 function placeOnRoad(st,s){
-  const i=Math.round(s/DS);st.x=RX[i];st.z=RZ[i];st.psi=RTH[i];st.idx=i;st.y=RY[i];st.v=0;st.u=0;st.kap=0;st.lean=0;st.gear=1;st.rpm=1300;st.crash=0;st.pitch=0;st.slide=0;st.wheelie=0;st.hit=0;st.brkS=0;
+  const i=Math.round(s/DS);st.x=RX[i];st.z=RZ[i];st.psi=RTH[i];st.idx=i;st.y=RY[i];st.v=0;st.u=0;st.kap=0;st.lean=0;st.gear=1;st.rpm=1300;st.crash=0;st.pitch=0;st.slide=0;st.wheelie=0;st.hit=0;st.brkS=0;st.up=0;st.aT=0;
 }
 const ROADHW=4.2, SHOULDER=6.4;
 function stepPhysics(st,bk,inp,aids,dt){
@@ -346,27 +216,40 @@ function stepPhysics(st,bk,inp,aids,dt){
   if(st.rpm>bk.red*1.01)Fd=0;
   const Fmax=mu*bk.mass*G*(ai?.78:1.0)*(1-.35*clamp(st.alat/(mu*G),0,1));
   Fd=Math.min(Fd,Fmax,bk.mass*G*1.25);
-  // freinage
+  // freinage : cercle d'adherence (le pneu partage son grip entre virage et freinage)
   st.brkS+=(inp.brk-st.brkS)*(1-Math.exp(-dt/(inp.brk>st.brkS?.07:.05)));
-  const gripF=mu/1.2,latF=1-.45*clamp(Math.abs(st.alat)/(mu*G),0,1);
-  let Fb=st.brkS*bk.mass*G*(ai?1.55:1.85)*gripF*latF*(1+.0016*Math.min(v,80));
-  const drag=.5*1.2*bk.cda*v*v+.012*bk.mass*G+(st.off?bk.mass*G*.08+v*20:0);
-  let a=(Fd-Fb-drag)/bk.mass; if(v<.05&&a<0)a=0;
+  const gripG=mu*G*1.05;
+  const aLong=Math.sqrt(Math.max(0,gripG*gripG-st.alat*st.alat));
+  // limite de stoppie ~1.15 g sur le sec ; avec ABS on reste juste sous la limite du pneu
+  const bMax=Math.min(G*1.15*(mu/1.2),ai?aLong*.97:G*1.3);
+  const Fb=st.brkS*bk.mass*Math.max(ai?G*.25*(mu/1.2):0,bMax);
+  // frein moteur quand on coupe les gaz
+  const Fe=inp.thr<.1&&!clutch?bk.mass*G*.07*clamp(st.rpm/bk.red,0,1):0;
+  // position du pilote : il se redresse au freinage (pare-brise humain), se couche sous le carenage aux gaz
+  const upT=inp.brk>0&&v>8?1:0;
+  st.up+=(upT-st.up)*Math.min(1,dt*(upT>st.up?5:3));
+  const cda=bk.cda*(1+1.1*st.up);
+  const aero=.5*1.2*cda*v*v;
+  const roll=.012*bk.mass*G+(st.off?bk.mass*G*.08+v*20:0);
+  let a=(Fd-Fb-Fe-aero-roll)/bk.mass; if(v<.05&&a<0)a=0;
   st.ax=a;
+  st.aT=(Fd-Fb-Fe)/bk.mass; // partie transmise par le pneu (l'aero ne consomme pas de grip)
   st.v=Math.max(0,v+a*dt);
   // boite auto
   if(((st.rpm>bk.red*.955&&inp.thr>.2)||st.rpm>bk.red*1.03)&&g<6)st.gear=g+1;
   else if(g>1&&st.rpm<bk.red*(.36+.05*g+(inp.brk>.3?.12:0))&&inp.brk+ (inp.thr<.1?1:0)>0)st.gear=g-1;
   if(st.v<2&&inp.thr<.1)st.gear=1;
   // direction
-  const k=1/(1+Math.pow(st.v/75,2));
+  // braquage : jusqu'a ~1.2 g d'acceleration laterale (≈ 50° d'angle), un peu moins tout en haut
+  const k=1/(1+Math.pow(st.v/170,2));
   const target=inp.steer;
-  const tau=.10+.06*Math.min(1,st.v/40);
+  const tau=.08+.05*Math.min(1,st.v/40);
   st.u+=(target-st.u)*(1-Math.exp(-dt/tau));
-  const Kmax=Math.min(1/5.2,1.5*G/Math.max(st.v*st.v,1));
+  const Kmax=Math.min(1/4.6,1.2*G*(mu/1.2)/Math.max(st.v*st.v,1));
   let kap=st.u*Kmax*k;
-  // limite d'adherence
-  const amax=Math.sqrt(Math.max(.01,(mu*G*1.04)**2-Math.min(Math.abs(a),mu*G)**2*.8));
+  // limite d'adherence (seules les forces du pneu comptent, pas la trainee aero)
+  const aT=Math.min(Math.abs(st.aT),mu*G*1.04);
+  const amax=Math.sqrt(Math.max(.01,(mu*G*1.04)**2-aT*aT*.9));
   const areq=st.v*st.v*Math.abs(kap);
   st.slide=0;
   if(areq>amax){
@@ -1103,7 +986,7 @@ function buildBike(b){
   A(torso,RK.rbox(.2,.08,.18,.04,2),suitDark,0,.02,.0);
   const head=new THREE.Group();head.position.copy(sh).add(V(0,.07,.08));rider.add(head);
   const hm=RK.helmet(head,helmShell,visor,{r:.145});hm.rotation.x=-.18;
-  const arms=[];
+  const arms=[],armRig=[];
   rider.updateMatrixWorld(true);
   for(const s of[-1,1]){
     const shd=V(s*.19,0,0).applyQuaternion(torso.quaternion).add(sh).add(V(0,-.04,0));
@@ -1111,6 +994,7 @@ function buildBike(b){
     const elb=RK.ik2(shd,grip,.3,.28,V(s*.9,-.6,-.3));
     const a1=limb(shd,elb,.052,suitMain),a2=limb(elb,grip,.043,suitDark),gl=A(null,RK.rbox(.055,.075,.1,.022,2),glove,grip.x,grip.y,grip.z);
     rider.add(a1,a2,gl);arms.push(a1,a2,gl);
+    armRig.push({shd0:shd.clone(),grip:grip.clone(),pole:V(s*.9,-.6,-.3),a1,a2,L1:shd.distanceTo(elb),L2:elb.distanceTo(grip)});
     const hp=V(s*.1,.93,-.42),peg=V(s*.2,.47,-.29),knee=RK.ik2(hp,peg,.45,.43,V(s*.5,.25,1));
     const th=limb(hp,knee,.08,suitMain),sn=limb(knee,peg.clone().add(V(0,.05,0)),.058,suitDark);
     const kn=A(null,RK.rbox(.06,.1,.05,.02,2),suitW,knee.x+s*.07,knee.y-.03,knee.z);
@@ -1123,7 +1007,7 @@ function buildBike(b){
   const sc=document.createElement('canvas');sc.width=sc.height=64;const sx=sc.getContext('2d');const gr=sx.createRadialGradient(32,32,2,32,32,30);gr.addColorStop(0,'rgba(0,0,0,.6)');gr.addColorStop(1,'rgba(0,0,0,0)');sx.fillStyle=gr;sx.fillRect(0,0,64,64);
   const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1.1,2.8),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=.17;root.add(shadow);
-  return {root,leanG,pitchG,inner,rider,head,torso,arms,st,fp,fw,rw,gp,shadow,hm,hl,dash};
+  return {root,leanG,pitchG,inner,rider,head,torso,arms,armRig,st,fp,fw,rw,gp,shadow,hm,hl,dash};
 }
 
 let bikeObj=null,bikeIdx=0;
@@ -1149,6 +1033,21 @@ const touch={l:false,r:false,g:false,b:false};
 function bindTouch(id,k){const el=document.getElementById(id);const on=e=>{e.preventDefault();touch[k]=true;el.classList.add('p')},off=e=>{e.preventDefault();touch[k]=false;el.classList.remove('p')};
   el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off)}
 bindTouch('tl','l');bindTouch('tr','r');bindTouch('tb','b');bindTouch('tg','g');
+// camera 3e personne : clic gauche + glisser pour tourner autour de la moto
+const orb={yaw:0,pitch:0,drag:false,lx:0,ly:0,idle:0,id:null};
+cv.classList.add('orbit');
+cv.addEventListener('pointerdown',e=>{
+  if(!playing||camMode!==0||e.button!==0)return;
+  orb.drag=true;orb.id=e.pointerId;orb.lx=e.clientX;orb.ly=e.clientY;cv.setPointerCapture(e.pointerId);cv.classList.add('drag');e.preventDefault();
+});
+cv.addEventListener('pointermove',e=>{
+  if(!orb.drag||e.pointerId!==orb.id)return;
+  orb.yaw-=(e.clientX-orb.lx)*.006;orb.pitch=clamp(orb.pitch+(e.clientY-orb.ly)*.005,-.3,1.1);
+  orb.yaw=Math.atan2(Math.sin(orb.yaw),Math.cos(orb.yaw));
+  orb.lx=e.clientX;orb.ly=e.clientY;orb.idle=0;
+});
+const orbEnd=e=>{if(e.pointerId!==orb.id)return;orb.drag=false;orb.idle=0;cv.classList.remove('drag')};
+cv.addEventListener('pointerup',orbEnd);cv.addEventListener('pointercancel',orbEnd);
 function readInput(){
   const left=keys['q']||keys['a']||keys['arrowleft']||touch.l,right=keys['d']||keys['arrowright']||touch.r;
   const gas=keys['z']||keys['w']||keys['arrowup']||keys[' ']&&false||touch.g,brk=keys['s']||keys['arrowdown']||touch.b;
@@ -1158,7 +1057,7 @@ function readInput(){
 /* ===== Camera, effets, audio ===== */
 let camMode=0,camPos=new THREE.Vector3(),camYaw=0,camInit=false,shake=0,t0=0;
 function setCam(m){
-  camMode=m;camInit=false;
+  camMode=m;camInit=false;orb.yaw=orb.pitch=0;orb.drag=false;cv.classList.toggle("orbit",m===0);
   document.querySelectorAll('#cams button').forEach(b=>b.classList.toggle('on',+b.dataset.cam===m));
   document.getElementById('rec').style.display=m===2?'block':'none';
   if(bikeObj){const fp=m===1;bikeObj.head.visible=!fp;bikeObj.torso.visible=!fp;bikeObj.arms.forEach(a=>a.visible=true);bikeObj.hl.visible=m!==2}
@@ -1178,14 +1077,19 @@ function updateCamera(st,dt,time){
   if(camMode===0){
     camYaw+=(Math.atan2(Math.sin(st.psi-camYaw),Math.cos(st.psi-camYaw)))*Math.min(1,dt*(camInit?4.5:100));
     const dist=4.6+sp*1.6,hgt=1.55+sp*.25;
-    _v.set(st.x-Math.sin(camYaw)*dist,st.y+hgt,st.z-Math.cos(camYaw)*dist);
+    // orbite souris : revient doucement derriere la moto apres 1,5 s sans glisser
+    if(!orb.drag){orb.idle+=dt;if(orb.idle>1.5){const f=Math.exp(-dt*2.5);orb.yaw*=f;orb.pitch*=f}}
+    const a=camYaw+orb.yaw,R=Math.hypot(dist,hgt),e=Math.atan2(hgt,dist)+orb.pitch;
+    _v.set(st.x-Math.sin(a)*Math.cos(e)*R,st.y+Math.sin(e)*R,st.z-Math.cos(a)*Math.cos(e)*R);
     if(!camInit){camPos.copy(_v);camInit=true}
-    camPos.lerp(_v,Math.min(1,dt*10));
+    camPos.lerp(_v,Math.min(1,dt*(orb.drag?30:10)));
     const g=terrainHeightFast(camPos.x,camPos.z);if(camPos.y<g+.5)camPos.y=g+.5;
     camera.position.copy(camPos);
     camera.up.set(0,1,0);
-    camera.lookAt(st.x+fwd.x*7+Math.sin(camYaw)*0,st.y+.95+Math.min(.6,sp*.5),st.z+fwd.z*7);
-    camera.rotateZ(st.lean*.12);
+    // en orbite on vise la moto plutot que la route devant
+    const w=clamp(Math.abs(orb.yaw)/.6+Math.abs(orb.pitch)/.6,0,1);
+    camera.lookAt(st.x+fwd.x*7*(1-w),st.y+.95+Math.min(.6,sp*.5)*(1-w)-.15*w,st.z+fwd.z*7*(1-w));
+    camera.rotateZ(st.lean*.12*(1-w));
     camera.fov=lerp(camera.fov,60+sp*28,Math.min(1,dt*4));
   }else if(camMode===1){
     _v.set(0,1.28,.1);b.inner.localToWorld(_v);
@@ -1340,6 +1244,7 @@ function drawMini(st){
   mx.fillStyle='rgba(255,255,255,.7)';mx.font='600 18px sans-serif';mx.fillText(Math.round(miniRange*.52/10)*10+' m',cx,W-14);
 }
 let last=performance.now(),acc=0,lastRoadUpd=0,fps=60,tAll=0;
+const _qUp=new THREE.Quaternion(),_ax=new THREE.Vector3(1,0,0),_yUp=new THREE.Vector3(0,1,0),_v1=new THREE.Vector3(),_v2=new THREE.Vector3();
 function frame(now){
   requestAnimationFrame(frame);
   let dt=Math.min(.05,(now-last)/1000);last=now;if(dt<=0)return;
@@ -1356,6 +1261,18 @@ function frame(now){
     b.root.position.set(st.x,st.y,st.z);b.root.rotation.y=st.psi;
     b.leanG.rotation.z=st.lean;b.pitchG.rotation.x=-st.pitch;
     b.rider.position.x=-st.lean*.22;
+    // buste redresse au freinage (rotation autour des hanches)
+    if(!b.torso.userData.q0){b.torso.userData.q0=b.torso.quaternion.clone();b.head.userData.p0=b.head.position.clone()}
+    _qUp.setFromAxisAngle(_ax,-.42*st.up);
+    b.torso.quaternion.copy(_qUp).multiply(b.torso.userData.q0);
+    b.head.position.copy(b.head.userData.p0).sub(b.torso.position).applyQuaternion(_qUp).add(b.torso.position);
+    b.head.rotation.x=.25*st.up;
+    for(const r of b.armRig){
+      const sh=_v1.copy(r.shd0).sub(b.torso.position).applyQuaternion(_qUp).add(b.torso.position);
+      const el=RK.ik2(sh,r.grip,.3,.28,r.pole);
+      r.a1.position.copy(sh);r.a1.quaternion.setFromUnitVectors(_yUp,_v2.subVectors(el,sh).normalize());r.a1.scale.y=el.distanceTo(sh)/r.L1;
+      r.a2.position.copy(el);r.a2.quaternion.setFromUnitVectors(_yUp,_v2.subVectors(r.grip,el).normalize());r.a2.scale.y=r.grip.distanceTo(el)/r.L2;
+    }
     b.st.rotation.y=st.steer;
     b.fw.userData.spin.rotation.x=st.spin;b.rw.userData.spin.rotation.x=st.spin;if(b.dash)b.dash(st,bk);
     b.shadow.rotation.z=0;
@@ -1389,8 +1306,5 @@ document.body.classList.add('menu');buildMenu();resize();
 initWorld('mountain');curMode='mountain';applyLight('day');selectBikeModel(0);
 placeOnRoad(bikeState,40);bikeState.y=RY[bikeState.idx];
 updateChunks(bikeState.x,bikeState.z,0,1);updateRoad(bikeState.idx);
-window.__sim={bikeState,get playing(){return playing},startRun,chunks,BIKES,setCam,scene,camera};
+window.__sim={orb,bikeState,stepPhysics,placeOnRoad,get playing(){return playing},startRun,chunks,BIKES,setCam,scene,camera};
 requestAnimationFrame(frame);
-</script>
-
-</body></html>
