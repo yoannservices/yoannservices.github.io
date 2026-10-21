@@ -259,6 +259,20 @@
   const fpvCam = new THREE.PerspectiveCamera(90, 1, 0.06, 3200);
   const qTilt = new THREE.Quaternion(), qShake = new THREE.Quaternion(), eShake = new THREE.Euler();
   const chasePos = new V3(10, 5, 30);
+  // vue poursuite : clic gauche + glisser pour tourner autour du drone
+  const orb = { yaw: 0, pitch: 0, drag: false, lx: 0, ly: 0, idle: 9, id: null };
+  canvas.addEventListener('pointerdown', e => {
+    if (camMode !== 1 || e.button !== 0) return;
+    orb.drag = true; orb.id = e.pointerId; orb.lx = e.clientX; orb.ly = e.clientY;
+    canvas.setPointerCapture(e.pointerId); canvas.classList.add('drag'); e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!orb.drag || e.pointerId !== orb.id) return;
+    orb.yaw -= (e.clientX - orb.lx) * 0.006; orb.pitch = Math.max(-0.4, Math.min(1.2, orb.pitch + (e.clientY - orb.ly) * 0.005));
+    orb.yaw = Math.atan2(Math.sin(orb.yaw), Math.cos(orb.yaw)); orb.lx = e.clientX; orb.ly = e.clientY; orb.idle = 0;
+  });
+  const orbEnd = e => { if (e.pointerId !== orb.id) return; orb.drag = false; orb.idle = 0; canvas.classList.remove('drag'); };
+  canvas.addEventListener('pointerup', orbEnd); canvas.addEventListener('pointercancel', orbEnd);
   const _up = new V3(), _fw = new V3();
   function placeCameras(dt) {
     const P = Quad.P, aspect = W / H;
@@ -284,8 +298,12 @@
       if (_fw.lengthSq() < 1e-4) _fw.set(0, 0, -1);
       _fw.normalize();
       const dist = 1.6 + 1.4 * P.size;
-      const want = _up.copy(st.pos).addScaledVector(_fw, -dist); want.y += 0.5 + 0.5 * P.size;
-      chasePos.lerp(want, 1 - Math.exp(-dt * 7));
+      // orbite souris : revient doucement derrière le drone après 1,5 s sans glisser
+      if (!orb.drag) { orb.idle += dt; if (orb.idle > 1.5) { const f = Math.exp(-dt * 2.5); orb.yaw *= f; orb.pitch *= f; } }
+      const h = 0.5 + 0.5 * P.size, R = Math.hypot(dist, h);
+      const a = Math.atan2(_fw.x, _fw.z) + orb.yaw, e = Math.atan2(h, dist) + orb.pitch;
+      const want = _up.set(-Math.sin(a) * Math.cos(e), Math.sin(e), -Math.cos(a) * Math.cos(e)).multiplyScalar(R).add(st.pos);
+      chasePos.lerp(want, 1 - Math.exp(-dt * (orb.drag ? 30 : 7)));
       chasePos.y = Math.max(chasePos.y, World.heightAt(chasePos.x, chasePos.z) + 0.25);
       camera.position.copy(chasePos); camera.up.set(0, 1, 0); camera.lookAt(st.pos);
       camera.fov = Math.min(80, vf * 0.75); camera.aspect = aspect;

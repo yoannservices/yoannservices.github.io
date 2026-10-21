@@ -19,6 +19,7 @@ Jeu de drift 3D sur une route de montagne au coucher du soleil, jouable dans le 
 | ← → / Q D | Tourner |
 | Espace | Frein à main |
 | R | Replacer la voiture |
+| Clic + glisser | Tourner la caméra autour de la voiture |
 
 ## Lancer en local
 

@@ -742,6 +742,20 @@
   let camMode = 0, camInit = true, shake = 0;
   const camPos = new V3(), camUp = new V3(0, 1, 0), camLook = new V3();
   const visPos = new V3(), visQuat = new Q(), visUp = new V3(), visFwd = new V3();
+  // vues extérieures : clic gauche + glisser pour tourner autour de la voiture
+  const orb = { yaw: 0, pitch: 0, drag: false, lx: 0, ly: 0, idle: 9, id: null };
+  canvas.addEventListener('pointerdown', e => {
+    if (paused || camMode === 2 || e.button !== 0) return;
+    orb.drag = true; orb.id = e.pointerId; orb.lx = e.clientX; orb.ly = e.clientY;
+    canvas.setPointerCapture(e.pointerId); canvas.classList.add('drag'); e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!orb.drag || e.pointerId !== orb.id) return;
+    orb.yaw -= (e.clientX - orb.lx) * 0.006; orb.pitch = clamp(orb.pitch + (e.clientY - orb.ly) * 0.005, -0.3, 1.1);
+    orb.yaw = Math.atan2(Math.sin(orb.yaw), Math.cos(orb.yaw)); orb.lx = e.clientX; orb.ly = e.clientY; orb.idle = 0;
+  });
+  const orbEnd = e => { if (e.pointerId !== orb.id) return; orb.drag = false; orb.idle = 0; canvas.classList.remove('drag'); };
+  canvas.addEventListener('pointerup', orbEnd); canvas.addEventListener('pointercancel', orbEnd);
   function updateCamera(dt) {
     visUp.set(0, 1, 0).applyQuaternion(visQuat); visFwd.set(0, 0, -1).applyQuaternion(visQuat);
     const sp = car.vel.length();
@@ -756,9 +770,13 @@
       const dist = camMode === 0 ? 7.2 : 13, hgt = camMode === 0 ? 2.3 : 4.2;
       if (camInit) { camUp.copy(visUp); }
       camUp.lerp(visUp, 1 - Math.exp(-dt * (car.grounded ? 5 : 2.5))).normalize();
-      const desired = tmp.copy(visPos).addScaledVector(visFwd, -dist - Math.min(3, sp * 0.02)).addScaledVector(camUp, hgt);
+      // orbite souris autour de l'axe « haut » de la voiture (qui peut être sur un mur) ; revient derrière après 1,5 s
+      if (!orb.drag) { orb.idle += dt; if (orb.idle > 1.5) { const f = Math.exp(-dt * 2.5); orb.yaw *= f; orb.pitch *= f; } }
+      const back = dist + Math.min(3, sp * 0.02), R = Math.hypot(back, hgt), e = Math.atan2(hgt, back) + orb.pitch;
+      const fw = tmp2.copy(visFwd).applyAxisAngle(camUp, orb.yaw);
+      const desired = tmp.copy(visPos).addScaledVector(fw, -R * Math.cos(e)).addScaledVector(camUp, R * Math.sin(e));
       if (camInit) { camPos.copy(desired); camInit = false; }
-      camPos.lerp(desired, 1 - Math.exp(-dt * 9));
+      camPos.lerp(desired, 1 - Math.exp(-dt * (orb.drag ? 30 : 9)));
       // la caméra ne traverse pas les murs
       const tgt = tmp2.copy(visPos).addScaledVector(camUp, 1.3);
       const dir = new V3().subVectors(camPos, tgt); const len = dir.length();
@@ -768,7 +786,8 @@
         camera.position.copy(h ? tgt.clone().addScaledVector(dir, Math.max(0.6, h.distance - 0.4)) : camPos);
       }
       camera.up.copy(camUp);
-      camLook.copy(visPos).addScaledVector(camUp, 1.1).addScaledVector(visFwd, 3);
+      const w = Math.min(1, Math.abs(orb.yaw) / 0.6 + Math.abs(orb.pitch) / 0.6);   // en orbite on vise la voiture
+      camLook.copy(visPos).addScaledVector(camUp, 1.1 - 0.3 * w).addScaledVector(visFwd, 3 * (1 - w));
       camera.lookAt(camLook);
     }
     if (shake > 0) {

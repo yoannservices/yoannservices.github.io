@@ -133,3 +133,4 @@ select, .btn { background: var(--ui-surface); color: var(--ui-text); border: 1px
 /* Sticks tactiles affichés : l'OSD du bas remonte au-dessus */
 html.touch-on .osd.bl, html.touch-on .osd.br, html.touch-on .osd.bc { bottom: calc(min(36vw, 170px) + 44px); }
 html.touch-on .osd.bc { bottom: calc(min(36vw, 170px) + 76px); }
+#view.drag { cursor: grabbing; }

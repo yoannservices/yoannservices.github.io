@@ -152,3 +152,4 @@ h3{margin:0 0 8px;font:700 18px/1.1 var(--display);letter-spacing:.1em;text-tran
 .phone-status p{color:var(--mute);margin:6px 0 0}
 .phone-map{width:100%;max-width:340px;aspect-ratio:1;display:block;margin:0 auto 12px;background:#101820;border-radius:8px;border:1px solid var(--line)}
 @media(max-width:700px){#navTarget{top:200px;width:190px}#deliv{width:190px}.phone{height:calc(100% - 8px)}.phone-app{min-height:110px}}
+canvas#gl.orbit{cursor:grab;touch-action:none}canvas#gl.orbit.drag{cursor:grabbing}body.first-person canvas#gl.orbit{cursor:default}

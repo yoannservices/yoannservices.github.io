@@ -23,6 +23,7 @@ Skatepark 3D : whips, barspins, flips et grinds en trottinette freestyle.
 | E | Revert |
 | J / U | Tailwhip / heelwhip |
 | P / Échap | Pause |
+| Clic + glisser | Tourner la caméra autour du rider |
 
 ## Lancer en local
 

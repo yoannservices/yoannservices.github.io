@@ -151,16 +151,28 @@ $('go').onclick=()=>{audio();$('start').style.display='none';running=true;reset(
 
 // caméra
 const cv=new T.Vector3(),lk=new T.Vector3();
+// caméra : clic gauche + glisser pour tourner autour de la voiture
+const orb={yaw:0,pitch:0,drag:false,lx:0,ly:0,idle:9,id:null},cnv=renderer.domElement;
+cnv.classList.add('orbit');
+cnv.addEventListener('pointerdown',e=>{if(!running||e.button!==0)return;orb.drag=true;orb.id=e.pointerId;orb.lx=e.clientX;orb.ly=e.clientY;cnv.setPointerCapture(e.pointerId);cnv.classList.add('drag');e.preventDefault()});
+cnv.addEventListener('pointermove',e=>{if(!orb.drag||e.pointerId!==orb.id)return;orb.yaw-=(e.clientX-orb.lx)*.006;orb.pitch=Math.max(-.3,Math.min(1.1,orb.pitch+(e.clientY-orb.ly)*.005));orb.yaw=Math.atan2(Math.sin(orb.yaw),Math.cos(orb.yaw));orb.lx=e.clientX;orb.ly=e.clientY;orb.idle=0});
+const orbEnd=e=>{if(e.pointerId!==orb.id)return;orb.drag=false;orb.idle=0;cnv.classList.remove('drag')};
+cnv.addEventListener('pointerup',orbEnd);cnv.addEventListener('pointercancel',orbEnd);
 function cam(dt,spd,drifting){
 let ct;if(running){const va=spd>4?Math.atan2(st.vx,st.vz):st.th;ct=st.th+angD(va,st.th)*.55}else ct=st.th+Math.PI*.78+clock*.15;
 st.cam+=angD(ct,st.cam)*(1-Math.exp(-dt*(running?5:2)));
 const dist=(running?7.2:10)+spd*.05,hg=(running?2.6:3.4)+spd*.012;
-cv.set(st.x-Math.sin(st.cam)*dist,st.y+hg,st.z-Math.cos(st.cam)*dist);
-if(camSnap){camera.position.copy(cv);camSnap=false}else camera.position.lerp(cv,1-Math.exp(-dt*13));
+// orbite souris : revient doucement derrière la voiture après 1,5 s sans glisser
+if(!orb.drag){orb.idle+=dt;if(orb.idle>1.5){const f=Math.exp(-dt*2.5);orb.yaw*=f;orb.pitch*=f}}
+const ca=st.cam+orb.yaw,R=Math.hypot(dist,hg),ce=Math.atan2(hg,dist)+orb.pitch;
+cv.set(st.x-Math.sin(ca)*Math.cos(ce)*R,st.y+Math.sin(ce)*R,st.z-Math.cos(ca)*Math.cos(ce)*R);
+if(camSnap){camera.position.copy(cv);camSnap=false}else camera.position.lerp(cv,1-Math.exp(-dt*(orb.drag?30:13)));
 camera.position.y=Math.max(camera.position.y,heightAt(camera.position.x,camera.position.z)+1.2);
 const sh=spd*.0005+hit*.5;camera.position.x+=(Math.random()-.5)*sh;camera.position.y+=(Math.random()-.5)*sh;hit*=Math.exp(-dt*6);
-lk.set(st.x+Math.sin(st.cam)*6,st.y+1.2,st.z+Math.cos(st.cam)*6);camera.lookAt(lk);
-st.roll+=(st.om*.03-st.roll)*(1-Math.exp(-dt*4));camera.rotateZ(st.roll);
+// en orbite on vise la voiture plutôt que la route devant
+const w=Math.min(1,Math.abs(orb.yaw)/.6+Math.abs(orb.pitch)/.6);
+lk.set(st.x+Math.sin(st.cam)*6*(1-w),st.y+1.2-.4*w,st.z+Math.cos(st.cam)*6*(1-w));camera.lookAt(lk);
+st.roll+=(st.om*.03-st.roll)*(1-Math.exp(-dt*4));camera.rotateZ(st.roll*(1-w));
 st.fov+=(60+Math.min(spd,55)*.5+(drifting?4:0)-st.fov)*(1-Math.exp(-dt*3));camera.fov=st.fov;camera.updateProjectionMatrix()}
 
 // boucle

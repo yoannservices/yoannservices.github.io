@@ -71,3 +71,4 @@ label.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--dim
 #pvSwatch{width:44px;height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.3)}
 #pvColor .btn{font-size:13px;padding:8px 12px}
 #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;letter-spacing:.2em;color:var(--hud);z-index:9}
+#gl.drag{cursor:grabbing}

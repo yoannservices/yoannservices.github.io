@@ -28,6 +28,7 @@ Simulateur de vol 3D dans le navigateur : F-35B et PV-40 à aile basculante, rel
 | G | Train d'atterrissage |
 | F | Volets |
 | C | Changer de vue |
+| Clic + glisser | Tourner la caméra autour de l'avion (vues extérieures) |
 
 ## Lancer en local
 

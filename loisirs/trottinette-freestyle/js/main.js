@@ -776,6 +776,20 @@
     { dist: 2.9, h: 1.15, look: 1.1, name: 'Proche' },
   ];
   const cam = { yaw: Math.PI, snap: true, pos: new V3(), look: new V3(), vertW: 0 };
+  // clic gauche + glisser pour tourner autour du rider
+  const orb = { yaw: 0, pitch: 0, drag: false, lx: 0, ly: 0, idle: 9, id: null };
+  canvas.addEventListener('pointerdown', e => {
+    if (game.state !== 'play' || e.button !== 0) return;
+    orb.drag = true; orb.id = e.pointerId; orb.lx = e.clientX; orb.ly = e.clientY;
+    canvas.setPointerCapture(e.pointerId); canvas.classList.add('drag');
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!orb.drag || e.pointerId !== orb.id) return;
+    orb.yaw -= (e.clientX - orb.lx) * 0.006; orb.pitch = Math.max(-0.3, Math.min(1.1, orb.pitch + (e.clientY - orb.ly) * 0.005));
+    orb.yaw = wrapPi(orb.yaw); orb.lx = e.clientX; orb.ly = e.clientY; orb.idle = 0;
+  });
+  const orbEnd = e => { if (e.pointerId !== orb.id) return; orb.drag = false; orb.idle = 0; canvas.classList.remove('drag'); };
+  canvas.addEventListener('pointerup', orbEnd); canvas.addEventListener('pointercancel', orbEnd);
   function updateCamera(dt) {
     const c = CAMS[game.camMode];
     const hs = Math.hypot(st.vel.x, st.vel.z);
@@ -786,12 +800,15 @@
     const k = 1 - Math.exp(-(st.mode === 'air' ? 1.5 : 3.2) * dt);
     cam.yaw += wrapPi(target - cam.yaw) * k;
 
+    // orbite souris : revient doucement derrière le rider après 1,5 s sans glisser
+    if (!orb.drag) { orb.idle += dt; if (orb.idle > 1.5) { const f = Math.exp(-dt * 2.5); orb.yaw *= f; orb.pitch *= f; } }
+    const oa = cam.yaw + orb.yaw, R = Math.hypot(c.dist, c.h - c.look), oe = Math.atan2(c.h - c.look, c.dist) + orb.pitch;
     _t.set(Math.sin(cam.yaw), 0, Math.cos(cam.yaw));
     const look = _g.copy(st.pos).addScaledVector(UP, c.look);
-    const want = new V3().copy(st.pos).addScaledVector(UP, c.h).addScaledVector(_t, -c.dist);
+    const want = new V3(-Math.sin(oa) * Math.cos(oe) * R, Math.sin(oe) * R, -Math.cos(oa) * Math.cos(oe) * R).add(look);
     // Air de quarter : on recule et on filme d'en bas, comme depuis le flat
     const vertCam = (st.mode === 'air' && st.air.vert) || (st.mode === 'ground' && st.n.y < 0.55);
-    cam.vertW += ((vertCam ? 1 : 0) - cam.vertW) * (1 - Math.exp(-3 * dt));
+    cam.vertW += ((vertCam && !orb.drag && orb.idle > 1.5 ? 1 : 0) - cam.vertW) * (1 - Math.exp(-3 * dt));
     if (cam.vertW > 0.01) {
       const vw = new V3().copy(st.pos).addScaledVector(_t, -(c.dist + 3.2));
       vw.y = Math.max(Park.ground(vw.x, vw.z).y + 1.2, st.pos.y * 0.35 + 1.3);
@@ -805,7 +822,7 @@
     }
     want.y = Math.max(want.y, Park.ground(want.x, want.z).y + 0.5);
     if (cam.snap) { cam.pos.copy(want); cam.look.copy(look); cam.snap = false; }
-    cam.pos.lerp(want, 1 - Math.exp(-9 * dt));
+    cam.pos.lerp(want, 1 - Math.exp(-(orb.drag ? 30 : 9) * dt));
     cam.look.lerp(look, 1 - Math.exp(-14 * dt));
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);

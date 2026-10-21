@@ -2077,7 +2077,7 @@ function renderMenu(){
     b.innerHTML=`<div class="keys"><span><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> / flèches</span><span>Conduire (accélérer, tourner, freiner et reculer)</span>
     <span><kbd>Maj</kbd></span><span>Activer ou arrêter le wheelie ; accélérer pour lever l’avant, freiner pour le baisser</span>
     <span><kbd>Espace</kbd></span><span>Frein arrière, pour déraper</span><span><kbd>E</kbd></span><span>Entrer dans un garage proche (boutique, atelier, recharge)</span>
-    <span><kbd>T</kbd></span><span>Téléphone : carte, livraisons, garages et trottinettes</span><span><kbd>C</kbd></span><span>Caméra 3e ou 1re personne</span><span><kbd>M</kbd></span><span>Carte de pause</span><span><kbd>N</kbd></span><span>Couper le son</span><span><kbd>Tab</kbd> / <kbd>Échap</kbd></span><span>Quêtes et pause</span></div>
+    <span><kbd>T</kbd></span><span>Téléphone : carte, livraisons, garages et trottinettes</span><span><kbd>C</kbd></span><span>Caméra 3e ou 1re personne (clic + glisser : tourner autour)</span><span><kbd>M</kbd></span><span>Carte de pause</span><span><kbd>N</kbd></span><span>Couper le son</span><span><kbd>Tab</kbd> / <kbd>Échap</kbd></span><span>Quêtes et pause</span></div>
     <h3 style="margin-top:16px">Police</h3><p class="fine">Griller un feu rouge ou dépasser la limite de plus de 6 km/h devant une patrouille (rayon d’environ 55 m, sans mur entre vous) te fait rechercher. Reste hors de vue 15 secondes pour la semer.<br>Niveau 1 : 2 voitures. Niveau 2 : 3 voitures plus rapides. Niveau 3 : 4 voitures, 1 fourgon, 1 blindé et 1 hélicoptère. Si une unité te touche à faible vitesse, tu es arrêté et tu paies une amende de 50 €.</p>`;
   }else{
     b.innerHTML=`<p>Progression enregistrée dans ce navigateur.</p><div class="sp"><button class="btn ghost" id="btnMute">${muted?'Réactiver le son':'Couper le son'}</button><button class="btn gold" id="btnTestMoney">+1 000 € (test)</button><button class="btn ghost" id="btnReset">Effacer la progression</button></div><p class="fine">Le bouton de test ajoute 1 000 € à ta sauvegarde.</p><p class="fine" id="resetMsg"></p>`;
@@ -2263,6 +2263,13 @@ window.addEventListener('blur',()=>{for(const k in KEYS)KEYS[k]=false});
 
 /* ---------- caméra ---------- */
 let camPos=new THREE.Vector3(),camInit=false;
+/* vue 3e personne : clic gauche + glisser pour tourner autour de la trottinette */
+const orb={yaw:0,pitch:0,drag:false,lx:0,ly:0,idle:9,id:null};
+canvas.classList.add('orbit');
+canvas.addEventListener('pointerdown',e=>{if(GAME.state!=='play'||GAME.cam===1||e.button!==0)return;orb.drag=true;orb.id=e.pointerId;orb.lx=e.clientX;orb.ly=e.clientY;canvas.setPointerCapture(e.pointerId);canvas.classList.add('drag');e.preventDefault()});
+canvas.addEventListener('pointermove',e=>{if(!orb.drag||e.pointerId!==orb.id)return;orb.yaw-=(e.clientX-orb.lx)*.006;orb.pitch=clamp(orb.pitch+(e.clientY-orb.ly)*.005,-.3,1.1);orb.yaw=Math.atan2(Math.sin(orb.yaw),Math.cos(orb.yaw));orb.lx=e.clientX;orb.ly=e.clientY;orb.idle=0});
+const orbEnd=e=>{if(e.pointerId!==orb.id)return;orb.drag=false;orb.idle=0;canvas.classList.remove('drag')};
+canvas.addEventListener('pointerup',orbEnd);canvas.addEventListener('pointercancel',orbEnd);
 function updateCamera(dt){
   const sp=P.spd,kmh=sp*3.6,fp=GAME.cam===1&&!CR.on;
   document.body.classList.toggle('first-person',fp);
@@ -2276,11 +2283,15 @@ function updateCamera(dt){
   if(!fp){
     const sh=Math.sin(P.camH),ch=Math.cos(P.camH);
     const back=4.4+sp*0.08,height=1.95+sp*0.025;
-    const tx=P.x-sh*back,tz=P.z-ch*back;
-    if(!camInit){camPos.set(tx,height,tz);camInit=true}
-    const k=1-Math.exp(-dt*9);camPos.x+=(tx-camPos.x)*k;camPos.z+=(tz-camPos.z)*k;camPos.y+=(height-camPos.y)*k;
+    /* orbite souris : revient doucement derrière la trottinette après 1,5 s sans glisser */
+    if(!orb.drag){orb.idle+=dt;if(orb.idle>1.5){const f=Math.exp(-dt*2.5);orb.yaw*=f;orb.pitch*=f}}
+    const a=P.camH+orb.yaw,R=Math.hypot(back,height-0.9),e=Math.atan2(height-0.9,back)+orb.pitch;
+    const tx=P.x-Math.sin(a)*Math.cos(e)*R,tz=P.z-Math.cos(a)*Math.cos(e)*R,ty=Math.max(0.4,0.9+Math.sin(e)*R);
+    if(!camInit){camPos.set(tx,ty,tz);camInit=true}
+    const k=1-Math.exp(-dt*(orb.drag?30:9));camPos.x+=(tx-camPos.x)*k;camPos.z+=(tz-camPos.z)*k;camPos.y+=(ty-camPos.y)*k;
     camera.position.copy(camPos);
-    const lookAhead=8+sp*0.5;
+    /* en orbite on vise la trottinette plutôt que la route devant */
+    const lookAhead=(8+sp*0.5)*(1-clamp(Math.abs(orb.yaw)/.6+Math.abs(orb.pitch)/.6,0,1));
     camera.lookAt(P.x+sh*lookAhead,1.25,P.z+ch*lookAhead);
     camera.fov=lerp(camera.fov,62+clamp(kmh*0.3,0,31),dt*3);
     playerMesh.userData.rider.visible=true;
@@ -2313,18 +2324,7 @@ function updatePlayerMesh(dt){
   P.wob=Math.max(0,P.wob-dt*1.5);
   tl.rotation.z=P.lean+Math.sin(GAME.t*30)*0.06*P.wob;
   tl.rotation.x=-P.wheelie;
-  /* wheelie : le pilote reste presque droit en pivotant sur ses pieds, ses mains suivent le guidon */
-  const c=P.wheelie*0.85,F=d.feet,r=d.rider;
-  r.rotation.set(c,0,0);
-  r.position.set(0,F.y-(F.y*Math.cos(c)-F.z*Math.sin(c)),F.z-(F.y*Math.sin(c)+F.z*Math.cos(c)));
-  if(c>0.005||d.armsAimed){
-    m.updateMatrixWorld(true);
-    for(const a of d.arms){
-      _v1.copy(a.grip);d.riderBody.localToWorld(_v1);d.torso.worldToLocal(_v1);_v1.sub(a.sh).normalize();
-      a.g.quaternion.setFromUnitVectors(a.rest,_v1);
-    }
-    d.armsAimed=c>0.005;
-  }
+  /* wheelie : le pilote bascule avec la trottinette, pieds sur le plateau et mains sur le guidon */
   for(const w of d.wheels)w.rotation.x+=P.spd*dt/(w.userData.r||0.27)*(Math.sign(P.vx*Math.sin(P.h)+P.vz*Math.cos(P.h))||1);
   const display=m.userData.display,dg=m.userData.dg,displaySpeed=Math.round(indicatedKmh(P.spd));
   if(display&&dg&&m.userData.displayedSpeed!==displaySpeed){

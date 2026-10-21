@@ -76,3 +76,4 @@ kbd{display:inline-block;min-width:1.5em;padding:1px 6px;margin:0 2px;border:1px
 #combopts{font:800 34px/1.05 var(--f-disp);color:#22d3ff;text-shadow:0 0 16px rgba(34,211,238,.6);font-variant-numeric:tabular-nums}
 #combo .hint{font:600 11px var(--f-body);color:var(--mute);letter-spacing:.08em}
 @media (max-width:700px){#scorebox{transform:scale(.8);transform-origin:left top}#combo{bottom:200px}}
+#c.drag{cursor:grabbing}

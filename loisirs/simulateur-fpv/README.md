@@ -23,6 +23,7 @@ Simulateur de drone FPV 3D dans le navigateur : acro, rates Betaflight, propwash
 | Espace | Armer / désarmer |
 | R | Reset |
 | C | Caméra |
+| Clic + glisser | Tourner autour du drone (vue poursuite) |
 | T | Cible |
 | H | OSD |
 | Échap | Menu |

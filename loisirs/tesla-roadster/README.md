@@ -25,6 +25,7 @@ Simulateur de Tesla Roadster (2e génération) en 3D dans le navigateur : ville 
 | Maj | Boost |
 | Espace | Propulseurs (décollage dans l'axe du toit) |
 | C | Caméra (poursuite, éloignée, cockpit) |
+| Clic + glisser | Tourner la caméra autour de la voiture |
 | R | Retour au départ |
 | K | Couleur de peinture |
 | L | Phares |

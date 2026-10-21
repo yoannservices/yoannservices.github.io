@@ -20,3 +20,4 @@ canvas{display:block}
 #start h1{font-size:clamp(36px,8vw,76px);margin:0;letter-spacing:.14em;font-weight:300;text-shadow:0 4px 30px rgba(255,150,100,.6)}
 #start p{max-width:460px;opacity:.85;line-height:1.6}
 #go{pointer-events:auto;margin-top:12px;font-size:17px;padding:13px 34px;border:0;border-radius:30px;background:linear-gradient(90deg,#ffcf6b,#ff7a5c);color:#2a1030;font-weight:600;cursor:pointer}
+canvas.orbit{cursor:grab;touch-action:none}canvas.orbit.drag{cursor:grabbing}

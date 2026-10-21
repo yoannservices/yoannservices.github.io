@@ -23,6 +23,7 @@ Jeu 3D de trottinette électrique en ville : livraisons, quêtes et garage.
 | E | Garage |
 | T | Téléphone |
 | C / M / Tab | Caméra / carte / quêtes et aide |
+| Clic + glisser | Tourner la caméra autour de la trottinette (vue 3e personne) |
 | Échap | Pause |
 
 ## Lancer en local

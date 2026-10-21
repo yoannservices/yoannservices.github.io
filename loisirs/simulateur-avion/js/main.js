@@ -1380,7 +1380,23 @@ const isInside=()=>camMode===1||camMode>=3;   // vues intérieures (cockpit, cab
 const camCount=()=>ACF.id==='pv40'?5:3;
 const cam={q:new Q4(),pos:new V3(),fov:62,shake:0,cloud:0,orb:0};
 let camInit=false;
-const _qo=new Q4(),_ro=new V3(),_cp=new V3(),_xa=new V3(1,0,0);
+const _qo=new Q4(),_ro=new V3(),_cp=new V3(),_xa=new V3(1,0,0),_oq=new Q4(),_oq2=new Q4(),_om=new THREE.Matrix4();
+/* vues extérieures : clic gauche + glisser (souris) pour tourner autour de l'avion ; revient derrière après 1,5 s */
+const orb={yaw:0,pitch:0,drag:false,lx:0,ly:0,idle:9,id:null};
+canvasGL.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0||!running||menuOpen||mapOpen||isInside())return;orb.drag=true;orb.id=e.pointerId;orb.lx=e.clientX;orb.ly=e.clientY;canvasGL.setPointerCapture(e.pointerId);canvasGL.classList.add('drag');e.preventDefault()});
+canvasGL.addEventListener('pointermove',e=>{if(!orb.drag||e.pointerId!==orb.id)return;orb.yaw-=(e.clientX-orb.lx)*.006;orb.pitch=clamp(orb.pitch+(e.clientY-orb.ly)*.005,-1.2,1.2);orb.yaw=Math.atan2(Math.sin(orb.yaw),Math.cos(orb.yaw));orb.lx=e.clientX;orb.ly=e.clientY;orb.idle=0});
+{const end=e=>{if(e.pointerId!==orb.id)return;orb.drag=false;orb.idle=0;canvasGL.classList.remove('drag')};canvasGL.addEventListener('pointerup',end);canvasGL.addEventListener('pointercancel',end)}
+function orbit(v,dt){
+  if(!orb.drag){orb.idle+=dt;if(orb.idle>1.5){const f=Math.exp(-dt*2.5);orb.yaw*=f;orb.pitch*=f}}
+  if(Math.abs(orb.yaw)+Math.abs(orb.pitch)<1e-4)return;
+  const R=v.length(),a=Math.atan2(v.x,v.z)+orb.yaw,e=clamp(Math.asin(clamp(v.y/R,-1,1))+orb.pitch,-1.45,1.45);
+  v.set(Math.sin(a)*Math.cos(e)*R,Math.sin(e)*R,Math.cos(a)*Math.cos(e)*R);
+}
+function orbitLook(p){   // en orbite on vise l'avion
+  const w=clamp(Math.abs(orb.yaw)/.5+Math.abs(orb.pitch)/.5,0,1);if(w<1e-3)return;
+  _ro.set(0,1,0).applyQuaternion(cam.q);_om.lookAt(camera.position,p,_ro);_oq.setFromRotationMatrix(_om);
+  _oq2.copy(camera.quaternion).slerp(_oq,w);camera.quaternion.copy(_oq2);
+}
 function updateCamera(dt,time){
   const p=S.p,speed=S.aspd;
   if(!camInit){cam.q.copy(S.q);camInit=true}
@@ -1392,12 +1408,12 @@ function updateCamera(dt,time){
   if(S.crashed){cam.orb+=dt*.3;_cp.set(Math.sin(cam.orb)*60,22,Math.cos(cam.orb)*60).add(p);camera.position.copy(_cp);camera.lookAt(p.x,p.y+4,p.z);tfov=60}
   else{
     const ks=A.camDist/21;
-    if(camMode===0){const d=A.camDist+Math.min(speed,600)*.03;_ro.set(0,A.camH,d).applyQuaternion(cam.q);camera.position.copy(p).add(_ro);_qo.setFromAxisAngle(_xa,-.1);camera.quaternion.copy(cam.q).multiply(_qo)}
+    if(camMode===0){const d=A.camDist+Math.min(speed,600)*.03;_ro.set(0,A.camH,d);orbit(_ro,dt);_ro.applyQuaternion(cam.q);camera.position.copy(p).add(_ro);_qo.setFromAxisAngle(_xa,-.1);camera.quaternion.copy(cam.q).multiply(_qo);orbitLook(p)}
     else if(camMode===1){_ro.fromArray(A.cockpit).applyQuaternion(cam.q);camera.position.copy(p).add(_ro);camera.quaternion.copy(cam.q)}
     else if(camMode>=3){   // PV-40 : cabine puis soute, regard vers l'arrière
       _ro.fromArray(camMode===3?A.cabin:A.bay).applyQuaternion(cam.q);camera.position.copy(p).add(_ro);
       _qo.setFromAxisAngle(Y_AXIS,Math.PI-(camMode===3?.12:.18));camera.quaternion.copy(cam.q).multiply(_qo);camera.rotateX(-.1)}
-    else{_ro.set(5.5*ks,1.8*ks,9*ks).applyQuaternion(cam.q);camera.position.copy(p).add(_ro);_qo.setFromAxisAngle(_xa,-.04);_ro.set(0,0,0);camera.quaternion.copy(cam.q).multiply(_qo);camera.rotateY(.3)}
+    else{_ro.set(5.5*ks,1.8*ks,9*ks);orbit(_ro,dt);_ro.applyQuaternion(cam.q);camera.position.copy(p).add(_ro);_qo.setFromAxisAngle(_xa,-.04);camera.quaternion.copy(cam.q).multiply(_qo);camera.rotateY(.3);orbitLook(p)}
     if(!inside){
       const sh=clamp((speed-70)/500,0,1)*.035+S.abL*.025+S.stall*.22+S.spin*.28+(S.G>5?.06:0);
       camera.position.x+=Math.sin(time*11)*sh;camera.position.y+=Math.sin(time*13+1)*sh;camera.rotateZ(Math.sin(time*9)*sh*.005);

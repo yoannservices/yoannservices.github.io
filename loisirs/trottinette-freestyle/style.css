@@ -212,3 +212,4 @@ body.touch #hud-balance { bottom: 250px; }
   .hud-tl .sub { display: none; }
   #toasts { top: 64px; }
 }
+#gl.drag{cursor:grabbing}
