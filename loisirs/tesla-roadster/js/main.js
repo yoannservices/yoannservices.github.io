@@ -147,6 +147,7 @@
     car.pos.copy(city.spawn.pos); car.vel.set(0, 0, 0); car.angVel.set(0, 0, 0);
     car.quat.setFromAxisAngle(new V3(0, 1, 0), city.spawn.yaw);
     car.grounded = false; car.detach = 0; car.fuel = 100; car.stuckT = 0;
+    score.active = false; score.crashed = false;
     vis.posOff.set(0, 0, 0); vis.quatOff.identity();
     camInit = true;
   }
@@ -233,7 +234,7 @@
 
     if (grounded) {
       const avgD = dSum / hits;
-      if (!car.grounded) onLand();
+      if (!car.grounded) onLand(n);
       car.grounded = true; car.airT = 0;
       // alignement sur la surface
       qa.setFromUnitVectors(up, n);
@@ -298,9 +299,10 @@
       }
     } else {
       // ---------- en l'air ----------
-      if (car.grounded) car.airT = 0;
+      if (car.grounded || (!score.active && !score.crashed)) startCombo();
       car.grounded = false;
       car.airT += dt;
+      score.maxH = Math.max(score.maxH, car.pos.y - score.takeoffY);
       car.vel.y -= P.G * dt;
       // rotations : Z/S tangage, Q/D lacet, A/E tonneau
       const tx = (inBrk - inThr) * 3.2, ty = (inL - inR) * 2.6, tz = (inRollL - inRollR) * 4.6;
@@ -308,7 +310,7 @@
       car.angVel.x = lerp(car.angVel.x, tx, k); car.angVel.y = lerp(car.angVel.y, ty, k); car.angVel.z = lerp(car.angVel.z, tz, k);
       const w = car.angVel.length();
       if (w > 1e-4) { qb.setFromAxisAngle(tmp.copy(car.angVel).divideScalar(w), w * dt); car.quat.multiply(qb).normalize(); }
-      car.rollAcc += car.angVel.z * dt; car.pitchAcc += car.angVel.x * dt;
+      car.rollAcc += car.angVel.z * dt; car.pitchAcc += car.angVel.x * dt; score.yawAcc += car.angVel.y * dt;
       car.steer = lerp(car.steer, 0, 1 - Math.exp(-dt * 5));
       if (boosting) car.vel.addScaledVector(fwd, P.AIR_BOOST * dt);
       // aide à l'atterrissage : on oriente doucement les roues vers la surface proche
@@ -354,6 +356,7 @@
       }
     }
     if (impact > 14) { shake = Math.min(1.2, shake + impact / 40); sfxImpact(impact); }
+    if (score.active && !car.grounded && contactN && impact > 6 && up.dot(contactN) < 0.3) crashCombo();
 
     // auto-redressement si la voiture est coincée sur le flanc / le toit
     if (!car.grounded && contactN && car.vel.length() < 4) {
@@ -365,7 +368,7 @@
         car.quat.setFromRotationMatrix(new THREE.Matrix4().lookAt(new V3(), tmp.clone(), WORLD_UP));
         car.pos.y += 1.2; car.vel.set(0, 0, 0); car.angVel.set(0, 0, 0);
         vis.posOff.add(prevP.sub(car.pos)); vis.quatOff.multiply(prevQ.multiply(car.quat.clone().invert()));
-        toast('Redressement');
+        crashCombo(); toast('Redressement');
       }
     } else car.stuckT = 0;
 
@@ -375,15 +378,58 @@
   }
   function surfName(n) { return n.y > 0.55 ? 'SOL' : n.y < -0.55 ? 'PLAFOND' : 'MUR'; }
 
-  function onLand() {
-    const rolls = Math.floor(Math.abs(car.rollAcc) / (Math.PI * 2) + 0.15);
-    const flips = Math.floor(Math.abs(car.pitchAcc) / (Math.PI * 2) + 0.15);
+  // ---------- Score des figures ----------
+  // Tout ce qui se passe en l'air rapporte : temps de vol, hauteur, degrés de rotation,
+  // et un bonus par figure complète. Atterrissage parfait (roues bien à plat) = x2, crash = combo perdu.
+  const score = { total: 0, best: null, active: false, takeoffY: 0, maxH: 0, yawAcc: 0 };
+  try { score.best = JSON.parse(localStorage.getItem('roadster:bestTrick') || 'null'); } catch (e) { score.best = null; }
+  const TAU = Math.PI * 2;
+  const turns = a => Math.floor(Math.abs(a) / TAU + 0.15);
+  const named = (k, name) => k === 1 ? name : k <= 4 ? ['', '', 'Double ', 'Triple ', 'Quadruple '][k] + name.toLowerCase() : `${name} x${k}`;
+  function startCombo() {
+    score.active = true; score.takeoffY = car.pos.y; score.maxH = 0; score.yawAcc = 0;
+    car.airT = 0; car.rollAcc = 0; car.pitchAcc = 0;
+  }
+  function comboInfo() {
+    const r = turns(car.rollAcc), f = turns(car.pitchAcc), y = turns(score.yawAcc);
     const parts = [];
-    if (rolls > 0) parts.push(rolls > 1 ? `Tonneau x${rolls}` : 'Tonneau');
-    if (flips > 0) parts.push(flips > 1 ? `Salto x${flips}` : 'Salto');
-    if (parts.length) trick(parts.join(' + '));
-    else if (car.airT > 2.5) trick(`Vol de ${car.airT.toFixed(1)} s`);
-    car.rollAcc = 0; car.pitchAcc = 0;
+    if (r) parts.push(named(r, 'Tonneau'));
+    if (f) parts.push(named(f, 'Salto'));
+    if (y) parts.push(named(y, 'Vrille'));
+    const deg = (Math.abs(car.rollAcc) + Math.abs(car.pitchAcc) + Math.abs(score.yawAcc)) * 180 / Math.PI;
+    let pts = car.airT * 60 + deg * 1.2 + Math.max(0, score.maxH) * 4 + r * 400 + f * 500 + y * 300;
+    const kinds = (r > 0) + (f > 0) + (y > 0);
+    if (kinds > 1) pts *= 1 + 0.25 * (kinds - 1);
+    if (!parts.length) parts.push(car.airT > 2.5 ? `Vol de ${car.airT.toFixed(1)} s` : 'Saut');
+    else if (car.airT > 4) parts.push(`vol de ${car.airT.toFixed(1)} s`);
+    return { name: parts.join(' + '), pts: Math.round(pts) };
+  }
+  function onLand(n) {
+    score.crashed = false;
+    if (!score.active) return;
+    score.active = false;
+    if (car.airT < 0.5) return; // petite bosse : rien à compter
+    const info = comboInfo();
+    const perfect = up.dot(n) > 0.94;
+    const gained = info.pts * (perfect ? 2 : 1);
+    score.total += gained;
+    trick(perfect ? 'Atterrissage parfait x2' : info.name, `${perfect ? info.name + ' · ' : ''}+${fmtPts(gained)}`);
+    if (!score.best || gained > score.best.pts) {
+      score.best = { name: info.name + (perfect ? ' (x2)' : ''), pts: gained };
+      try { localStorage.setItem('roadster:bestTrick', JSON.stringify(score.best)); } catch (e) { /* stockage indisponible */ }
+      if (gained >= 300) toast('Nouvelle meilleure figure !');
+    }
+    renderScore();
+  }
+  function crashCombo() {
+    if (!score.active) return;
+    score.active = false; score.crashed = true;
+    if (car.airT > 0.5) trick('Crash !', 'Combo perdu');
+  }
+  const fmtPts = v => Math.round(v).toLocaleString('fr-FR');
+  function renderScore() {
+    $('scoreval').textContent = fmtPts(score.total);
+    $('bestval').textContent = score.best ? `${score.best.name} — ${fmtPts(score.best.pts)}` : '—';
   }
 
   // ---------- Trafic ----------
@@ -780,7 +826,7 @@
   const hud = window.createHUD();
   let toastT = 0, trickT = 0;
   function toast(t) { const el = $('msg'); el.textContent = t; el.classList.add('on'); toastT = 2.2; }
-  function trick(t) { const el = $('trick'); el.textContent = t; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); trickT = 2.5; }
+  function trick(t, sub = '') { const el = $('trick'); $('tricktitle').textContent = t; $('tricksub').textContent = sub; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); trickT = 2.5; }
   let hudT = 0;
   function updateHUD(dt) {
     hudT += dt;
@@ -792,6 +838,10 @@
     hud.minimap(city.mapCanvas, city.MAP, car.pos.x, car.pos.z, heading, traffic.map(t => t.pos));
     if (toastT > 0) { toastT -= dt; if (toastT <= 0) $('msg').classList.remove('on'); }
     if (trickT > 0) { trickT -= dt; if (trickT <= 0) $('trick').classList.remove('on'); }
+    // combo en cours
+    const live = score.active && car.airT > 0.3;
+    $('combo').classList.toggle('on', live);
+    if (live) { const info = comboInfo(); $('comboname').textContent = info.name; $('combopts').textContent = '+' + fmtPts(info.pts); }
   }
 
   // ---------- Menu ----------
@@ -830,6 +880,7 @@
   $('go').onclick = startGame;
   $('qbtn').onclick = () => { hiQ = !hiQ; applyQuality(); };
   renderPaintChips();
+  renderScore();
   $('qbtn').textContent = hiQ ? 'Qualité : haute' : 'Qualité : performance';
 
   function onResize() {
