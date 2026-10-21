@@ -14,7 +14,7 @@ Chaque projet important a aussi son propre dépôt (voir mon [portfolio](https:/
 - `developpement/` : API Dashboard, Portfolio
 - `education/` : Révision Lycée, Tableau Périodique
 - `outils/` : Agenda, Conjugator, CSS Animator, Game Tools Lab, Générateur de CV, Habit Tracker, Lieux Proches, PC Builder, Pièces Détachées Tél., Unit Converter
-- `loisirs/` : jeux, simulateurs 3D, Pokédex, Music Player, Tier List, Univers, script Operateur112
+- `loisirs/` : jeux, simulateurs 3D, Sport Live, Pokédex, Music Player, Tier List, Univers, script Operateur112
 
 Chaque projet a son propre `README.md` dans son dossier.
 

@@ -8,7 +8,8 @@ Jeu 3D de trottinette électrique en ville : livraisons, quêtes et garage.
 
 - Ville ouverte : livraisons de colis, pièces à ramasser, quêtes
 - Téléphone en jeu : livraisons, carte, trottinettes
-- Police : un feu grillé ou un excès de vitesse vu par une patrouille déclenche une poursuite
+- Police : un feu grillé ou un excès de vitesse vu par une patrouille déclenche une poursuite ; 5 niveaux de recherche (plus de voitures, plus rapides, barrages) ; un policier peut descendre de sa voiture et t’arrêter si tu restes immobile 3 s
+- Chutes : le pilote est éjecté dans la direction du choc, il faut revenir à pied relever la trottinette
 - Garage : boutique, atelier, repos ; batterie à gérer
 - Progression enregistrée automatiquement (`localStorage`)
 
@@ -17,8 +18,8 @@ Jeu 3D de trottinette électrique en ville : livraisons, quêtes et garage.
 | Touche | Action |
 |---|---|
 | Z S Q D (ou flèches) | Accélérer, freiner / reculer, tourner |
-| Maj | Wheelie |
-| Espace | Frein arrière (dérapage) |
+| Maj | Wheelie (accélérer pour monter jusqu’à 75°, freiner pour redescendre) ; courir quand on est à pied |
+| Espace | Frein arrière : drift en virage, à tenir à l’accélérateur |
 | E | Garage |
 | T | Téléphone |
 | C / M / Tab | Caméra / carte / quêtes et aide |

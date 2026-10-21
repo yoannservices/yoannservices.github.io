@@ -1,4 +1,4 @@
-# Simulateur Moto (Col Vitesse)
+# Simu Moto
 
 Simulateur de moto 3D sur route de col, jouable dans le navigateur.
 

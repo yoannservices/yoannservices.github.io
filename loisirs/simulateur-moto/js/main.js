@@ -217,12 +217,12 @@ function stepPhysics(st,bk,inp,aids,dt){
   const Fmax=mu*bk.mass*G*(ai?.78:1.0)*(1-.35*clamp(st.alat/(mu*G),0,1));
   Fd=Math.min(Fd,Fmax,bk.mass*G*1.25);
   // freinage : cercle d'adherence (le pneu partage son grip entre virage et freinage)
-  st.brkS+=(inp.brk-st.brkS)*(1-Math.exp(-dt/(inp.brk>st.brkS?.07:.05)));
-  const gripG=mu*G*1.05;
+  st.brkS+=(inp.brk-st.brkS)*(1-Math.exp(-dt/(inp.brk>st.brkS?.04:.05)));
+  const gripG=mu*G*1.45;
   const aLong=Math.sqrt(Math.max(0,gripG*gripG-st.alat*st.alat));
-  // limite de stoppie ~1.15 g sur le sec ; avec ABS on reste juste sous la limite du pneu
-  const bMax=Math.min(G*1.15*(mu/1.2),ai?aLong*.97:G*1.3);
-  const Fb=st.brkS*bk.mass*Math.max(ai?G*.25*(mu/1.2):0,bMax);
+  // freinage puissant ~1.6 g sur le sec ; avec ABS on reste juste sous la limite du pneu
+  const bMax=Math.min(G*1.6*(mu/1.2),ai?aLong*.97:G*1.75);
+  const Fb=st.brkS*bk.mass*Math.max(ai?G*.4*(mu/1.2):0,bMax);
   // frein moteur quand on coupe les gaz
   const Fe=inp.thr<.1&&!clutch?bk.mass*G*.07*clamp(st.rpm/bk.red,0,1):0;
   // position du pilote : il se redresse au freinage (pare-brise humain), se couche sous le carenage aux gaz
@@ -240,16 +240,16 @@ function stepPhysics(st,bk,inp,aids,dt){
   else if(g>1&&st.rpm<bk.red*(.36+.05*g+(inp.brk>.3?.12:0))&&inp.brk+ (inp.thr<.1?1:0)>0)st.gear=g-1;
   if(st.v<2&&inp.thr<.1)st.gear=1;
   // direction
-  // braquage : jusqu'a ~1.2 g d'acceleration laterale (≈ 50° d'angle), un peu moins tout en haut
-  const k=1/(1+Math.pow(st.v/170,2));
+  // braquage : jusqu'a ~1.6 g d'acceleration laterale (≈ 58° d'angle), un peu moins tout en haut
+  const k=1/(1+Math.pow(st.v/220,2));
   const target=inp.steer;
-  const tau=.08+.05*Math.min(1,st.v/40);
+  const tau=.06+.04*Math.min(1,st.v/40);
   st.u+=(target-st.u)*(1-Math.exp(-dt/tau));
-  const Kmax=Math.min(1/4.6,1.2*G*(mu/1.2)/Math.max(st.v*st.v,1));
+  const Kmax=Math.min(1/3.2,1.6*G*(mu/1.2)/Math.max(st.v*st.v,1));
   let kap=st.u*Kmax*k;
   // limite d'adherence (seules les forces du pneu comptent, pas la trainee aero)
-  const aT=Math.min(Math.abs(st.aT),mu*G*1.04);
-  const amax=Math.sqrt(Math.max(.01,(mu*G*1.04)**2-aT*aT*.9));
+  const aT=Math.min(Math.abs(st.aT),mu*G*1.45);
+  const amax=Math.sqrt(Math.max(.01,(mu*G*1.45)**2-aT*aT*.9));
   const areq=st.v*st.v*Math.abs(kap);
   st.slide=0;
   if(areq>amax){

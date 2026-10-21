@@ -1,0 +1,65 @@
+/* Plein écran 3D, HUD néon : compteur rond en bas à droite, réservoir à gauche, mini-carte en haut à droite. */
+:root{
+  color-scheme:dark;
+  --bg:#05070b; --panel:rgba(9,12,18,.78); --line:rgba(255,255,255,.14);
+  --fg:#eef1f4; --mute:#8d97a3; --accent:#ff3b4e; --cyan:#22d3ff; --violet:#a855f7;
+  --f-disp:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --f-body:'Barlow',var(--ui-font,system-ui),sans-serif;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:dark}}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);overflow:hidden;user-select:none;-webkit-user-select:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hide{display:none!important}
+kbd{display:inline-block;min-width:1.5em;padding:1px 6px;margin:0 2px;border:1px solid rgba(255,255,255,.28);border-bottom-width:2px;border-radius:5px;font:600 12px var(--f-body);text-align:center;background:rgba(255,255,255,.06);color:var(--fg)}
+
+#hud{position:fixed;inset:0;pointer-events:none;z-index:2}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
+#clockbox{position:absolute;top:max(14px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));padding:7px 12px;font:600 15px var(--f-body);display:flex;gap:8px;align-items:center}
+#clockbox b{font:700 20px var(--f-disp);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+#clockbox .sub{color:var(--mute);font-size:12px;margin-left:6px}
+#mini{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));border-radius:50%;box-shadow:0 0 24px rgba(0,0,0,.5)}
+#speedo{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));filter:drop-shadow(0 6px 24px rgba(0,0,0,.6))}
+#tank{position:absolute;left:max(10px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));filter:drop-shadow(0 6px 24px rgba(0,0,0,.6))}
+#msg{position:absolute;top:70px;left:50%;transform:translate(-50%,-8px);opacity:0;transition:opacity .25s,transform .25s;font:700 22px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;padding:6px 16px;border-radius:10px;background:var(--panel);border:1px solid var(--line);white-space:nowrap}
+#msg.on{opacity:1;transform:translate(-50%,0)}
+#trick{position:absolute;top:28%;left:50%;transform:translateX(-50%) scale(.8);opacity:0;font:800 46px var(--f-disp);letter-spacing:.04em;text-transform:uppercase;color:#fff;text-shadow:0 0 18px var(--violet),0 0 40px var(--cyan);white-space:nowrap}
+#trick.on{animation:pop 2.5s ease-out forwards}
+@keyframes pop{0%{opacity:0;transform:translateX(-50%) scale(.6)}12%{opacity:1;transform:translateX(-50%) scale(1.08)}22%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-30px)}}
+#help{position:absolute;left:max(16px,env(safe-area-inset-left));top:64px;padding:12px 16px;max-width:min(420px,calc(100vw - 32px))}
+#help h3{margin:0 0 8px;font:700 18px var(--f-disp);letter-spacing:.06em;text-transform:uppercase}
+#help .grid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;align-items:center}
+#help .grid span:nth-child(odd){white-space:nowrap}
+
+#menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:radial-gradient(ellipse at 70% 30%,rgba(168,85,247,.18),transparent 55%),radial-gradient(ellipse at 20% 80%,rgba(34,211,238,.14),transparent 50%),rgba(3,5,9,.55);overflow:auto}
+#menu .in{width:min(640px,100%);background:rgba(8,11,17,.86);border:1px solid var(--line);border-radius:18px;padding:26px 28px;backdrop-filter:blur(12px);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#menu .kicker{font:600 13px var(--f-body);letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+#menu h1{margin:4px 0 8px;font:800 64px/0.95 var(--f-disp);letter-spacing:.02em;text-transform:uppercase}
+#menu h1 span{color:var(--accent);text-shadow:0 0 24px rgba(255,59,78,.6)}
+#menu .lead{margin:0 0 18px;color:#c7cfd8;font-size:15px;line-height:1.5}
+#menu .row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+#menu .block{flex:1 1 220px}
+#menu h2{margin:0 0 8px;font:700 15px var(--f-disp);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+#menu h2 span{color:var(--fg);letter-spacing:.04em;margin-left:6px;text-transform:none;font-family:var(--f-body);font-weight:600}
+#paints{display:flex;gap:10px;flex-wrap:wrap}
+.chip{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55),transparent 40%),var(--c);cursor:pointer;padding:0}
+.chip.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.18),0 0 18px var(--c)}
+.ghost{font:600 14px var(--f-body);color:var(--fg);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+#menu .keys{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#d7dde4;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+#menu .note{font-size:13px;color:var(--mute);line-height:1.5;margin:14px 0 18px}
+#go{width:100%;font:800 22px var(--f-disp);letter-spacing:.14em;text-transform:uppercase;color:#fff;border:0;border-radius:12px;padding:14px;cursor:pointer;
+  background:linear-gradient(90deg,#ff3b4e,#a855f7 60%,#22d3ff);box-shadow:0 10px 30px rgba(168,85,247,.35)}
+#go:hover{filter:brightness(1.1)}
+.chip:focus-visible,#go:focus-visible,.ghost:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+#loading{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:var(--bg);font:600 16px var(--f-body);color:var(--mute);text-align:center;padding:16px}
+.spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--cyan);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media (max-width:700px){
+  #speedo{transform:scale(.62);transform-origin:right bottom}
+  #tank{transform:scale(.62);transform-origin:left bottom}
+  #mini{transform:scale(.6);transform-origin:right top}
+  #menu h1{font-size:46px}
+}
