@@ -40,4 +40,4 @@ HTML, CSS et JavaScript ; carte avec [Leaflet](https://leafletjs.com/) 1.9.4 (CD
 
 ---
 
-Fait partie de [Mes Projets](https://yoannservices.github.io/) · [Portfolio](https://yoannservices.github.io/Y.Portfolio/) · par [@yoannservices](https://github.com/yoannservices)
+Fait partie de [Mes Projets](https://yoannservices.github.io/) · [Portfolio](https://yoannservices.github.io/portfolio/) · par [@yoannservices](https://github.com/yoannservices)

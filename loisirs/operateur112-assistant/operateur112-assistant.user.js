@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Operateur112 – Assistant d'envoi (semi-auto)
 // @namespace    loisirs.operateur112
-// @version      0.3.0
+// @version      0.3.3
 // @description  Affiche les besoins de la mission et pré-coche les véhicules manquants. C'est TOI qui cliques sur « Déployer ».
 // @match        https://operateur112.fr/*
 // @match        https://www.operateur112.fr/*
@@ -135,14 +135,40 @@
     return r === w || r.startsWith(w) || w.startsWith(r);
   }
 
+  // Noms génériques du jeu (« Restant à envoyer : 1 fourgon d'incendie… ») → tag de la case.
+  // Les plus spécifiques d'abord ; le premier qui correspond gagne.
+  const CAPTION_ATTR = [
+    [/tout usage|\bvtu\b/i, 'gkw'], // VTU : le tag fire=1 y est aussi, donc avant « fourgon »
+    [/[ée]chelle|bras|dlk|platform/i, 'dlk'],
+    [/chef de colonne|kdow/i, 'kdow_orgl'],
+    [/chef de groupe|commandement|elw/i, 'elw'],
+    [/secours routier|sauvetage|d[ée]sincarc/i, 'rw'],
+    [/air respirable|appareil respiratoire/i, 'gwa'],
+    [/citerne|camion[- ]citerne/i, 'gwl2wasser'],
+    [/feu.*for[êe]t|forestier/i, 'brush_truck'],
+    [/patrouille|police|v[ée]hicule de patrouille/i, 'fustw'],
+    [/ambulance|samu|sanitaire/i, 'rtw'],
+    [/fourgon|engin.*incendie|pompe|camion.*pompier|pompier/i, 'fire'],
+  ];
+
+  // Retourne une fonction qui dit si une ligne de véhicule répond à ce libellé.
+  function matcher(caption) {
+    const hit = CAPTION_ATTR.find(([re]) => re.test(caption));
+    if (hit) return (r) => has(r, hit[1]);
+    return (r) => matches(r.type, caption); // sinon : nom exact du véhicule (FPT, VSRM…)
+  }
+
   function preselect(missing) {
     const rows = vehicleRows(); // les plus proches d'abord
     const result = [];
+    const used = new Set();
     missing.forEach(({ count, caption }) => {
-      let got = rows.filter((r) => r.cb.checked && matches(r.type, caption)).length;
+      const ok = matcher(caption);
+      let got = rows.filter((r) => r.cb.checked && ok(r)).length;
       for (const r of rows) {
         if (got >= count) break;
-        if (!r.cb.checked && matches(r.type, caption)) {
+        if (!r.cb.checked && !used.has(r) && ok(r)) {
+          used.add(r);
           r.cb.click(); // click() pour que le jeu mette à jour ses compteurs
           got++;
         }
@@ -309,11 +335,18 @@
 
   // Prisonniers : surligne, pour chaque véhicule, la cellule la plus proche
   // (les postes de l'alliance avec taxe passent après les tiens).
-  function highlightCells() {
-    const btns = [...document.querySelectorAll('a.btn, button.btn')].filter((b) => /Cellules disponibles/i.test(b.textContent));
-    if (!btns.length) return 0;
+  // Boutons « Poste X (Cellules disponibles : N, distance : … km) ». Tag libre : on prend le plus interne.
+  function cellButtons() {
+    const all = [...document.querySelectorAll('a, button, input[type=button], input[type=submit], [role=button]')]
+      .filter((b) => /Cellules disponibles/i.test(b.textContent || b.value || ''));
+    return all.filter((b) => !all.some((o) => o !== b && b.contains(o)));
+  }
+
+  // Meilleur bouton par véhicule (cellule libre, sans taxe d'abord, puis la plus proche).
+  function bestCells() {
+    const btns = cellButtons();
     const parse = (b) => {
-      const t = b.textContent.replace(/\s+/g, ' ');
+      const t = (b.textContent || b.value).replace(/\s+/g, ' ');
       const cells = parseInt((t.match(/Cellules disponibles\s*:\s*(\d+)/i) || [])[1] || '0', 10);
       const dist = parseFloat(((t.match(/distance\s*:\s*([\d.,]+)/i) || [])[1] || '999').replace(',', '.'));
       const tax = parseInt((t.match(/taxe[^:]*:\s*(\d+)/i) || [])[1] || '0', 10);
@@ -322,23 +355,51 @@
     // Un groupe de boutons par véhicule transportant des prisonniers.
     const groups = new Map();
     btns.forEach((b) => {
-      const key = b.closest('tr') || b.closest('.vehicle_prisoner_select') || b.parentElement.parentElement;
+      const key = b.closest('tr, .well, .panel-body') || b.parentElement.parentElement;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(parse(b));
     });
-    let n = 0;
+    const out = [];
     groups.forEach((list) => {
       const best = list.filter((x) => x.cells > 0).sort((a, b) => (a.tax - b.tax) || (a.dist - b.dist))[0];
-      if (best) { best.b.classList.add('o112-highlight'); n++; }
+      if (best) out.push(best.b);
     });
-    return n;
+    return out;
+  }
+
+  // Lecture toutes les 2 s : les boutons de cellule arrivent parfois après le chargement.
+  const clicked = new Map();
+  let lastCellClick = 0;
+  function prisonerTick(el) {
+    const best = bestCells();
+    best.forEach((b) => b.classList.add('o112-highlight'));
+    const waiting = /prisonniers? doivent? [êe]tre transport/i.test(document.body.innerText);
+    if (best.length) {
+      el.innerHTML = `<span class="ok">Prisonniers : cellule trouvée (${best.length}).</span><br>`;
+      if (!AUTO_TRANSPORT || Date.now() - lastCellClick < 3000) return;
+      const b = best.find((x) => Date.now() - (clicked.get(x.textContent) || 0) > 30000);
+      if (!b) return;
+      clicked.set(b.textContent, Date.now());
+      lastCellClick = Date.now();
+      b.click();
+    } else if (waiting) {
+      el.innerHTML = '<span class="ko">Prisonniers à transporter : aucune cellule libre trouvée.</span><br>';
+    } else {
+      el.innerHTML = '';
+    }
   }
 
   // Ambulances / patrouilles sur place qui attendent qu'on choisisse un hôpital ou une cellule.
+  // Statut 5 (pastille rouge) = le véhicule attend un hôpital ou une cellule ; liens « Demande de transport » en plus.
   function transportRequests() {
-    return [...document.querySelectorAll('a[href^="/vehicles/"]')]
-      .filter((a) => /demande de transport/i.test(a.textContent))
-      .map((a) => ({ href: a.getAttribute('href'), text: a.textContent.replace(/\s+/g, ' ').trim() }));
+    const links = [
+      ...document.querySelectorAll('tr:has(.building_list_fms_5) a[href^="/vehicles/"]'),
+      ...document.querySelectorAll('a[href^="/vehicles/"]'),
+    ].filter((a, i, all) => all.indexOf(a) === i &&
+      (a.closest('tr')?.querySelector('.building_list_fms_5') || /demande de transport/i.test(a.textContent)));
+    return links
+      .filter((a, i, all) => all.findIndex((x) => x.getAttribute('href') === a.getAttribute('href')) === i)
+      .map((a) => ({ a, href: a.getAttribute('href'), text: a.textContent.replace(/\s+/g, ' ').trim() }));
   }
 
   function highlightAlarm() {
@@ -348,9 +409,12 @@
   async function missionPage() {
     const panel = document.createElement('div');
     panel.id = 'o112-panel';
-    panel.innerHTML = '<h4>Assistant 112</h4><div id="o112-body">Chargement…</div>';
+    panel.innerHTML = '<h4>Assistant 112</h4><div id="o112-prison"></div><div id="o112-body">Chargement…</div>';
     document.body.appendChild(panel);
     const body = panel.querySelector('#o112-body');
+    const prison = panel.querySelector('#o112-prison');
+    prisonerTick(prison);
+    setInterval(() => prisonerTick(prison), 2000);
 
     let mission = null;
     const missionType = missionTypeId();
@@ -386,8 +450,6 @@
 
     const render = (res) => {
       let html = mission ? `<b>${mission.name}</b><br>` : '';
-      const cells = highlightCells();
-      if (cells) html += `<span class="ok">Prisonniers : clique sur la cellule surlignée (${cells}).</span><br>`;
       const reqs = transportRequests();
       if (reqs.length) {
         html += '<span class="ko">Transport à attribuer :</span><ul>' +
@@ -452,8 +514,9 @@
   // Sur la mission : ouvre la première « Demande de transport envoyée ».
   function autoOpenTransport() {
     if (!AUTO_TRANSPORT) return false;
-    const link = [...document.querySelectorAll('a[href^="/vehicles/"]')].find((a) => /demande de transport/i.test(a.textContent));
-    if (!link) return false;
+    const req = transportRequests()[0];
+    if (!req) return false;
+    const link = req.a;
     try { sessionStorage.setItem(RETURN_KEY, location.pathname); } catch (e) { /* stockage bloqué */ }
     link.classList.add('o112-highlight');
     later(() => link.click());
@@ -462,11 +525,11 @@
 
   // Page du véhicule : clique le 1er hôpital (ou la 1re cellule) de la liste,
   // puis passe au véhicule suivant ou revient à la mission.
-  function vehiclePage() {
+  function vehiclePage(tries = 0) {
     const usable = (a) => !a.classList.contains('disabled') && a.offsetParent !== null;
     const target =
       [...document.querySelectorAll('a[href*="/patient/"]')].find(usable) ||
-      [...document.querySelectorAll('a[href*="/gefangener/"]')].find(usable);
+      bestCells().find(usable); // « Sélection de cellule » (prisonniers)
     const next = [...document.querySelectorAll('a, button')].find((b) => /prochain v[ée]hicule/i.test(b.textContent));
 
     if (target) {
@@ -480,6 +543,8 @@
         sessionStorage.setItem(key, String(Date.now()));
       } catch (e) { /* stockage bloqué */ }
       later(() => target.click());
+    } else if (!next && /s[ée]lection de cellule|choisir.*h[ôo]pital|demande de transport/i.test(document.body.innerText) && tries < 10) {
+      setTimeout(() => vehiclePage(tries + 1), 1000); // boutons pas encore chargés
     } else if (next) {
       if (AUTO_TRANSPORT) later(() => next.click());
       else next.classList.add('o112-highlight');

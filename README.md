@@ -4,7 +4,7 @@ Le site qui regroupe tous mes projets web : outils, développement, loisirs et �
 
 **▶ En ligne : [https://yoannservices.github.io/](https://yoannservices.github.io/)**
 
-Chaque projet important a aussi son propre dépôt (voir mon [portfolio](https://yoannservices.github.io/Y.Portfolio/) et [mon profil GitHub](https://github.com/yoannservices)).
+Chaque projet important a aussi son propre dépôt (voir mon [portfolio](https://yoannservices.github.io/portfolio/) et [mon profil GitHub](https://github.com/yoannservices)).
 
 ## Organisation
 
@@ -37,7 +37,7 @@ Le script `.claude/publier.py` copie ce dossier vers le dépôt `yoannservices.g
 
 ```bash
 python .claude/publier.py                          # aperçu, ne pousse rien
-python .claude/publier.py --projet loisirs/simulateur-moto
+python .claude/publier.py --projet loisirs/moto-rider
 python .claude/publier.py --publier -m "Message"   # commit et push
 ```
 
