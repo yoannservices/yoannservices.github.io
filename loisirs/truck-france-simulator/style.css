@@ -1,0 +1,76 @@
+/* Charte Yoann : thème sombre, Inter, accent vert (catégorie loisirs) */
+:root {
+  --bg: #0f0f13; --surface: #1a1a24; --border: #2e2e40;
+  --text: #e2e8f0; --muted: #8892a4;
+  --accent: #22c55e; --warn: #f59e0b; --danger: #ef4444;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#hud { position: fixed; inset: 0; pointer-events: none; }
+.card { position: absolute; background: rgba(26, 26, 36, .82); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; backdrop-filter: blur(6px); font-size: 13px; animation: fadeUp .5s ease; }
+.row { display: flex; justify-content: space-between; gap: 24px; margin: 3px 0; }
+.row span, small { color: var(--muted); }
+#dash { left: 16px; bottom: 16px; width: 220px; }
+#info { right: 16px; top: 16px; min-width: 210px; }
+#help { left: 16px; top: 16px; font-size: 12px; color: var(--muted); max-width: 330px; line-height: 1.6; }
+#help b { color: var(--text); }
+.speed b { font-size: 3rem; font-weight: 700; letter-spacing: -1px; }
+.speed small { margin-left: 6px; }
+.gear { margin-bottom: 6px; color: var(--muted); } .gear b { color: var(--text); }
+.bar { height: 6px; background: #13131b; border-radius: 99px; overflow: hidden; margin: 4px 0 8px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; }
+.bar i.ok { background: var(--accent); } .bar i.low { background: var(--warn); } .bar i.crit { background: var(--danger); }
+#msg { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); font-size: 22px; font-weight: 700; text-align: center; text-shadow: 0 2px 12px #000; }
+#msg.warn { color: var(--warn); } #msg.danger { color: var(--danger); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 600px) { #help { display: none; } #info { top: 60px; } }
+
+/* Garage */
+#garage { position: fixed; inset: 0; pointer-events: none; }
+#garage[hidden], #hud[hidden] { display: none; }
+.gp { pointer-events: auto; top: 16px; bottom: 16px; width: 300px; overflow: auto; }
+#g-left { left: 16px; } #g-right { right: 16px; }
+.gp h2 { margin: 0 0 12px; font-size: 1.3rem; letter-spacing: -.5px; display: flex; justify-content: space-between; align-items: baseline; }
+.gp h2 small { color: var(--accent); font-weight: 600; font-size: .9rem; }
+.gp h3 { margin: 14px 0 6px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.list { display: grid; gap: 6px; }
+.item { display: flex; justify-content: space-between; background: #13131b; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 13px; cursor: pointer; transition: .15s; }
+.item:hover { background: rgba(255,255,255,.05); transform: translateX(4px); }
+.item.on { border-color: var(--accent); background: rgba(34,197,94,.1); }
+.item span { color: var(--muted); }
+.stat { margin-bottom: 8px; }
+.primary { width: 100%; margin-top: 12px; padding: 12px; border: 0; border-radius: 99px; background: var(--accent); color: #04130a; font: 700 14px Inter, sans-serif; cursor: pointer; }
+.primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+.hint { display: block; text-align: center; margin-top: 10px; }
+@media (max-width: 800px) { .gp { width: auto; } #g-left { left: 16px; right: 16px; top: 12px; bottom: auto; max-height: 30vh; } #g-right { left: 16px; right: 16px; top: auto; bottom: 12px; max-height: 40vh; } }
+
+/* Carte */
+#map-screen { position: fixed; inset: 0; z-index: 10; background: var(--bg); }
+#map-screen[hidden] { display: none; }
+#leaflet { position: absolute; inset: 0; background: var(--bg); }
+#m-panel { left: 16px; z-index: 1000; }
+.item.static { cursor: default; align-items: center; gap: 8px; } .item.static:hover { transform: none; background: #13131b; }
+.item.static b { flex: 1; text-align: right; } .item.static button { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; }
+.item.route { flex-wrap: wrap; text-align: left; border-left: 4px solid var(--c); } .item.route small { flex-basis: 100%; margin-top: 4px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.ghost { padding: 10px; border: 1px solid var(--border); border-radius: 99px; background: none; color: var(--text); font: 600 13px Inter, sans-serif; cursor: pointer; }
+.ghost:hover { background: rgba(255,255,255,.05); }
+.leaflet-tooltip { background: var(--surface); color: var(--text); border-color: var(--border); }
+@media (max-width: 800px) { #m-panel { right: 16px; top: auto; bottom: 12px; max-height: 50vh; } }
+.leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6); } /* tuiles OSM en thème sombre */
+
+/* Écrans plein cadre : menu, contrats, résumé */
+.screen { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(15,15,19,.94); padding: 16px; overflow: auto; }
+.screen[hidden] { display: none; }
+.card.center { position: relative; width: min(420px, 100%); display: grid; gap: 10px; }
+.card.center.wide { width: min(640px, 100%); }
+.card.center h1 { margin: 0; font-size: clamp(2rem, 5vw, 2.6rem); letter-spacing: -1px; }
+.card.center h2 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.card.center h2 small { color: var(--accent); }
+.sub { margin: 0 0 8px; color: var(--muted); }
+#mn-options { display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
+.card.center hr { border: 0; border-top: 1px solid var(--border); width: 100%; margin: 6px 0; }
+.neg { color: var(--danger); } .pos { color: var(--accent); } .total { font-size: 1.1rem; }
+.ghost:disabled { opacity: .4; cursor: not-allowed; }

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr" class="ui-mini" data-cat="loisirs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Truck France Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "leaflet": "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js"
+    } }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="menu" class="screen">
+    <div class="card center">
+      <h1>Truck France Simulator</h1>
+      <p class="sub">Livrez la France, un contrat à la fois.</p>
+      <button class="primary" id="mn-new">Nouvelle partie</button>
+      <button class="ghost" id="mn-cont">Continuer</button>
+      <button class="ghost" id="mn-opt">Options</button>
+      <div id="mn-options" hidden>
+        <label><input type="checkbox" id="op-shadows" /> Ombres</label>
+        <label><input type="checkbox" id="op-lowres" /> Résolution réduite (plus fluide)</label>
+      </div>
+    </div>
+  </div>
+  <div id="contracts" class="screen" hidden>
+    <div class="card center wide">
+      <h2><span id="ct-title"></span> <small id="ct-money"></small></h2>
+      <div id="ct-list" class="list"></div>
+      <button class="ghost" id="ct-back">Garage</button>
+    </div>
+  </div>
+  <div id="summary" class="screen" hidden>
+    <div class="card center">
+      <h2 id="sm-title"></h2>
+      <div id="sm-lines"></div>
+      <div class="two"><button class="primary" id="sm-next">Nouveau contrat</button><button class="ghost" id="sm-menu">Menu</button></div>
+    </div>
+  </div>
+  <div id="garage" hidden>
+    <div class="card gp" id="g-left">
+      <h2>Garage <small id="g-money"></small></h2>
+      <h3>Cabines</h3><div id="g-cabs" class="list"></div>
+      <h3>Remorques</h3><div id="g-trailers" class="list"></div>
+    </div>
+    <div class="card gp" id="g-right">
+      <h2 id="g-title"></h2>
+      <div id="g-stats"></div>
+      <button id="g-action" class="primary"></button>
+      <small class="hint">Glisser pour tourner l'aperçu</small>
+    </div>
+  </div>
+  <div id="map-screen" hidden>
+    <div id="leaflet"></div>
+    <div class="card gp" id="m-panel">
+      <h2>Carte de France</h2>
+      <div id="m-stops" class="list"></div>
+      <h3>Itinéraires</h3>
+      <div id="m-routes" class="list"></div>
+      <button id="m-go" class="primary">Lancer la livraison</button>
+      <div class="two"><button id="m-clear" class="ghost">Effacer</button><button id="m-back" class="ghost">Garage</button></div>
+    </div>
+  </div>
+  <div id="hud" hidden>
+    <div class="card" id="dash">
+      <div class="speed"><b id="spd">0</b><small>km/h</small></div>
+      <div class="gear">Rapport <b id="gear">N</b></div>
+      <div class="bar"><i id="rpm"></i></div>
+      <div class="row"><span>Carburant</span><b id="fuel">0</b></div>
+      <div class="bar"><i id="fuelbar" class="ok"></i></div>
+    </div>
+    <div class="card" id="info">
+      <div class="row"><span>Heure</span><b id="clock">08:00</b></div>
+      <div class="row"><span>Conduite</span><b id="drive">0h00</b></div>
+      <div class="row"><span>Masse</span><b id="mass">0 t</b></div>
+      <div class="row"><span>Distance</span><b id="odo">0 km</b></div>
+      <div class="row"><span>Attelage</span><b id="rig">-</b></div>
+      <div class="row"><span>Trajet</span><b id="route">-</b></div>
+      <div class="row"><span>Reste</span><b id="remain">-</b></div>
+      <div class="row"><span>Échéance</span><b id="deadline">-</b></div>
+      <div class="row"><span>Météo</span><b id="weather">-</b></div>
+      <div class="row"><span>Camion</span><b id="dmgT">0 %</b></div>
+      <div class="row"><span>Cargaison</span><b id="dmgC">0 %</b></div>
+      <div class="row"><span>Argent</span><b id="money">-</b></div>
+    </div>
+    <div id="msg"></div>
+    <div class="card" id="help">
+      <b>Contrôles</b><br />
+      ZQSD / flèches : conduire · Espace : frein à main<br />
+      C : caméra · G : garage · L : charge · F : plein · P : pause · M : carte · Échap : menu · R : départ · H : météo
+    </div>
+  </div>
+  <script src="../../assets/site.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
