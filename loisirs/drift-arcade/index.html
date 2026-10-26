@@ -1,0 +1,22 @@
+<!doctype html>
+<html class="sim" lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a1a1f">
+  <title>Drift Arcade</title>
+  <link rel="stylesheet" href="../../assets/theme.css">
+  <link rel="stylesheet" href="../../assets/simulateur.css">
+  <script src="../../assets/site.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+  </script>
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <div id="hud">SCORE <span id="score">0</span><br>MEILLEUR <span id="best">0</span></div>
+  <div id="combo" aria-live="polite"></div>
+  <div id="help">Z/W/↑ accélérer · S/↓ frein/marche arrière · Q/A/← → direction · R reset</div>
+</body>
+</html>
