@@ -21,7 +21,8 @@ function startGame() {
   const rig = new CameraRig(stage.camera);
   const skids = new Skids(stage.scene);
   const smoke = new Smoke(stage.scene);
-  const score = new Score(SCORE, (m) => hud.popup(m));
+  const sound = new Sound();
+  const score = new Score(SCORE, (m) => { hud.popup(m); sound.cue(m.kind); });
   stage.onResize = (w, h) => smoke.setViewport(h * stage.renderer.getPixelRatio(), VIEW.camera.fov);
   stage.onResize(innerWidth, innerHeight);
 
@@ -30,9 +31,10 @@ function startGame() {
   stage.scene.add(debug);
 
   let best = loadBest();
-  let timeLeft, started, finished, acc = 0, last = performance.now();
+  let timeLeft, started, finished, paused = false, acc = 0, last = performance.now();
 
   function reset() {
+    paused = false;
     car.reset(START.x, START.y, START.angle);
     world.reset();
     score.reset();
@@ -54,7 +56,9 @@ function startGame() {
 
   function onEvent(e) {
     score.onEvent(e);
+    if (e.type === 'near') sound.cue('near');
     if (e.type === 'impact') {
+      sound.impact(e.speed, e.obstacle.comboBreak !== false);
       rig.shake(Math.min(e.speed / 500, 1.5));
       smoke.burst(e.x, e.y, Math.min(Math.round(e.speed / 40), 14));
     }
@@ -66,6 +70,14 @@ function startGame() {
     last = now;
 
     let inp = input.read();
+    if (inp.any) sound.start();
+    if (inp.toggleMute) sound.toggleMute();
+    if (inp.pause && started && !finished) {
+      paused = !paused;
+      sound.setPaused(paused);
+      if (paused) hud.showPause(); else hud.hideOverlay();
+    }
+    if (paused) { if (inp.restart) { paused = false; sound.setPaused(false); reset(); } stage.render(); return; }
     if (inp.restart) reset();
     else if (!started && !finished && inp.any) { started = true; hud.hideOverlay(); }
     if (inp.toggleDebug) debug.visible = !debug.visible;
@@ -94,9 +106,12 @@ function startGame() {
       debug.setDirection(new THREE.Vector3(car.vx, 0, car.vy).normalize());
       debug.setLength(Math.max(30, car.speed * 0.15), 12, 8);
     }
+    sound.update(car, inp.throttle, skids.intensity);
     hud.update({ score, car, timeLeft });
     stage.render();
   }
+
+  document.addEventListener('visibilitychange', () => { if (document.hidden && started && !finished && !paused) { paused = true; sound.setPaused(true); hud.showPause(); } });
 
   reset();
   requestAnimationFrame(frame);

@@ -32,8 +32,6 @@ const DEFAULT_CAR = {
   minDriftSpeed: 100,    // px/s
   minDriftAngle: 0.17,   // rad (~10°)
 
-  slickGrip: 0.3,        // multiplicateur d'adhérence après une rampe de glisse
-
   // Collisions
   mass: 1,               // masse relative aux objets déplaçables
 

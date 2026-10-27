@@ -32,7 +32,7 @@ class Hud {
   }
 
   showStart(best) {
-    this.el.card.innerHTML = `<h1>DRIFT ZONE</h1><p>Dérape, enchaîne, frôle les obstacles.<br>Un choc fait perdre la chaîne en cours.</p>
+    this.el.card.innerHTML = `<h1>DRIFT ZONE</h1><p>Dérape, enchaîne, frôle les obstacles.<br>Un choc valide tes points mais remet le combo à zéro.</p>
       <p>Meilleur score : <b>${fmt(best)}</b></p><p class="cta">Appuie sur une touche pour démarrer</p>`;
     this.el.overlay.classList.remove('hidden');
   }
@@ -40,6 +40,11 @@ class Hud {
   showEnd(total, best, isBest) {
     this.el.card.innerHTML = `<h1>TEMPS ÉCOULÉ</h1><p class="big">${fmt(total)}</p><p>${isBest ? '<b>Nouveau record !</b>' : `Meilleur score : ${fmt(best)}`}</p>
       <p class="cta">R pour rejouer</p>`;
+    this.el.overlay.classList.remove('hidden');
+  }
+
+  showPause() {
+    this.el.card.innerHTML = '<h1>PAUSE</h1><p class="cta">Échap pour reprendre</p><p style="font-size:12px">M : couper / remettre le son</p>';
     this.el.overlay.classList.remove('hidden');
   }
 

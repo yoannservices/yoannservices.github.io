@@ -78,7 +78,7 @@ class World {
   /** Remet les objets mobiles à leur place (redémarrage). */
   reset() {
     this.movables.forEach((o) => Object.assign(o, o.home, { vx: 0, vy: 0, av: 0 }));
-    this.grid.forEach((list) => list.forEach((o) => { o.inside = false; o.nearState = 0; }));
+    this.grid.forEach((list) => list.forEach((o) => { o.nearState = 0; }));
     this.movables.forEach((o) => { o.nearState = 0; });
   }
 
@@ -138,7 +138,6 @@ class World {
   }
 
   hit(car, o, events) {
-    if (o.sensor) return this.hitSensor(car, o, events);
     const test = o.shape === 'circle' ? carVsCircle : carVsBox;
     const c = test(car, o);
     if (!c) {
@@ -185,17 +184,4 @@ class World {
     if (impact > CRASH.minEvent) events.push({ type: 'impact', obstacle: o, speed: impact, x: c.px, y: c.py, nx, ny });
   }
 
-  hitSensor(car, o, events) {
-    const dx = car.x - o.x, dy = car.y - o.y;
-    const lx = dx * Math.cos(o.angle) + dy * Math.sin(o.angle);
-    const ly = -dx * Math.sin(o.angle) + dy * Math.cos(o.angle);
-    const inside = Math.abs(lx) < o.w / 2 && Math.abs(ly) < o.h / 2;
-    if (inside && !o.inside) {
-      car.vx += Math.cos(car.angle) * o.boost;
-      car.vy += Math.sin(car.angle) * o.boost;
-      car.slick = o.slick;
-      events.push({ type: 'ramp', obstacle: o, x: car.x, y: car.y });
-    }
-    o.inside = inside;
-  }
 }

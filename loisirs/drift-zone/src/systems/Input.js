@@ -3,7 +3,7 @@ const PREVENT = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRig
 
 /**
  * Clavier + manette. Les codes sont physiques : W/A/S/D correspondent à Z/Q/S/D sur AZERTY.
- * read() -> { throttle, brake, steer, handbrake, restart, toggleDebug, any }
+ * read() -> { throttle, brake, steer, handbrake, restart, toggleDebug, pause, toggleMute, any }
  */
 class Input {
   constructor() {
@@ -27,6 +27,8 @@ class Input {
     let handbrake = d('Space');
     let restart = this.pressed.has('KeyR');
     const toggleDebug = this.pressed.has('KeyG');
+    const pause = this.pressed.has('Escape') || this.pressed.has('KeyP');
+    const toggleMute = this.pressed.has('KeyM');
     const anyKey = this.pressed.size > 0;
     this.pressed.clear();
 
@@ -43,6 +45,6 @@ class Input {
       this.padRestartWas = start;
       padActive = Math.abs(ax) > DEADZONE || throttle > 0 || brake > 0 || handbrake || start;
     }
-    return { throttle, brake, steer, handbrake, restart, toggleDebug, any: anyKey || padActive };
+    return { throttle, brake, steer, handbrake, restart, toggleDebug, pause, toggleMute, any: anyKey || padActive };
   }
 }

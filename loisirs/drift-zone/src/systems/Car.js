@@ -21,7 +21,6 @@ class Car {
     this.vy = 0;
     this.steer = 0;
     this.yawRate = 0;
-    this.slick = 0; // s restantes d'adhérence réduite (rampe de glisse)
     // valeurs dérivées, lues par caméra / score / audio / HUD
     this.speed = 0;
     this.forwardSpeed = 0;
@@ -61,7 +60,6 @@ class Car {
     // Adhérence latérale : friction constante plafonnée, qui baisse avec la vitesse
     let grip = c.grip * (1 - c.gripSpeedLoss * speedRatio);
     if (input.handbrake) grip *= c.handbrakeGrip;
-    if (this.slick > 0) { grip *= c.slickGrip; this.slick -= dt; }
     if (input.throttle > 0) grip *= 1 - c.throttleGripLoss * input.throttle * speedRatio;
     if (Math.abs(vL) > c.slideThreshold) grip *= c.slideGrip;
     const vLBefore = vL;
