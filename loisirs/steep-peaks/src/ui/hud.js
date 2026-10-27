@@ -18,7 +18,8 @@ export class HUD {
       <div id="br"><div id="score">0</div><div id="combo"></div><div id="lvl"><span></span><div class="bar"><i></i></div></div></div>
       <div id="live"></div><div id="popups"></div>
       <div id="crash" class="hidden"></div>
-      <div id="hint">ZQSD diriger · Espace (maintenir) sauter · A/E/F/G grabs · 1 2 3 discipline · Échap menu · M carte</div>
+      <div id="hint">ZQSD diriger · Espace (maintenir) sauter · A/E/F/G grabs · Tab (maintenir) roue des disciplines · Échap menu · M carte</div>
+      <div id="wheel"><svg></svg><div class="wcenter"></div></div>
       <div id="menu" class="hidden"></div>
       <div id="loading"><div><h1>Steep Peaks</h1><p>Génération du massif…</p></div></div>`;
     this.el = Object.fromEntries(['disc', 'compass', 'wx', 'toasts', 'chal', 'spd', 'alt', 'info', 'score', 'combo', 'lvl', 'live', 'popups', 'crash', 'menu', 'loading', 'hint'].map((k) => [k, $('#' + k)]));
@@ -142,9 +143,9 @@ export class HUD {
     return `<div class="help">
       <p><b>Diriger</b> Z Q S D (ou W A S D / flèches / stick gauche) · <b>S</b> freine · <b>Maj</b> dérape (drift) · <b>Z</b> en descente = position tuck</p>
       <p><b>Sauter</b> maintenir Espace pour charger, relâcher pour sauter · en l'air : Q/D = spins, Z/S = flips · <b>E F G</b> = grabs</p>
-      <p><b>Discipline</b> 1 Snowboard · 2 Ski · 3 Wingsuit (saute d'une falaise) · Tab = suivante · en vol : Espace = parachute</p>
+      <p><b>Discipline</b> maintenir Tab = roue (relâcher pour choisir) · 1 Snowboard · 2 Ski · 3 Wingsuit (saute d'une falaise) · en vol : Espace = parachute</p>
       <p><b>Wingsuit</b> Z pique (vitesse) · S cabre (finesse) · Q/D inclinent. Frôle le relief pour marquer des points.</p>
       <p><b>Autres</b> M carte (clic = téléportation) · T départ suivant · V caméra · R relancer · X déclencher une avalanche · B météo · N heure · C abandonner un défi · Échap menu</p>
-      <p><b>Manette</b> stick = diriger · A saut · B/X/Y grabs · LB/RB discipline · LT frein · Start menu · Back carte</p></div>`;
+      <p><b>Manette</b> stick = diriger · A saut · B/X/Y grabs · LB/RB discipline (ou stick dans la roue) · LT frein · Start menu · Back carte</p></div>`;
   }
 }

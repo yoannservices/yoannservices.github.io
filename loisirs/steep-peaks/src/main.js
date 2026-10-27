@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { clamp } from './core/config.js';
 import { data, save } from './core/save.js';
-import { inp, poll, pressed, endFrame } from './core/input.js';
+import { inp, poll, pressed, held, endFrame } from './core/input.js';
 import { heightAt, starts, downhillHeading, descend, pois } from './world/heightmap.js';
 import { Terrain } from './world/terrain.js';
 import { Sky } from './world/sky.js';
@@ -16,6 +16,7 @@ import { Challenges } from './gameplay/challenges.js';
 import { prog } from './gameplay/progression.js';
 import { HUD } from './ui/hud.js';
 import { MapView } from './ui/map.js';
+import { createWheel } from './ui/wheel.js';
 import { Audio } from './audio/audio.js';
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -42,6 +43,7 @@ const teleport = (t) => {
   audio.whoosh(0.4);
 };
 const map = new MapView(player, challenges, teleport);
+const wheel = createWheel((d) => player.switchTo(d), (id) => (id === 'wingsuit' ? 'Combi : ' : id === 'ski' ? 'Skis : ' : 'Planche : ') + player.stats[id].name);
 hud.hooks = {
   defs: () => challenges.defs, poiCount: () => pois.length,
   equip: () => { player.refreshStats(); },
@@ -82,7 +84,7 @@ function controls() {
   if (pressed('1')) player.switchTo('snowboard');
   if (pressed('2')) player.switchTo('ski');
   if (pressed('3')) player.switchTo('wingsuit');
-  if (pressed('tab') || pressed('nextdisc') || pressed('prevdisc')) {
+  if (pressed('nextdisc') || pressed('prevdisc')) {
     const order = ['snowboard', 'ski', 'wingsuit'], d = order[(order.indexOf(player.disc) + (pressed('prevdisc') ? 2 : 1)) % 3];
     player.switchTo(d);
   }
@@ -96,13 +98,20 @@ function controls() {
 }
 
 const clock = new THREE.Clock();
+let slow = 1;
 function frame() {
   requestAnimationFrame(frame);
-  const dt = Math.min(clock.getDelta(), 0.05);
+  const rdt = Math.min(clock.getDelta(), 0.05), dt = rdt * slow;
   poll(); controls();
   const paused = hud.open || map.open;
+  // roue des disciplines : Tab maintenu, le temps ralentit
+  if (!paused && held('tab') && !wheel.isOpen) { wheel.setCurrent(player.disc); wheel.show(); }
+  else if (wheel.isOpen && (paused || !held('tab'))) wheel.close(!paused);
+  if (pressed('escape') && wheel.isOpen) wheel.close(false);
+  slow += ((wheel.isOpen ? 0.12 : 1) - slow) * (1 - Math.exp(-rdt * 10));
+  if (wheel.isOpen) wheel.stick(inp.x, -inp.y);
   if (!paused) {
-    const pin = cam.mode === 2 ? NEUTRAL : inp;
+    const pin = cam.mode === 2 || wheel.isOpen ? NEUTRAL : inp;
     const steps = Math.ceil(dt / (1 / 90));
     for (let i = 0; i < steps; i++) player.update(dt / steps, pin);
     tricks.tick(dt, player); challenges.update(dt);
@@ -117,7 +126,7 @@ function frame() {
     if (saveT > 6) { saveT = 0; if (p.mode === 'ground') data.pos = { x: p.pos.x, z: p.pos.z, disc: p.groundDisc }; save(); }
   }
   character.update(paused ? 0 : dt, player);
-  cam.update(dt, player);
+  cam.update(rdt, player);
   terrain.update(camera.position.x, camera.position.z);
   audio.update(dt, player, weather.cur, avalanche);
   camera.getWorldDirection(fwd);
@@ -127,4 +136,4 @@ function frame() {
 }
 hud.ready();
 frame();
-window.__sp = { player, terrain, camera, cam, sky, weather, avalanche, tricks, challenges, scene, renderer, teleport, hud, character, map };
+window.__sp = { player, terrain, camera, cam, sky, weather, avalanche, tricks, challenges, scene, renderer, teleport, hud, character, map, wheel };
