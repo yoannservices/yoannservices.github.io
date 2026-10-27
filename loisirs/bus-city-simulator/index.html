@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bus City Simulator</title>
+<link rel="stylesheet" href="../../assets/theme.css" />
+<script src="../../assets/site.js"></script>
+<style>
+  :root { --bg: #0f1218; --panel: #151a23ee; --line: #ffffff22; --acc: #7fd1ff; --ok: #3ddc84; --warn: #ffb000; --bad: #ff453a; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, sans-serif; color: #e8ecf2; }
+  canvas#scene { display: block; width: 100vw; height: 100vh; }
+  .hud { position: fixed; pointer-events: none; text-shadow: 0 1px 4px #000a; }
+  button { font: inherit; color: inherit; background: #243042; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+  button:hover:not(:disabled) { background: #2f4058; } button:disabled { opacity: .45; cursor: default; }
+  button.go { background: #1f6f43; } button.danger { background: #7a2620; }
+
+  #topbar { top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; background: #0f1218b8; border: 1px solid var(--line); border-radius: 12px; padding: 8px 18px; font-size: 16px; }
+  #topbar b { font-size: 20px; } #money.neg { color: var(--bad); }
+  .bar { width: 70px; height: 6px; background: #ffffff22; border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--acc); }
+  #nextstop { top: 70px; left: 50%; transform: translateX(-50%); display: none; gap: 14px; align-items: center; background: #0f1218b8; border: 1px solid var(--line); border-radius: 12px; padding: 8px 16px; }
+  #arrow { font-size: 26px; color: var(--acc); } #nsName { font-weight: 700; } #nsDelta.ok { color: var(--ok); } #nsDelta.warn { color: var(--warn); } #nsDelta.bad { color: var(--bad); }
+  #prompt { bottom: 26%; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: 600; background: #0f1218c8; border: 1px solid var(--acc); border-radius: 10px; padding: 8px 18px; transition: opacity .2s; opacity: 0; }
+  #event { top: 130px; left: 50%; transform: translateX(-50%); display: none; background: #7a2620cc; border-radius: 8px; padding: 5px 14px; font-weight: 700; }
+  #toasts { position: fixed; top: 150px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(640px, 92vw); }
+  .toast { background: #151a23ee; border-left: 4px solid var(--acc); border-radius: 8px; padding: 8px 14px; font-size: 14px; transition: opacity .5s; text-align: center; }
+  .toast.ok { border-color: var(--ok); } .toast.warn { border-color: var(--warn); } .toast.bad { border-color: var(--bad); } .toast.out { opacity: 0; }
+
+  #speedbox { left: 24px; bottom: 24px; }
+  #speed { font-size: 56px; font-weight: 700; line-height: 1; } #speed small { font-size: 18px; font-weight: 400; opacity: .7; margin-left: 6px; }
+  #status { margin-bottom: 8px; font-size: 15px; display: flex; gap: 12px; flex-wrap: wrap; max-width: 420px; } #status span.off { opacity: .25; }
+  #side { left: 24px; bottom: 140px; width: 190px; font-size: 14px; display: grid; gap: 6px; }
+  #side .row { display: flex; justify-content: space-between; } #side .bar { width: 100%; height: 8px; }
+  #limit { display: inline-flex; width: 44px; height: 44px; border-radius: 50%; border: 5px solid #d3202a; background: #fff; color: #111; align-items: center; justify-content: center; font-weight: 800; text-shadow: none; }
+  #dial { left: 50%; bottom: 0; transform: translateX(-50%); display: none; }
+  #minimap { right: 20px; bottom: 20px; width: 220px; height: 220px; }
+  #help { right: 20px; top: 70px; background: #0f1218cc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6; }
+  #help b { display: inline-block; min-width: 70px; color: var(--acc); } #help.hidden { display: none; }
+  #maparea { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #000a; pointer-events: none; }
+  #mapfull { border: 1px solid var(--line); border-radius: 10px; background: #0d1219; max-height: 92vh; max-width: 92vw; }
+
+  #menu { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #05080dcc; }
+  .panel { width: min(720px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .head { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--line); } .head h1 { margin: 0; font-size: 20px; flex: 1; }
+  .tabs { display: flex; gap: 6px; padding: 10px 14px 0; } .tabs button.on { background: var(--acc); color: #06121c; font-weight: 700; }
+  .body { padding: 14px; overflow: auto; display: grid; gap: 8px; }
+  .card { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #1b2230; border-radius: 10px; }
+  .card .grow { flex: 1; } .card small { display: block; opacity: .65; margin-top: 2px; } .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+  .hint { opacity: .65; font-size: 13px; margin: 4px 0 0; } .foot { padding: 10px 18px; font-size: 12px; opacity: .6; border-top: 1px solid var(--line); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .stats div { background: #1b2230; border-radius: 10px; padding: 10px; text-align: center; } .stats b { font-size: 20px; display: block; } .stats small { opacity: .6; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<canvas id="dial" class="hud" width="240" height="240"></canvas>
+<div id="topbar" class="hud"><span id="clock" style="font-size:20px;font-weight:700">08:00</span><span id="weather">Dégagé</span><b id="money">0 €</b><span id="level">Niveau 1</span><div class="bar"><i id="xpbar"></i></div></div>
+<div id="nextstop" class="hud"><span id="arrow">▲</span><div><div id="nsName"></div><small><span id="nsDist"></span> · <span id="nsDelta"></span></small></div></div>
+<div id="event" class="hud"></div>
+<div id="prompt" class="hud"></div>
+<div id="toasts"></div>
+<div id="side" class="hud">
+  <div class="row"><span>Voyageurs</span><b id="pax">0</b></div>
+  <div class="row"><span>Satisfaction</span><b id="sat">100%</b></div><div class="bar"><i id="satbar"></i></div>
+  <div class="row"><span id="enlabel">Carburant</span></div><div class="bar"><i id="enbar"></i></div>
+  <div class="row"><span>Limite</span><span id="limit">50</span></div>
+</div>
+<div id="speedbox" class="hud">
+  <div id="status"><span id="gear">N</span><span id="hb" class="off">Frein à main</span><span id="lights" class="off">Phares</span>
+    <span id="indL" class="off">◀</span><span id="indR" class="off">▶</span><span id="door" class="off">Portes</span><span id="ramp" class="off">Rampe</span><span id="view">Vue externe</span></div>
+  <div id="speed"><span id="kmh">0</span><small>km/h</small></div>
+</div>
+<canvas id="minimap" class="hud" width="220" height="220"></canvas>
+<div id="help" class="hud hidden">
+  <b>Z / ↑</b> accélérer<br><b>S / ↓</b> frein / marche arrière<br><b>Q D / ← →</b> braquer<br><b>Espace</b> frein à main<br>
+  <b>H</b> klaxon<br><b>L</b> phares<br><b>A / E</b> clignotants gauche / droit<br><b>O</b> portes<br><b>R</b> rampe PMR<br><b>N</b> sauter l'arrêt<br>
+  <b>V</b> vue : externe / cabine / passagers<br><b>M</b> carte<br><b>Tab</b> menu<br><b>I</b> aide<br>
+  <b>Manette</b> stick · RT/LT · A frein à main · B klaxon · X phares · Y vue · LB/RB clignotants · ← portes · → rampe · ↑ carte · Start menu
+</div>
+<div id="maparea"><canvas id="mapfull" width="760" height="760"></canvas></div>
+<div id="menu"></div>
+<script type="importmap">{"imports":{"three":"./lib/three.module.min.js"}}</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
