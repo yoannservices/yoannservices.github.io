@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drift Zone</title>
+  <style>
+    :root { --cream: #f5f2ec; --ink: #2c3140; --red: #e8363b; --cyan: #7fe8e8; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--cyan); font-family: Inter, system-ui, sans-serif; color: var(--ink); }
+    #game { position: fixed; inset: 0; }
+    #hud { position: fixed; left: 16px; top: 16px; display: grid; gap: 6px; pointer-events: none; }
+    .row { display: flex; gap: 6px; }
+    .pill { background: var(--cream); padding: 6px 14px; border-radius: 3px; font-weight: 700; letter-spacing: .04em; min-width: 60px; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
+    .pill small { font-size: 11px; opacity: .6; margin-right: 10px; }
+    .pill.num { min-width: 110px; text-align: right; }
+    #chain { color: var(--red); display: none; }
+    #meter { position: fixed; left: 16px; bottom: 16px; font-weight: 700; background: var(--cream); padding: 6px 14px; border-radius: 3px; pointer-events: none; }
+    #hint { position: fixed; right: 16px; bottom: 16px; font-size: 12px; background: rgba(245,242,236,.85); padding: 6px 10px; border-radius: 3px; pointer-events: none; }
+    #popups { position: fixed; left: 0; right: 0; top: 110px; text-align: center; pointer-events: none; }
+    .popup { position: absolute; left: 0; right: 0; font-size: 26px; font-weight: 800; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,.6); animation: rise 1.2s ease-out forwards; }
+    .popup.near { color: #0a8f8f; } .popup.lost { color: var(--red); } .popup.bank { color: #1e7a3a; }
+    @keyframes rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
+    #overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(44,49,64,.35); }
+    #overlay.hidden { display: none; }
+    .card { background: var(--cream); padding: 28px 40px; border-radius: 6px; text-align: center; box-shadow: 0 6px 0 rgba(0,0,0,.15); max-width: 460px; }
+    .card h1 { margin: 0 0 6px; font-size: 44px; letter-spacing: .06em; color: var(--red); }
+    .card p { margin: 6px 0; } .card .big { font-size: 40px; font-weight: 800; }
+    .card .cta { margin-top: 14px; font-weight: 700; color: var(--red); }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="../../assets/site.js"></script>
+</head>
+<body>
+  <div id="game"></div>
+  <div id="hud">
+    <div class="row"><div class="pill"><small>SCORE</small><span id="score">0</span></div><div class="pill" id="chain"></div></div>
+    <div class="row"><div class="pill"><small>TEMPS</small><span id="time">2:00</span></div></div>
+  </div>
+  <div id="meter"><span id="speed">0</span> km/h · <span id="angle">0</span>°</div>
+  <div id="hint">ZQSD / flèches · ESPACE frein à main · R recommencer · G debug</div>
+  <div id="popups"></div>
+  <div id="overlay"><div class="card" id="card"><h1>DRIFT ZONE</h1><p>Chargement…</p><p style="font-size:12px;opacity:.7">Si rien ne change, ouvre la console (F12) : une erreur de chargement y est affichée.</p></div></div>
+  <script src="src/config/carConfig.js"></script>
+  <script src="src/config/scoreConfig.js"></script>
+  <script src="src/config/obstacles.js"></script>
+  <script src="src/config/viewConfig.js"></script>
+  <script src="src/systems/Car.js"></script>
+  <script src="src/systems/Collision.js"></script>
+  <script src="src/systems/Score.js"></script>
+  <script src="src/systems/Input.js"></script>
+  <script src="src/systems/Obstacles.js"></script>
+  <script src="src/map.js"></script>
+  <script src="src/render/Stage.js"></script>
+  <script src="src/render/CarMesh.js"></script>
+  <script src="src/render/CameraRig.js"></script>
+  <script src="src/render/Skids.js"></script>
+  <script src="src/render/Smoke.js"></script>
+  <script src="src/hud.js"></script>
+  <script src="src/game.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Operateur112 – Assistant d'envoi (semi-auto)
 // @namespace    loisirs.operateur112
-// @version      0.3.3
+// @version      0.4.1
 // @description  Affiche les besoins de la mission et pré-coche les véhicules manquants. C'est TOI qui cliques sur « Déployer ».
 // @match        https://operateur112.fr/*
 // @match        https://www.operateur112.fr/*
@@ -16,7 +16,7 @@
   // le bouton en évidence. Seuls les transports vers l'hôpital / la cellule
   // sont automatiques (désactivable ci-dessous).
   const AUTO_TRANSPORT = true;
-  const AUTO_DELAY = 700; // ms avant chaque clic automatique
+  const AUTO_DELAY = 400; // ms avant chaque clic automatique
 
   const TYPE_ASSU = 5;
   const TYPE_AR = 28;
@@ -68,8 +68,6 @@
     #o112-panel button:hover{background:#4c5670}
     .o112-highlight{outline:3px solid #ffb347 !important;outline-offset:2px;animation:o112pulse 1s infinite}
     @keyframes o112pulse{50%{outline-color:transparent}}
-    #o112-next{position:fixed;bottom:12px;right:12px;z-index:99999;padding:8px 12px;border:0;border-radius:6px;
-      background:#c0392b;color:#fff;font:bold 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
   `;
   const style = document.createElement('style');
   style.textContent = css;
@@ -138,7 +136,7 @@
   // Noms génériques du jeu (« Restant à envoyer : 1 fourgon d'incendie… ») → tag de la case.
   // Les plus spécifiques d'abord ; le premier qui correspond gagne.
   const CAPTION_ATTR = [
-    [/tout usage|\bvtu\b/i, 'gkw'], // VTU : le tag fire=1 y est aussi, donc avant « fourgon »
+    [/tout usage|\bvtu\b/i, 'vtu'], // VTU : aucun tag sur la case, on compare le nom (avant « fourgon »)
     [/[ée]chelle|bras|dlk|platform/i, 'dlk'],
     [/chef de colonne|kdow/i, 'kdow_orgl'],
     [/chef de groupe|commandement|elw/i, 'elw'],
@@ -195,23 +193,45 @@
     ['mobile_air_vehicles', 'gwa'],
     ['water_tankers', 'gwl2wasser'],
     ['brush_truck', 'brush_truck'],
-    ['thw_gkw', 'gkw'],
+    ['thw_gkw', 'vtu'],
     ['police_cars', 'fustw'],
     ['ambulances', 'rtw'],
     ['firetrucks', 'fire'],
   ];
 
-  const has = (r, attr) => r.cb.getAttribute(attr) === '1';
-  const water = (r) => parseInt(r.cb.getAttribute('wasser_amount') || '0', 10);
+  // 'vtu' : pas de tag dans le jeu, on reconnaît le nom du véhicule. r.cb peut être nul (véhicule engagé de type inconnu).
+  const has = (r, attr) => attr === 'vtu' ? /\bvtu\b|tout usage/.test(r.type) : r.cb?.getAttribute(attr) === '1';
+  const water = (r) => parseInt(r.cb?.getAttribute('wasser_amount') || '0', 10);
+
+  // Véhicules déjà sur les lieux ou en route (« Unités en intervention ») : ils comptent dans les besoins.
+  // Le tag vient d'une case libre du même type de véhicule, à défaut on se rabat sur le nom.
+  function engagedRows(rows) {
+    const tags = new Map();
+    rows.forEach((r) => tags.set(r.cb.getAttribute('vehicle_type_id'), r.cb));
+    return [...document.querySelectorAll('#mission_vehicle_at_mission tbody tr, #mission_vehicle_driving tbody tr')]
+      .map((tr) => {
+        const a = tr.querySelector('a[vehicle_type_id]');
+        if (!a) return null;
+        const name = (tr.querySelector('small') || {}).textContent || a.textContent;
+        return { type: norm(name.replace(/[()]/g, '')), cb: tags.get(a.getAttribute('vehicle_type_id')) || null };
+      })
+      .filter(Boolean);
+  }
 
   function preselectFromRequirements(req) {
     const rows = vehicleRows();
+    const engaged = engagedRows(rows);
+    const usedE = new Set();
     const used = new Set();
     const report = [];
     for (const [key, attr] of REQ_ATTR) {
       const count = req[key];
       if (!count) continue;
       let got = 0;
+      for (const e of engaged) {
+        if (got >= count) break;
+        if (!usedE.has(e) && has(e, attr)) { usedE.add(e); got++; }
+      }
       for (const r of rows) {
         if (got >= count) break;
         if (used.has(r) || !has(r, attr)) continue;
@@ -223,7 +243,7 @@
     }
     // Eau : on complète avec les véhicules qui en transportent le plus.
     if (req.water_needed) {
-      let total = [...used].reduce((s, r) => s + water(r), 0);
+      let total = [...used, ...engaged].reduce((s, r) => s + water(r), 0);
       const extra = rows.filter((r) => !used.has(r) && water(r) > 0).sort((a, b) => a.dist - b.dist);
       for (const r of extra) {
         if (total >= req.water_needed) break;
@@ -440,7 +460,7 @@
         report.push(...r.report);
         unknown.push(...r.unknown.map((k) => `${mission.req[k]} × ${LABELS[k] || k}`));
       } else {
-        // Des véhicules sont déjà engagés et le jeu ne signale rien de manquant.
+        // Véhicules déjà engagés et rien de manquant selon le jeu : seuls les patients restent à gérer.
         source = engaged ? 'Véhicules déjà engagés' : 'Mission';
       }
       if (!engaged) handleTransfer(report);
@@ -483,28 +503,6 @@
     // Pré-cochage à l'ouverture ; l'envoi reste toujours manuel.
     render(run());
     highlightAlarm();
-  }
-
-  // ---------- Carte principale : ouvrir la prochaine mission sans véhicule ----------
-  function mainPage() {
-    const btn = document.createElement('button');
-    btn.id = 'o112-next';
-    btn.textContent = '➜ Mission suivante (N)';
-    btn.title = 'Ouvre la prochaine mission sans véhicule engagé';
-    document.body.appendChild(btn);
-
-    const openNext = () => {
-      const entries = [...document.querySelectorAll('#mission_list .missionSideBarEntry, #mission_list > div[id^="mission_"]')]
-        .filter((e) => e.offsetParent !== null);
-      const red = entries.find((e) => e.querySelector('.mission_panel_red')) || null;
-      if (!red) { btn.textContent = 'Aucune mission en attente'; setTimeout(() => (btn.textContent = '➜ Mission suivante (N)'), 2000); return; }
-      const link = red.querySelector('a[id^="alarm_button_"], a.btn[href*="/missions/"]');
-      if (link) link.click(); // ouvre la fenêtre de la mission (n'envoie rien)
-    };
-    btn.onclick = openNext;
-    document.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'n' && !/input|textarea|select/i.test(e.target.tagName)) openNext();
-    });
   }
 
   // ---------- Transports automatiques ----------
@@ -557,5 +555,4 @@
 
   if (/^\/missions\/\d+/.test(location.pathname)) missionPage();
   else if (/^\/vehicles\/\d+/.test(location.pathname)) vehiclePage();
-  else if (location.pathname === '/' && document.querySelector('#mission_list')) mainPage();
 })();
