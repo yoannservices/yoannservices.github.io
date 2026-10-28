@@ -2270,6 +2270,7 @@ canvas.addEventListener('pointerdown',e=>{if(GAME.state!=='play'||GAME.cam===1||
 canvas.addEventListener('pointermove',e=>{if(!orb.drag||e.pointerId!==orb.id)return;orb.yaw-=(e.clientX-orb.lx)*.006;orb.pitch=clamp(orb.pitch+(e.clientY-orb.ly)*.005,-.3,1.1);orb.yaw=Math.atan2(Math.sin(orb.yaw),Math.cos(orb.yaw));orb.lx=e.clientX;orb.ly=e.clientY;orb.idle=0});
 const orbEnd=e=>{if(e.pointerId!==orb.id)return;orb.drag=false;orb.idle=0;canvas.classList.remove('drag')};
 canvas.addEventListener('pointerup',orbEnd);canvas.addEventListener('pointercancel',orbEnd);
+const camPiv=new THREE.Vector3();
 function updateCamera(dt){
   const sp=P.spd,kmh=sp*3.6,fp=GAME.cam===1&&!CR.on;
   document.body.classList.toggle('first-person',fp);
@@ -2282,7 +2283,7 @@ function updateCamera(dt){
   }
   if(!fp){
     const sh=Math.sin(P.camH),ch=Math.cos(P.camH);
-    const back=4.4+sp*0.08,height=1.95+sp*0.025;
+    const back=4.4+sp*0.08,height=1.6+sp*0.02-P.wheelie*0.25; // plus basse, et ne monte pas quand on cabre
     /* orbite souris : revient doucement derrière la trottinette après 1,5 s sans glisser */
     if(!orb.drag){orb.idle+=dt;if(orb.idle>1.5){const f=Math.exp(-dt*2.5);orb.yaw*=f;orb.pitch*=f}}
     const a=P.camH+orb.yaw,R=Math.hypot(back,height-0.9),e=Math.atan2(height-0.9,back)+orb.pitch;
@@ -2292,15 +2293,18 @@ function updateCamera(dt){
     camera.position.copy(camPos);
     /* en orbite on vise la trottinette plutôt que la route devant */
     const lookAhead=(8+sp*0.5)*(1-clamp(Math.abs(orb.yaw)/.6+Math.abs(orb.pitch)/.6,0,1));
-    camera.lookAt(P.x+sh*lookAhead,1.25,P.z+ch*lookAhead);
+    camera.lookAt(P.x+sh*lookAhead,1.1,P.z+ch*lookAhead);
     camera.fov=lerp(camera.fov,62+clamp(kmh*0.3,0,31),dt*3);
     playerMesh.userData.rider.visible=true;
   }else{
     const sh=Math.sin(P.h),ch=Math.cos(P.h);
-    const eyeBack=0.22+Math.sin(P.wheelie)*0.25;
-    camera.position.set(P.x-sh*eyeBack,1.88+Math.sin(P.wheelie)*0.08,P.z-ch*eyeBack);
+    /* tête du pilote : en wheelie elle pivote avec la trottinette autour de l'axe de la roue arrière (80 %), le compteur reste donc dans le champ */
+    const a=P.wheelie*0.8,tl=playerMesh.userData.tilt;tl.getWorldPosition(camPiv);
+    const rf=-0.22-(camPiv.x*sh+camPiv.z*ch)+(P.x*sh+P.z*ch),ru=1.7-camPiv.y;  // position de base relative au pivot (avant, haut)
+    const nf=rf*Math.cos(a)-ru*Math.sin(a),nu=rf*Math.sin(a)+ru*Math.cos(a);
+    camera.position.set(camPiv.x+sh*nf,camPiv.y+nu,camPiv.z+ch*nf);
     const lookAhead=22+sp*0.12;
-    const pitch=Math.atan2(camera.position.y-1.48,lookAhead)-P.wheelie*0.35;
+    const pitch=Math.atan2(1.7-1.48,lookAhead)-a;
     camera.rotation.set(-pitch,P.h+Math.PI,-P.steer*0.07*Math.min(1,sp/10)-P.lean*0.3,'YXZ');
     camera.fov=lerp(camera.fov,70+clamp(kmh*0.2,0,24),dt*3);
     playerMesh.userData.rider.visible=false;
