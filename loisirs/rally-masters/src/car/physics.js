@@ -17,7 +17,7 @@ export class CarPhysics {
     const d = def, L = d.L;
     this.m = d.mass; this.a = L * (1 - d.wf); this.b = L * d.wf; this.Iz = d.mass * (d.iz * L) ** 2;
     this.P = d.power * 1000 * (1 + 0.07 * this.up.moteur);
-    this.Tp = this.P / (curve(0.9) * 0.9 * d.rpmMax * 2 * Math.PI / 60);
+    this.Tp = this.P / (curve(0.9) * 0.9 * d.rpmMax * 2 * Math.PI / 60) * 1.4;
     this.brakeF = d.brakeG * G * d.mass * (1 + 0.07 * this.up.freins);
     this.prot = 1 - 0.18 * this.up.protection;
     this.stiff = (this.setup.suspF + this.setup.suspR) / 2 * (1 + 0.04 * this.up.suspension);
@@ -107,7 +107,7 @@ export class CarPhysics {
 
     // --- direction ---
     const au = Math.abs(this.u), dmg = this.dmg;
-    const dmax = d.steerMax * (1 - 0.25 * dmg.steer / 100) / (1 + (au / 22) ** 2);
+    const dmax = d.steerMax * (1 - 0.25 * dmg.steer / 100) / (1 + (au / 30) ** 2);
     const target = clamp(-ctl.steer, -1, 1) * dmax + dmg.steerSign * dmg.steer / 100 * 0.07;
     this.steer += (target - this.steer) * (1 - Math.exp(-dt / 0.09));
     const dl = this.steer;
