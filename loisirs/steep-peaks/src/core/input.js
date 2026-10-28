@@ -1,5 +1,5 @@
 const keys = new Set(), hit = new Set();
-const PAD_KEYS = { 0: 'space', 1: 'e', 2: 'f', 3: 'g', 4: 'prevdisc', 5: 'nextdisc', 8: 'm', 9: 'escape', 10: 'v', 12: 't', 13: 'b' };
+const PAD_KEYS = { 0: 'space', 1: 'e', 2: 'f', 3: 'g', 4: 'prevdisc', 5: 'nextdisc', 8: 'm', 9: 'escape', 10: 'c', 12: 't', 13: 'b' };
 const norm = (e) => {
   if (e.code.startsWith('Digit')) return e.code.slice(5);
   if (/^Numpad\d$/.test(e.code)) return e.code.slice(6);

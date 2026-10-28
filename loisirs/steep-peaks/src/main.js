@@ -88,13 +88,13 @@ function controls() {
     const order = ['snowboard', 'ski', 'wingsuit'], d = order[(order.indexOf(player.disc) + (pressed('prevdisc') ? 2 : 1)) % 3];
     player.switchTo(d);
   }
-  if (pressed('v')) hud.toast(cam.cycle());
+  if (pressed('c')) hud.toast(cam.cycle());
   if (pressed('r')) { if (player.mode === 'ragdoll') player.respawnReq = true; else { player.crash('relance'); player.respawnReq = true; player.ragT = 0.8; } }
   if (pressed('t')) { startIdx = (startIdx + 1) % starts.length; teleport(starts[startIdx]); hud.toast('Départ : ' + starts[startIdx].name); }
   if (pressed('b')) { weather.cycle(); }
   if (pressed('n')) { sky.hour = (sky.hour + 3) % 24; }
   if (pressed('x')) { if (player.slope > 0.3 && player.mode === 'ground') triggerAvalanche(false); else hud.toast('Il faut une pente pour déclencher une avalanche'); }
-  if (pressed('c')) challenges.cancel('Défi abandonné');
+  if (pressed('v')) challenges.cancel('Défi abandonné');
 }
 
 const clock = new THREE.Clock();

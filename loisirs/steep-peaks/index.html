@@ -9,10 +9,11 @@
   <link rel="stylesheet" href="src/ui/style.css" />
   <script type="importmap">
   { "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
   } }
   </script>
+<script type="module">import { patch } from "../../assets/perf.js"; import * as T from "three"; patch(T);</script>
 </head>
 <body>
   <div id="app"></div>

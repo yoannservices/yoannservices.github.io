@@ -145,7 +145,7 @@ export class HUD {
       <p><b>Sauter</b> maintenir Espace pour charger, relâcher pour sauter · en l'air : Q/D = spins, Z/S = flips · <b>E F G</b> = grabs</p>
       <p><b>Discipline</b> maintenir Tab = roue (relâcher pour choisir) · 1 Snowboard · 2 Ski · 3 Wingsuit (saute d'une falaise) · en vol : Espace = parachute</p>
       <p><b>Wingsuit</b> Z pique (vitesse) · S cabre (finesse) · Q/D inclinent. Frôle le relief pour marquer des points.</p>
-      <p><b>Autres</b> M carte (clic = téléportation) · T départ suivant · V caméra · R relancer · X déclencher une avalanche · B météo · N heure · C abandonner un défi · Échap menu</p>
+      <p><b>Autres</b> M carte (clic = téléportation) · T départ suivant · C caméra · R relancer · X déclencher une avalanche · B météo · N heure · V abandonner un défi · Échap menu</p>
       <p><b>Manette</b> stick = diriger · A saut · B/X/Y grabs · LB/RB discipline (ou stick dans la roue) · LT frein · Start menu · Back carte</p></div>`;
   }
 }

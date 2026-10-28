@@ -4,6 +4,22 @@
    projet précédent/suivant, menu de tous les projets) et
    mémorise les projets récemment ouverts pour le hub.
    ═══════════════════════════════════════════════════════════ */
+
+/* Clavier AZERTY : la lettre M est sur la position physique "Semicolon" (code KeyM = la touche virgule). Les jeux lisent event.code,
+   on relaie donc la lettre m comme KeyM et on ignore la touche virgule qui porte ce code. */
+(function () {
+  const skip = (e) => !e.isTrusted || e.ctrlKey || e.altKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName) || (e.target && e.target.isContentEditable);
+  const fix = (e) => {
+    if (skip(e)) return;
+    const isM = e.key && e.key.toLowerCase() === 'm';
+    if (isM && e.code !== 'KeyM') {
+      e.stopImmediatePropagation(); e.preventDefault();
+      (e.target || window).dispatchEvent(new KeyboardEvent(e.type, { key: e.key, code: 'KeyM', repeat: e.repeat, shiftKey: e.shiftKey, bubbles: true, cancelable: true }));
+    } else if (!isM && e.code === 'KeyM') { e.stopImmediatePropagation(); }
+  };
+  addEventListener('keydown', fix, true); addEventListener('keyup', fix, true);
+})();
+
 (function () {
   'use strict';
 
