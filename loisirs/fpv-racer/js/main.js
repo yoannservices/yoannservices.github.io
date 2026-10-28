@@ -31,24 +31,45 @@
   function buildDrone() {
     if (drone) scene.remove(drone.g);
     const P = Quad.P, g = new THREE.Group(), inner = new THREE.Group();
-    const carbon = new THREE.MeshLambertMaterial({ color: 0x1d1d1f });
+    const M = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.5, metalness: 0.2, ...o });
+    const carbon = M(0x17181a, { roughness: 0.35, metalness: 0.5 }), alu = M(0xd9a21b, { roughness: 0.3, metalness: 0.9 }), black = M(0x0b0b0d, { roughness: 0.8 });
     const add = (geo, mat, x, y, z, ry = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; inner.add(m); return m; };
-    add(new THREE.BoxGeometry(0.06, 0.03, 0.12), carbon, 0, 0, 0);
-    for (const a of [Math.PI / 4, -Math.PI / 4]) add(new THREE.BoxGeometry(0.026, 0.008, 0.25), carbon, 0, -0.012, 0, a);
-    add(new THREE.BoxGeometry(0.036, 0.032, 0.08), new THREE.MeshLambertMaterial({ color: 0xf2c21b }), 0, 0.033, 0.005);
-    add(new THREE.BoxGeometry(0.022, 0.022, 0.02), new THREE.MeshLambertMaterial({ color: 0xff6a00 }), 0, 0.006, -0.062);
-    add(new THREE.BoxGeometry(0.02, 0.004, 0.004), new THREE.MeshBasicMaterial({ color: 0xff2020 }), 0, 0.0, 0.062);
-    const props = [];
-    const propMat = new THREE.MeshBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false });
-    const motorMat = new THREE.MeshLambertMaterial({ color: 0x8a8f99 });
-    for (const [x, z] of [[0.088, -0.088], [-0.088, -0.088], [0.088, 0.088], [-0.088, 0.088]]) {
-      add(new THREE.CylinderGeometry(0.014, 0.014, 0.018, 10), motorMat, x, 0.0, z);
-      const disc = new THREE.Mesh(new THREE.CircleGeometry(0.0635, 20), propMat);
-      disc.rotation.x = -Math.PI / 2; disc.position.set(x, 0.014, z); inner.add(disc);
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.002, 0.012), carbon);
-      blade.position.set(x, 0.015, z); inner.add(blade); props.push(blade);
-      if (P.ducts) { const d = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.006, 6, 24), carbon); d.rotation.x = Math.PI / 2; d.position.set(x, 0.01, z); inner.add(d); }
+    // châssis X en fibre de carbone : plaque centrale + 4 bras effilés + plaque supérieure
+    const plate = (pts, h, y) => { const sh = new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, z))); const ge = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: false }); ge.rotateX(-Math.PI / 2); return add(ge, carbon, 0, y, 0); };
+    plate([[-0.03, -0.055], [0.03, -0.055], [0.036, -0.03], [0.036, 0.05], [0.025, 0.065], [-0.025, 0.065], [-0.036, 0.05], [-0.036, -0.03]], 0.003, -0.016);
+    plate([[-0.026, -0.05], [0.026, -0.05], [0.03, -0.02], [0.03, 0.045], [-0.03, 0.045], [-0.03, -0.02]], 0.003, 0.022);
+    for (const [x, z] of [[1, -1], [-1, -1], [1, 1], [-1, 1]]) {
+      const len = 0.115, ang = Math.atan2(x, z), arm = new THREE.Shape([new THREE.Vector2(-0.011, 0), new THREE.Vector2(0.011, 0), new THREE.Vector2(0.0075, len), new THREE.Vector2(-0.0075, len)]);
+      const ge = new THREE.ExtrudeGeometry(arm, { depth: 0.005, bevelEnabled: false }); ge.rotateX(-Math.PI / 2);
+      const m = add(ge, carbon, 0, -0.016, 0); m.rotation.y = ang + Math.PI;
     }
+    // colonnettes aluminium, électronique, batterie sanglée, caméra, antenne, LED
+    for (const [x, z] of [[0.026, -0.04], [-0.026, -0.04], [0.026, 0.04], [-0.026, 0.04]]) add(new THREE.CylinderGeometry(0.0035, 0.0035, 0.038, 8), alu, x, 0.003, z);
+    add(new THREE.BoxGeometry(0.03, 0.004, 0.034), M(0x0f5d2f), 0, 0.0, 0.0); add(new THREE.BoxGeometry(0.03, 0.004, 0.034), M(0x1a1a20), 0, 0.01, 0.0);
+    add(new THREE.BoxGeometry(0.034, 0.026, 0.09), M(0x2a2d33, { roughness: 0.7 }), 0, 0.037, 0.01);
+    for (const z of [-0.025, 0.04]) add(new THREE.BoxGeometry(0.038, 0.029, 0.007), M(0xff6a00, { roughness: 0.9 }), 0, 0.037, z);
+    add(new THREE.BoxGeometry(0.012, 0.008, 0.016), M(0xf2c21b), 0, 0.02, 0.062);
+    const cam = new THREE.Group(); cam.position.set(0, 0.0, -0.062); cam.rotation.x = -0.45; inner.add(cam);
+    for (const s of [-1, 1]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.026, 0.026), carbon); p.position.x = s * 0.012; cam.add(p); }
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.018), black); cam.add(body);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.012, 14).rotateX(Math.PI / 2), M(0x0a1622, { roughness: 0.05, metalness: 0.8 })); lens.position.z = -0.014; cam.add(lens);
+    const ant = add(new THREE.CylinderGeometry(0.0012, 0.0012, 0.045, 5), black, 0, 0.05, 0.075); ant.rotation.x = 0.5;
+    add(new THREE.BoxGeometry(0.02, 0.004, 0.004), new THREE.MeshBasicMaterial({ color: 0xff2020 }), 0, 0.0, 0.07);
+    const props = [];
+    const propMat = new THREE.MeshBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthWrite: false });
+    const bladeG = new THREE.BoxGeometry(0.06, 0.0015, 0.011).translate(0.032, 0, 0);
+    const bellG = new THREE.CylinderGeometry(0.0145, 0.0125, 0.016, 16), baseG = new THREE.CylinderGeometry(0.011, 0.012, 0.006, 12);
+    const motor = [0xe03030, 0x2f6fe0, 0x2f6fe0, 0xe03030];
+    [[0.083, -0.083], [-0.083, -0.083], [0.083, 0.083], [-0.083, 0.083]].forEach(([x, z], i) => {
+      add(baseG, black, x, -0.009, z); add(bellG, M(motor[i], { roughness: 0.25, metalness: 0.9 }), x, 0.002, z);
+      add(new THREE.CylinderGeometry(0.003, 0.003, 0.006, 8), alu, x, 0.013, z);
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(0.0635, 24), propMat); disc.rotation.x = -Math.PI / 2; disc.position.set(x, 0.016, z); inner.add(disc);
+      const hub = new THREE.Group(); hub.position.set(x, 0.016, z);
+      for (let k = 0; k < 3; k++) { const bl = new THREE.Mesh(bladeG, carbon); bl.rotation.y = k * Math.PI * 2 / 3; bl.rotation.z = 0.1; hub.add(bl); }
+      inner.add(hub); props.push(hub);
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.002, 0.012), new THREE.MeshBasicMaterial({ color: z < 0 ? 0x30ff60 : 0xff3030 })); led.position.set(x * 0.8, -0.018, z * 0.8); inner.add(led);
+      if (P.ducts) { const d = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.006, 6, 28), carbon); d.rotation.x = Math.PI / 2; d.position.set(x, 0.01, z); inner.add(d); }
+    });
     inner.scale.setScalar(P.size);
     g.add(inner);
     g.traverse(o => o.layers.set(1));
