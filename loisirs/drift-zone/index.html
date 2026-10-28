@@ -27,8 +27,9 @@
     .card p { margin: 6px 0; } .card .big { font-size: 40px; font-weight: 800; }
     .card .cta { margin-top: 14px; font-weight: 700; color: var(--red); }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="../../assets/site.js"></script>
+<link rel="stylesheet" href="../../assets/theme.css" />
+<link rel="stylesheet" href="../../assets/simulateur.css" />
+<script src="../../assets/site.js"></script>
 </head>
 <body>
   <div id="game"></div>
@@ -40,24 +41,6 @@
   <div id="hint">ZQSD / flèches · ESPACE frein à main · R recommencer · Échap pause · M son · G debug</div>
   <div id="popups"></div>
   <div id="overlay"><div class="card" id="card"><h1>DRIFT ZONE</h1><p>Chargement…</p><p style="font-size:12px;opacity:.7">Si rien ne change, ouvre la console (F12) : une erreur de chargement y est affichée.</p></div></div>
-  <script src="src/config/carConfig.js"></script>
-  <script src="src/config/scoreConfig.js"></script>
-  <script src="src/config/obstacles.js"></script>
-  <script src="src/config/viewConfig.js"></script>
-  <script src="src/systems/Car.js"></script>
-  <script src="src/systems/Collision.js"></script>
-  <script src="src/systems/Score.js"></script>
-  <script src="src/systems/Input.js"></script>
-  <script src="src/systems/Obstacles.js"></script>
-  <script src="src/map.js"></script>
-  <script src="src/render/Stage.js"></script>
-  <script src="src/render/CarMesh.js"></script>
-  <script src="src/render/CameraRig.js"></script>
-  <script src="src/render/Skids.js"></script>
-  <script src="src/render/Smoke.js"></script>
-  <script src="src/audio.js"></script>
-  <script src="src/hud.js"></script>
-  <script src="src/game.js"></script>
-  <script src="src/main.js"></script>
+<script type="module" src="../../assets/three-compat.js" data-scripts="src/config/carConfig.js,src/config/scoreConfig.js,src/config/obstacles.js,src/config/viewConfig.js,src/systems/Car.js,src/systems/Collision.js,src/systems/Score.js,src/systems/Input.js,src/systems/Obstacles.js,src/map.js,src/render/Stage.js,src/render/CarMesh.js,src/render/CameraRig.js,src/render/Skids.js,src/render/Smoke.js,src/audio.js,src/hud.js,src/game.js,src/main.js"></script>
 </body>
 </html>
