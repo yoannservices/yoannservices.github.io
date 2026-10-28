@@ -169,8 +169,25 @@ window.buildRoadster = function (THREE) {
   }
   const dash = add(new THREE.BoxGeometry(1.3, 0.16, 0.3), M.carpet, body, false);
   dash.position.set(0, floorY + 0.3, -0.55);
-  const scr = add(new THREE.PlaneGeometry(0.3, 0.2), M.screen, body, false);
-  scr.position.set(0.02, floorY + 0.44, -0.37); scr.rotation.x = -0.5;
+  // écran central : vitesse, rapport et heure en direct (setScreen)
+  const sc = document.createElement('canvas'); sc.width = 512; sc.height = 340;
+  const scTex = new THREE.CanvasTexture(sc); scTex.colorSpace = THREE.SRGBColorSpace; scTex.anisotropy = 4;
+  M.screen.map = scTex; M.screen.emissiveMap = scTex; M.screen.color.setHex(0xffffff); M.screen.emissive.setHex(0xffffff); M.screen.emissiveIntensity = 0.45;
+  const sg = sc.getContext('2d');
+  let scLast = '';
+  function setScreen(kmh, boost) {
+    const key = Math.round(kmh) + '|' + (boost ? 1 : 0); if (key === scLast) return; scLast = key;
+    sg.fillStyle = '#05080e'; sg.fillRect(0, 0, 512, 340);
+    sg.fillStyle = '#e8f1ff'; sg.font = 'bold 150px Arial'; sg.textAlign = 'center'; sg.fillText(String(Math.round(kmh)), 256, 190);
+    sg.font = '34px Arial'; sg.fillStyle = '#7fb4ff'; sg.fillText('km/h', 256, 236);
+    sg.fillStyle = boost ? '#ff7a2f' : '#3f8cff'; sg.fillRect(40, 270, 432 * Math.min(1, kmh / 500), 14);
+    sg.strokeStyle = '#27405f'; sg.lineWidth = 2; sg.strokeRect(40, 270, 432, 14);
+    sg.fillStyle = '#9fb4d0'; sg.font = 'bold 30px Arial'; sg.textAlign = 'left'; sg.fillText('D', 40, 60); sg.textAlign = 'right'; sg.fillText(boost ? 'BOOST' : 'ROADSTER', 472, 60);
+    scTex.needsUpdate = true;
+  }
+  setScreen(0, false);
+  const scr = add(new THREE.PlaneGeometry(0.38, 0.25), M.screen, body, false);
+  scr.position.set(-0.12, floorY + 0.72, -0.34); scr.rotation.x = -0.9; scr.rotation.y = 0.35;
   // Volant type « yoke »
   const yoke = new THREE.Group();
   const rimY = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.022, 8, 24, Math.PI), M.carpet); rimY.rotation.z = Math.PI; yoke.add(rimY);
@@ -312,5 +329,5 @@ window.buildRoadster = function (THREE) {
 
   function setPaint(hex) { M.paint.color.setHex(hex); }
 
-  return { root, body, wheels, plumes, nozzles, bottomNozzles, headLights, materials: M, setPaint, cockpitCam, yoke };
+  return { root, body, wheels, plumes, nozzles, bottomNozzles, headLights, materials: M, setPaint, cockpitCam, yoke, setScreen };
 };

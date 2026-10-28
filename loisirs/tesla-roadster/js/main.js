@@ -764,7 +764,8 @@
     if (camMode === 2) {
       camera.position.copy(model.cockpitCam).applyQuaternion(visQuat).add(visPos);
       camera.up.copy(visUp);
-      camera.lookAt(tmp.copy(camera.position).addScaledVector(visFwd, 10).addScaledVector(visUp, -0.6));
+      camera.lookAt(tmp.copy(camera.position).addScaledVector(visFwd, 10).addScaledVector(visUp, -4.0).addScaledVector(tmp2.crossVectors(visFwd, visUp), 2.4)); // regard vers le bas et le centre : volant et écran visibles : volant et écran visibles
+      model.setScreen(sp * 3.6, false);
       camUp.copy(visUp); camPos.copy(camera.position);
     } else {
       const dist = camMode === 0 ? 7.2 : 13, hgt = camMode === 0 ? 2.3 : 4.2;
