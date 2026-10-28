@@ -1123,8 +1123,8 @@ let touchBrake=false;
    Poussées et accélérations en m/s² (poussée / masse). Rapport poussée/poids = poussée / 9,81. */
 const AIRCRAFT={
  f35:{id:'f35',name:'F-35B Lightning II',kind:'jet',
-   tmil:5.8,tab:4.4,ram:.45,tvtol:13.5,                 // à sec 0,6 g · post-combustion 1,0 g · ram (effet de compression) en supersonique
-   cd0:.0175,cdSuper:.0076,wave:.012,k:.065,cla:5,clmax:1.35,gmax:13,
+   tmil:7,tab:16,ram:.6,vmax:845,tvtol:13.5,             // à sec 0,7 g · post-combustion 2,3 g · ram en supersonique : ~3000 km/h en ~30 s, plafonné à vmax (m/s)
+   cd0:.0175,cdSuper:.0075,wave:.008,k:.065,cla:5,clmax:1.35,gmax:13,
    vrot:48,vstall:44,pitchLo:.08,pitchHi:.47,pitchFast:.78,rollLo:1.2,rollHi:3.8,rollV:[80,260],yaw:.45,
    gearH:2.05,bellyH:1.15,hit:[[-8.2,-.2,3],[8.2,-.2,3],[0,0,-8.5],[0,.4,5.5,.5]],
    camDist:21,camH:4.6,cockpit:[0,.91,-2.48],tips:[[-8.3,-.2,3.4],[8.3,-.2,3.4]],exhaust:[0,0,7],shadow:22},
@@ -1194,7 +1194,7 @@ function physics(dt,time){
     S.abL=0;
   }else{
     S.abL=approach(S.abL,(S.ab&&S.thr>.99)?1:0,dt*(S.ab?1.8:3));
-    const conv=(A.tmil*S.thr+A.tab*S.abL)*Math.pow(rho,.75)*(1+A.ram*clamp(mach,0,2.6));
+    const conv=(A.tmil*S.thr+A.tab*S.abL)*Math.pow(rho,.75)*(1+A.ram*clamp(mach,0,2.6))*(1-smooth(A.vmax-70,A.vmax,speed));
     T=lerp(conv,A.tvtol*S.thr*Math.pow(rho,.7),S.noz);
   }
   ax+=_td.x*T;ay+=_td.y*T;az+=_td.z*T;
