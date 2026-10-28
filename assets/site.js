@@ -59,6 +59,7 @@
     { cat: 'loisirs', path: 'loisirs/steep-peaks/', mini: true, name: 'Steep Peaks', desc: 'Snowboard, ski et wingsuit en monde ouvert de montagne' },
     { cat: 'loisirs', path: 'loisirs/kukirin/', mini: true,         name: 'Kukirin',                desc: 'Trottinette, livraisons et quêtes' },
     { cat: 'loisirs', path: 'loisirs/trottinette-freestyle/', mini: true, name: 'Trottinette Freestyle', desc: 'Skatepark 3D : whips, barspins, flips et grinds' },
+    { cat: 'loisirs', path: 'loisirs/downhill-riders/', mini: true, name: 'Downhill Riders', desc: 'VTT de descente freestyle : pistes par graine, tricks, biomes, boutique' },
     { cat: 'loisirs', path: 'loisirs/rail-express/', mini: true, name: 'Rail Express',      desc: 'Conduite ferroviaire : signalisation, gares et procédures' },
     { cat: 'loisirs', path: 'loisirs/fpv-racer/', mini: true, pos: 'tr', name: 'FPV Racer',  desc: 'Drone FPV acro : tunnels, bando, course et suivi de voitures en drift' },
     { cat: 'loisirs', path: 'loisirs/truck-france-simulator/', mini: true, pos: 'tr', name: 'Truck France Simulator', desc: 'Camion en France : contrats, carte, météo, trafic et stations' },

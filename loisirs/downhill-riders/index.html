@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="sim" lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Downhill Riders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <link rel="stylesheet" href="../../assets/simulateur.css" />
+  <script src="../../assets/site.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">import { patch } from '../../assets/perf.js'; import * as T from 'three'; patch(T);</script>
+</head>
+<body>
+  <canvas id="gl" tabindex="0" aria-label="Descente en VTT en 3D"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-tl panel"><span class="lbl" id="h-mode">Run</span><strong id="h-score">0</strong><span class="sub" id="h-time">0:00</span></div>
+    <div class="hud-tc"><div id="h-lives"></div><div id="h-obj" class="panel"></div></div>
+    <div class="hud-tr panel"><span class="spd"><b id="h-speed">0</b> km/h</span><span class="sub" id="h-line"></span></div>
+    <div id="h-combo" class="panel" hidden><div class="names" id="h-names"></div><div class="tot"><b id="h-ctot">0</b><i id="h-cmult">x1</i></div><div class="bar"><i id="h-cbar"></i></div></div>
+    <div id="h-pop" aria-live="polite"></div>
+    <div id="h-land" class="panel" hidden><span>Réception</span><div class="bar"><i id="h-landbar"></i></div><b id="h-landtxt"></b></div>
+    <div id="h-hint"></div>
+    <canvas id="h-map" width="280" height="280" hidden></canvas>
+    <div id="toasts"></div>
+  </div>
+
+  <div id="screen" class="overlay"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
