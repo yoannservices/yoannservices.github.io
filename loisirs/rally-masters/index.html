@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html class="sim" lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Rally Masters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <link rel="stylesheet" href="../../assets/simulateur.css" />
+  <script src="../../assets/site.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">import { patch } from '../../assets/perf.js'; import * as T from 'three'; patch(T);</script>
+</head>
+<body>
+  <canvas id="gl" tabindex="0" aria-label="Rallye en 3D"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-tl panel">
+      <span class="lbl" id="h-stage">Spéciale</span>
+      <strong id="h-time">0:00.00</strong>
+      <span id="h-delta" class="delta"></span>
+      <span id="h-pen" class="pen"></span>
+    </div>
+    <div class="hud-tc"><div id="h-notes" aria-live="polite"></div><div id="h-say" class="panel" hidden></div></div>
+    <div class="hud-tr panel"><span id="h-pos">P–</span><span id="h-weather"></span><span id="h-view" class="sub"></span></div>
+    <div class="hud-bl panel" id="h-dmg" title="Dégâts">
+      <div class="d-car">
+        <i id="d-bf" class="d bump f"></i><i id="d-t0" class="d tire tl"></i><i id="d-t1" class="d tire tr"></i>
+        <i id="d-bo" class="d body"></i><i id="d-en" class="d eng"></i><i id="d-st" class="d steer"></i>
+        <i id="d-t2" class="d tire bl"></i><i id="d-t3" class="d tire br"></i><i id="d-br" class="d bump r"></i>
+      </div>
+      <div class="d-txt"><span id="d-health">100 %</span><small>état</small></div>
+    </div>
+    <div class="hud-br">
+      <div class="spd"><b id="h-speed">0</b><small id="h-unit">km/h</small></div>
+      <div class="gear" id="h-gear">1</div>
+      <div class="rpm"><i id="h-rpm"></i></div>
+      <div class="turbo" id="h-turboW"><i id="h-turbo"></i></div>
+      <div class="ind"><span id="i-lights">FEUX</span><span id="i-hand">FREIN À MAIN</span></div>
+    </div>
+    <div class="hud-bc"><div id="h-prog"><i id="h-progbar"></i><b class="cpm" style="left:25%"></b><b class="cpm" style="left:50%"></b><b class="cpm" style="left:75%"></b></div></div>
+    <canvas id="h-map" width="260" height="260" hidden></canvas>
+    <div id="h-count"></div>
+    <div id="h-msg"></div>
+    <div id="h-hint"></div>
+  </div>
+  <div id="toasts"></div>
+  <div id="screen" class="overlay"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
