@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { patch } from "../../../assets/perf.js";
+patch({ WebGLRenderer: THREE.WebGLRenderer });
 import { Vehicle } from './bus/Vehicle.js';
 import { City } from './city/City.js';
 import { TrafficLights } from './city/TrafficLights.js';

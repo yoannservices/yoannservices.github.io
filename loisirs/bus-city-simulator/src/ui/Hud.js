@@ -50,7 +50,7 @@ export class Hud {
     el.door.classList.toggle('off', !s.doorsOpen);
     el.ramp.classList.toggle('off', !s.rampOn);
     el.view.textContent = g.rig.name;
-    el.dial.style.display = g.rig.cabin ? 'block' : 'none';
+    el.dial.style.display = 'none'; // le combiné 3D de la cabine remplace ce cadran 2D
     if (g.rig.cabin) drawDial(kmh);
 
     el.clock.textContent = g.env.clock;

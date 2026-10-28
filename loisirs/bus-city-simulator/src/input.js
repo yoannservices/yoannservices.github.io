@@ -27,7 +27,7 @@ export function readInput() {
     steer: (key('q', 'arrowleft') ? 1 : 0) - (key('d', 'arrowright') ? 1 : 0) || -dead(pad?.axes[0] ?? 0),
     handbrake: key(' ') || pb(0),
     horn: key('h') || pb(1),
-    toggleView: once('v') || padHit(3),
+    toggleView: once('c', 'v') || padHit(3),
     toggleLights: once('l') || padHit(2),
     toggleHelp: once('i'),
     indicatorLeft: once('a') || padHit(4),

@@ -65,6 +65,6 @@ export class Menu {
     }
     this.root.innerHTML = `<div class="panel"><div class="head"><h1>Bus City Simulator</h1><span>${eur(d.money)} · Niveau ${e.level}</span>
       <button data-act="close">✕</button></div><div class="tabs">${tabs.map(([k, n]) => `<button class="${this.tab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
-      <div class="body">${body}</div><div class="foot">Tab / Échap : menu · V vue · O portes · R rampe PMR · N sauter l'arrêt · M carte · I aide</div></div>`;
+      <div class="body">${body}</div><div class="foot">Tab / Échap : menu · C vue · O portes · R rampe PMR · N sauter l'arrêt · M carte · I aide</div></div>`;
   }
 }
