@@ -1,0 +1,129 @@
+/* ===== Animation de réflexion de NEXUS et curseur de la réponse qui s'écrit ===== */
+
+/* Orbe qui tourne, avec un cœur qui respire */
+.reflexion-orbe {
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, #22d3ee, #3b82f6, rgba(34, 211, 238, 0.05), #22d3ee);
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.45));
+  animation: reflexion-rotation 1.6s linear infinite;
+}
+
+.reflexion-orbe::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, #ecfeff, #22d3ee 55%, #0e7490);
+  animation: reflexion-pouls 1.8s ease-in-out infinite;
+}
+
+/* Phrase avec un reflet qui glisse dessus */
+.reflexion-phrase {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    reflexion-reflet 2.6s linear infinite,
+    reflexion-apparition 0.45s ease-out both;
+}
+
+.reflexion-phrase--sombre {
+  background-image: linear-gradient(90deg, #67e8f9 0%, #ffffff 50%, #67e8f9 100%);
+}
+
+.reflexion-phrase--clair {
+  background-image: linear-gradient(90deg, #1d4ed8 0%, #38bdf8 50%, #1d4ed8 100%);
+}
+
+/* Barres qui dansent sous la phrase */
+.reflexion-barres {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+}
+
+.reflexion-barres span {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: #22d3ee;
+  transform-origin: bottom;
+  animation: reflexion-barre 0.9s ease-in-out infinite;
+}
+
+.reflexion-barres span:nth-child(2) { animation-delay: 0.15s; }
+.reflexion-barres span:nth-child(3) { animation-delay: 0.3s; }
+.reflexion-barres span:nth-child(4) { animation-delay: 0.45s; }
+
+body.light-mode .reflexion-barres span {
+  background: #2563eb;
+}
+
+/* Curseur clignotant à la fin de la réponse qui s'écrit */
+.curseur-flux::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: reflexion-curseur 1s steps(2, start) infinite;
+}
+
+@keyframes reflexion-rotation {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes reflexion-pouls {
+  0%, 100% { transform: scale(0.82); opacity: 0.75; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes reflexion-reflet {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes reflexion-barre {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+@keyframes reflexion-apparition {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reflexion-curseur {
+  to { visibility: hidden; }
+}
+
+/* Sans animations : la phrase reste lisible, sans reflet qui dépend du mouvement */
+@media (prefers-reduced-motion: reduce) {
+  .reflexion-orbe,
+  .reflexion-orbe::after,
+  .reflexion-phrase,
+  .reflexion-barres span,
+  .curseur-flux::after {
+    animation: none;
+  }
+
+  .reflexion-phrase {
+    background: none;
+    color: #67e8f9;
+  }
+
+  body.light-mode .reflexion-phrase {
+    color: #1d4ed8;
+  }
+}

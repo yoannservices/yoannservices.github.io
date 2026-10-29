@@ -51,6 +51,11 @@
   Park.build(scene);
   const rider = Rider.create();
   scene.add(rider.root);
+  // vraie trottinette freestyle (Sketchfab « Scooter » par Deza, CC-BY) à la place des pièces procédurales (supprimées) ; le pilote reste
+  import(new URL('../../assets/glb.js', location.href).href).then(m => m.loadGLB(new URL('../../assets/models/kick-scooter.glb', location.href).href).then(g => {
+    for (const o of [rider.deck, rider.bar, rider.frontWheel, rider.rearWheel]) m.purge(o);
+    rider.deck.add(m.fitGLB(g, 0.95));
+  })).catch(e => console.warn('Trottinette non chargée', e));
 
   /* ═══ Sons (Web Audio, synthétisés) ═══ */
   const Sfx = (() => {

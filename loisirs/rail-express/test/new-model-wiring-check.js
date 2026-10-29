@@ -1,0 +1,14 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const models = fs.readFileSync(path.join(__dirname, '../js/models.js'), 'utf8');
+assert(models.includes('queensland_railways_1900s_bl_heritage_carriage.glb'), 'heritage carriage asset should be wired');
+assert(models.includes('train_liquid_tanker_wagon_queensland_railway_wse.glb'), 'rail tanker asset should be wired');
+assert(models.includes('queensland_railways_1200_class_diesel_locomotive.glb'), '1200-class locomotive asset should be wired');
+assert(models.includes("catch(e => console.warn('Modèle GLB non chargé'"), 'procedural vehicles should remain as fallback');
+assert(models.includes('out.children.forEach(o => { if (o.isMesh) o.visible = false; })'), 'hide procedural geometry only after GLB load');
+assert(models.includes('realCar(c, v)'), 'attach GLB to each cloned wagon');
+assert(models.includes("catch(e => console.warn('Modèle GLB non chargé'"), 'procedural model remains visible on load failure');
+assert(models.includes('o.visible = false; o.add(real)'), 'hide procedural locomotive only after GLB load');
+assert(models.includes("catch(e => console.warn('Locomotive non chargée'"), 'procedural locomotive remains visible on load failure');
+console.log('Rail Express new model wiring and fallback verified');

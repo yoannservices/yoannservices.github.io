@@ -81,6 +81,8 @@
   await new Promise(r => setTimeout(r, 10));
   const model = window.buildRoadster(THREE);
   scene.add(model.root);
+  // vrai Tesla Roadster (Sketchfab « Tesla Roadster » par Mona x Supercars, CC-BY)
+  import(new URL('../../assets/glb.js', location.href).href).then(async (m) => model.body.add(m.fitGLB(await m.loadGLB(new URL('../../assets/models/tesla-roadster.glb', location.href).href), 4.3))).catch((e) => console.warn('Tesla non chargée', e));
 
   // ---------- Requêtes de collision ----------
   const _ray = new THREE.Ray();
@@ -114,20 +116,11 @@
     else if (k === 'n') { timeOfDay = (timeOfDay + 6) % 24; toast('Heure : ' + fmtTime(timeOfDay)); }
     else if (k === 'h') $('help').classList.toggle('hide');
     else if (k === 'm') { muted = !muted; toast(muted ? 'Son coupé' : 'Son activé'); }
-    else if (k === 'k') cyclePaint();
     else if (k === 'g') { hiQ = !hiQ; applyQuality(); toast(hiQ ? 'Qualité haute' : 'Qualité performance'); }
   });
   addEventListener('keyup', e => { keys[e.code] = false; });
   addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
   const key = (...codes) => codes.some(c => keys[c]);
-
-  // ---------- Peintures ----------
-  const PAINTS = [
-    ['Rouge multicouche', 0x9a0a10], ['Blanc nacré', 0xe8e8e6], ['Noir intense', 0x07080a], ['Argent vif', 0x8f949b],
-    ['Bleu outremer', 0x0f2a6b], ['Vert néon', 0x1f8a3c],
-  ];
-  let paintIdx = 0;
-  function cyclePaint(i) { paintIdx = i !== undefined ? i : (paintIdx + 1) % PAINTS.length; model.setPaint(PAINTS[paintIdx][1]); if (i === undefined) toast(PAINTS[paintIdx][0]); renderPaintChips(); }
 
   // ---------- État de la voiture ----------
   const P = {
@@ -764,7 +757,7 @@
     if (camMode === 2) {
       camera.position.copy(model.cockpitCam).applyQuaternion(visQuat).add(visPos);
       camera.up.copy(visUp);
-      camera.lookAt(tmp.copy(camera.position).addScaledVector(visFwd, 10).addScaledVector(visUp, -4.0).addScaledVector(tmp2.crossVectors(visFwd, visUp), 2.4)); // regard vers le bas et le centre : volant et écran visibles : volant et écran visibles
+      camera.lookAt(tmp.copy(camera.position).addScaledVector(visFwd, 10).addScaledVector(visUp, -1.4)); // droit devant, léger regard vers le bas : volant centré en bas de l'image
       model.setScreen(sp * 3.6, false);
       camUp.copy(visUp); camPos.copy(camera.position);
     } else {
@@ -866,18 +859,6 @@
 
   // ---------- Menu ----------
   let menuOpen = true, paused = true, started = false;
-  function renderPaintChips() {
-    const box = $('paints'); box.innerHTML = '';
-    PAINTS.forEach(([name, hex], i) => {
-      const b = document.createElement('button');
-      b.className = 'chip' + (i === paintIdx ? ' on' : '');
-      b.style.setProperty('--c', '#' + hex.toString(16).padStart(6, '0'));
-      b.setAttribute('aria-label', name); b.title = name;
-      b.onclick = () => cyclePaint(i);
-      box.appendChild(b);
-    });
-    $('paintname').textContent = PAINTS[paintIdx][0];
-  }
   function applyQuality() {
     const sz = hiQ ? 2048 : 1024;
     if (sun.shadow.mapSize.x !== sz) { sun.shadow.mapSize.set(sz, sz); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
@@ -899,7 +880,6 @@
   }
   $('go').onclick = startGame;
   $('qbtn').onclick = () => { hiQ = !hiQ; applyQuality(); };
-  renderPaintChips();
   renderScore();
   $('qbtn').textContent = hiQ ? 'Qualité : haute' : 'Qualité : performance';
 

@@ -1,0 +1,6 @@
+# Les librairies Python dont le backend a besoin pour démarrer.
+
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.14.1
+anthropic==2.1.0

@@ -1,0 +1,19 @@
+# Ce qui ne doit JAMAIS entrer dans la boîte (image Docker)
+**/.env
+**/node_modules
+**/.venv
+**/__pycache__
+# Secrets : tous les fichiers .env* (le .env.example n'est pas utile dans l'image)
+**/.env.*
+# Les bases SQLite contiennent les comptes des élèves : jamais dans l'image
+# (y compris leurs fichiers annexes : journal, wal, shm)
+**/*.db
+**/*.db-*
+frontend/dist
+.git
+.claude/worktrees
+# Fichiers inutiles au build
+**/*.log
+**/.pytest_cache
+**/.ruff_cache
+**/*.tsbuildinfo

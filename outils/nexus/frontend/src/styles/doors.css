@@ -1,0 +1,146 @@
+/* ===== PORTES ===== */
+.doors-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* Lumière qui sort de la fente quand les portes s'ouvrent */
+.door-light {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 60vw;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(125, 243, 255, 0.9), rgba(0, 150, 255, 0.35) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  will-change: transform;
+  /* métal sombre + rainures de panneau */
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 90px),
+    linear-gradient(180deg, #0b1220 0%, #101a2c 50%, #070c16 100%);
+  background-size: 90px 100%, 100% 100%;
+  background-repeat: repeat-x, no-repeat;
+}
+
+/* Les rainures partent de la fente centrale : le motif est le miroir exact
+   de chaque côté, donc la jonction est nette */
+.door-left {
+  left: 0;
+  background-position: right top, 0 0;
+  /* Pas d'ombre extérieure : celle de la porte droite assombrissait la porte gauche */
+  box-shadow: inset -6px 0 0 #1b2b40, inset -9px 0 18px rgba(0, 217, 255, 0.45);
+}
+
+.door-right {
+  right: 0;
+  background-position: left top, 0 0;
+  box-shadow: inset 6px 0 0 #1b2b40, inset 9px 0 18px rgba(0, 217, 255, 0.45);
+}
+
+/* Décor large comme l'écran : la porte droite le décale pour montrer sa moitié */
+.door-face {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.door-left .door-face { left: 0; }
+.door-right .door-face { right: 0; }
+
+.door-title {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  padding-left: 0.12em; /* recentre malgré l'espacement des lettres */
+}
+
+.door-reactor {
+  width: min(62vw, 46vh, 380px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 22px rgba(0, 217, 255, 0.6));
+}
+
+.door-hint { animation: hintBlink 2.4s ease-in-out infinite; }
+
+.reactor-coils { animation: coilSpin 24s linear infinite; }
+.reactor-core { animation: corePulse 2.4s ease-in-out infinite; }
+
+@keyframes coilSpin { to { transform: rotate(360deg); } }
+@keyframes corePulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+@keyframes hintBlink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+/* Le cœur "se charge" juste avant que les portes bougent */
+@keyframes reactorCharge {
+  0%   { filter: drop-shadow(0 0 22px rgba(0, 217, 255, 0.6)) brightness(1); transform: scale(1); }
+  100% { filter: drop-shadow(0 0 60px rgba(125, 243, 255, 1)) brightness(1.7); transform: scale(1.06); }
+}
+
+/* Ouverture : charge du cœur (0-22%), puis les portes glissent (22-100%) */
+@keyframes doorLeftOpen {
+  0%, 22% { transform: translateX(0); animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1); }
+  100%    { transform: translateX(-101%); }
+}
+@keyframes doorRightOpen {
+  0%, 22% { transform: translateX(0); animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1); }
+  100%    { transform: translateX(101%); }
+}
+
+/* Fermeture : les portes reviennent et claquent au centre */
+@keyframes doorLeftClose {
+  from { transform: translateX(-101%); }
+  to   { transform: translateX(0); }
+}
+@keyframes doorRightClose {
+  from { transform: translateX(101%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes lightOpen {
+  0%   { opacity: 0; }
+  22%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes lightClose {
+  0%   { opacity: 0; }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+.doors-opening .door-left  { animation: doorLeftOpen 1.8s both; }
+.doors-opening .door-right { animation: doorRightOpen 1.8s both; }
+.doors-opening .door-reactor { animation: reactorCharge 0.4s ease-out both; }
+.doors-opening .door-light { animation: lightOpen 1.8s ease-out both; }
+.doors-opening .door-hint { animation: none; opacity: 0; }
+
+.doors-closing .door-left  { animation: doorLeftClose 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+.doors-closing .door-right { animation: doorRightClose 1.4s cubic-bezier(0.3, 0.7, 0.2, 1) both; }
+.doors-closing .door-light { animation: lightClose 1.4s ease-in both; }
+.doors-closing { pointer-events: none; }
+
+/* Respecte les utilisateurs qui préfèrent moins d'animations */
+@media (prefers-reduced-motion: reduce) {
+  .reactor-coils, .reactor-core, .door-hint { animation: none; }
+  /* Pas de mouvement des portes : le passage se fait d'un coup (useDoors ne garde aucune durée) */
+  .doors-opening, .doors-closing { display: none; }
+}
+

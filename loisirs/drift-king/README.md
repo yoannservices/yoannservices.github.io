@@ -43,3 +43,7 @@ HTML, CSS et JavaScript ; rendu 3D avec [Three.js](https://threejs.org/) r128 (c
 ---
 
 Fait partie de [Mes Projets](https://yoannservices.github.io/) · [Portfolio](https://yoannservices.github.io/portfolio/) · par [@yoannservices](https://github.com/yoannservices)
+
+## Crédits
+
+Modèle de voiture : Ferrari 458 Italia par vicent091036 (Sketchfab), fichier `assets/models/ferrari.glb` repris des exemples de three.js. Licence non vérifiée (la page Sketchfab d'origine est désactivée) : à contrôler avant toute publication. 

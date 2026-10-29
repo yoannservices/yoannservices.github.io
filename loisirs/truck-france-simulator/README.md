@@ -32,3 +32,7 @@ node js/map/routing.test.mjs
 node js/economy/contracts.test.mjs
 ```
 Flux : menu → garage → contrats → carte → conduite → résumé (sauvegarde localStorage `tfs-save-v1`). Échap : menu.
+
+## Crédits des modèles 3D
+
+Véhicules réels sous licence CC-BY (Sketchfab) : auteurs et licences dans `assets/models/CREDITS.md`.

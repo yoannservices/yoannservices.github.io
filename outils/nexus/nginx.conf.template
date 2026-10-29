@@ -1,0 +1,62 @@
+server {
+    listen ${PORT};
+
+    # Vraie adresse de l'élève, et non celle du proxy Railway.
+    # Sur Railway, toutes les requêtes arrivent depuis l'adresse du proxy : sans
+    # cette section, $remote_addr serait identique pour tous les élèves, et les
+    # quotas d'inscription / blocages de connexion (backend, adresse_client) seraient
+    # partagés par tout le monde.
+    # Le module "real_ip" lit X-Forwarded-For (rempli par le proxy Railway) et
+    # remplace $remote_addr par l'adresse trouvée.
+    # Pas de "real_ip_recursive on" : nginx prend la DERNIÈRE adresse de la liste,
+    # celle ajoutée par le proxy le plus proche. Le navigateur ne peut pas la
+    # falsifier ; la première, elle, vient du navigateur et peut être inventée.
+    # "set_real_ip_from 0.0.0.0/0" fait confiance à tout voisin direct de nginx.
+    # C'est sûr ici car le conteneur n'est joignable que via le proxy Railway
+    # (le port public ne sert qu'à lui). Si les plages IP du proxy Railway sont
+    # connues un jour, les mettre à la place de 0.0.0.0/0.
+    # Sans en-tête X-Forwarded-For (ex. lancement local sans proxy), rien ne change :
+    # $remote_addr reste l'adresse de la connexion.
+    # À VÉRIFIER SUR RAILWAY : après déploiement, l'adresse reçue par le backend
+    # (X-Real-IP) doit être celle de votre navigateur, pas une adresse interne.
+    set_real_ip_from 0.0.0.0/0;
+    real_ip_header   X-Forwarded-For;
+
+    # En-têtes de sécurité, envoyés pour toutes les réponses (site, API, health).
+    # "always" : même les réponses d'erreur les reçoivent.
+    # Note : l'aperçu HTML du chat est une iframe en srcdoc (contenu inline,
+    # sans réponse HTTP propre) : X-Frame-Options ne la concerne pas.
+    # SAMEORIGIN (et non DENY) : le jeu du menu "Jeux" est affiché dans une iframe du même site.
+    # Les autres sites ne peuvent toujours pas afficher NEXUS dans leur page.
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Le site (fichiers construits par Vite)
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Toute requête vers /api est transmise au backend, dans la même boîte
+    location /api {
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+
+        # Pour les réponses en streaming (le chatbot qui écrit au fur et à mesure)
+        proxy_set_header   Connection        '';
+        proxy_buffering    off;
+        proxy_cache        off;
+        proxy_read_timeout 300s;
+    }
+
+    # Le "healthcheck" de Railway vérifie que le backend répond
+    location = /health {
+        proxy_pass http://127.0.0.1:8000;
+    }
+}

@@ -42,3 +42,7 @@ Ouvrez `index.html` dans un navigateur récent (Three.js est chargé depuis un C
 ```bash
 python -m http.server 8000
 ```
+
+## Crédits des modèles 3D
+
+Véhicules réels sous licence CC-BY (Sketchfab) : auteurs et licences dans `assets/models/CREDITS.md`.

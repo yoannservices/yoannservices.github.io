@@ -1,0 +1,155 @@
+// Interface texts in English. Must mirror fr/interface.ts exactly (TypeScript checks it).
+import type { interfaceFr } from '../fr/interface';
+
+export const interfaceEn: typeof interfaceFr = {
+  entete: {
+    assistantIa: 'AI Assistant',
+    compte: 'Account',
+    monCompte: 'My account',
+    jeux: 'Games',
+    passerThemeClair: 'Switch to light theme',
+    passerThemeSombre: 'Switch to dark theme',
+  },
+
+  jeux: {
+    titre: 'Games',
+    fermer: 'Close',
+    retourListe: 'Back to the list',
+    jouer: 'Play',
+  },
+
+  portes: {
+    sousTitre: 'AI ASSISTANT',
+    indice: 'CLICK TO ENTER',
+    entrer: 'Enter NEXUS',
+  },
+
+  connexion: {
+    typeCompte: 'Account type',
+    modeConnexion: 'Log in',
+    modeInscription: 'Sign up',
+    boutonConnexion: 'Log in',
+    boutonInscription: 'Sign up',
+    sessionExpiree: 'Your session has expired. Please log in again.',
+    nomUtilisateur: 'Username',
+    pseudoPlaceholder: 'Your nickname, not your real name',
+    motDePasse: 'Password',
+    afficherMotDePasse: 'Show password',
+    masquerMotDePasse: 'Hide password',
+    avertissementRgpd: 'Use a nickname, never your real name. Do not write your address, phone number or e-mail.',
+    erreurs: {
+      'not-found': 'This username doesn\'t exist.',
+      'wrong-password': 'Wrong password.',
+      taken: 'This username is already taken.',
+      invalid: 'Invalid username (3 to 20 characters: letters, numbers, _ or -) or password (8 characters minimum).',
+      unreachable: 'Unable to reach the server.',
+      'too-many': 'Too many attempts. Try again in a few minutes.',
+      tropEssaisAvec: (minutes: number) => `Too many attempts. Try again in ${minutes} min.`,
+    },
+  },
+
+  parametres: {
+    titre: 'My account',
+    fermer: 'Close',
+    connecteEn: 'Signed in as',
+    aucunCompte: 'No account signed in.',
+    tailleTexte: 'Text size',
+    petit: 'Small',
+    moyen: 'Medium',
+    grand: 'Large',
+    theme: 'Theme',
+    sombre: 'Dark',
+    clair: 'Light',
+    langue: 'Language',
+    francais: 'Français',
+    anglais: 'English',
+    seDeconnecter: 'Log out',
+    supprimerCompte: 'Delete my account',
+    supprimerExplication: 'This erases your account, your conversations and your attached files. This cannot be undone.',
+    motDePasseConfirmation: 'Password to confirm',
+    supprimerDefinitivement: 'Delete permanently',
+    annuler: 'Cancel',
+    erreurSuppression: 'Deletion failed. Try again.',
+    mauvaisMotDePasse: 'Wrong password.',
+    tropEssaisAvec: (minutes: number) => `Too many attempts. Try again in ${minutes} min.`,
+  },
+
+  liste: {
+    listeConversations: 'Conversation list',
+    titreTiroir: 'Conversations',
+    fermerTiroir: 'Close the conversation list',
+    fermer: 'Close',
+    options: 'Options',
+    labelReplier: 'Collapse',
+    labelAfficher: 'Show',
+    replier: 'Collapse the list',
+    afficher: 'Show the list',
+    nouveauChat: '+ New chat',
+    optionsChat: 'Conversation options',
+    renommer: 'Rename',
+    supprimer: 'Delete',
+    confirmerSuppression: 'Delete this conversation?',
+    annuler: 'Cancel',
+    nouveauNom: 'New conversation name',
+    nouvelleConversation: 'New conversation',
+    aucuneConversation: 'No conversation yet',
+    erreurCreation: 'Unable to create the conversation. Try again.',
+    erreurRenommage: 'Unable to rename the conversation. Try again.',
+    erreurSuppression: 'Unable to delete the conversation. Try again.',
+    exporter: 'Export as Markdown',
+    exportRoleEleve: 'Student',
+    exportRoleNexus: 'NEXUS',
+  },
+
+  accueil: {
+    presentation: 'NEXUS is an AI assistant: you describe what you want, and it answers you.',
+    invitation: 'Create a chat to start talking.',
+    nouveauChat: 'New chat',
+  },
+
+  chat: {
+    erreurEnvoi: 'NEXUS couldn\'t reply. Try again.',
+    copierReponse: 'Copy the reply',
+    copier: 'Copy',
+    copie: 'Copied',
+    copieImpossible: 'Copy failed',
+    nexusEcrit: 'NEXUS is typing...',
+    nexusEcritAria: 'NEXUS is typing',
+    erreurChargement: 'Unable to load your conversations.',
+    reessayer: 'Try again',
+    reponseTerminee: 'NEXUS has replied.',
+    allerFinConversation: 'Go to the end of the conversation',
+  },
+
+  // Animation while NEXUS prepares its answer: the phrases rotate
+  reflexion: {
+    phrases: ['NEXUS is thinking…', 'Gathering ideas…', 'Preparing a clear answer…', 'Just a moment…'],
+  },
+
+  saisie: {
+    analyseFichier: 'File analysis',
+    analyseEnCours: 'Analyzing…',
+    fichiersJoints: 'Attached files',
+    retirerFichier: 'Remove the file',
+    joindreFichier: 'Attach a file',
+    joindre: 'Attach',
+    deposerFichier: 'Drop your file here',
+    retirer: 'Remove',
+    envoyer: 'Send',
+    arreter: 'Stop',
+    placeholder: 'Type your message...',
+  },
+
+  verdict: {
+    safe: 'SAFE',
+    toCheck: 'TO CHECK',
+    dangerous: 'DANGEROUS',
+  },
+
+  apercu: {
+    titre: 'Preview',
+    fermer: 'Close the preview',
+    fermerCourt: 'Close',
+    iframeTitre: 'HTML preview',
+  },
+};

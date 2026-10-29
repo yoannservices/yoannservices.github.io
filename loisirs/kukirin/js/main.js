@@ -829,12 +829,14 @@ function buildScooter(scooterId,color){
   const rider=new THREE.Group();body.add(rider);
   const shoes=M.std(0xe9e9e6,.7,0),sole=M.std(0x2a2a2a,.85,0),gloveMat=M.std(0x18191b,.65,0),helmShell=M.paint(0xf2f2f0,{metalness:.1,roughness:.35}),visorMat=M.std(0x0b0c0e,.2,.4);
   const lean=.2,thigh=.44,shin=.43,upper=.29,fore=.27;
-  const pelvisH=dTop+.88,torsoL=.5;
+  /* cotes du vrai modèle Tier (voir rebuildPlayer, échelle tk) : plateau, guidon (penché vers le pilote) et poignées, pour caler pieds et mains dessus */
+  const tk=(front-rear)/.97,dTopR=.26*tk,barYR=1.29*tk,barZR=(front+rear)/2-.005*tk+.234*tk+.03;
+  const pelvisH=dTopR+.88,torsoL=.5;
   let zc=deckZ-.02;
   const shoulderOff=V(0,torsoL*Math.cos(lean)-.04,torsoL*Math.sin(lean));
   { /* recule ou avance le pilote pour que les bras atteignent le guidon avec les coudes pliés */
-    const sy=pelvisH+shoulderOff.y,dy=barY-sy,dx=(hw-.07)-.18,want=.47,dz=Math.sqrt(Math.max(.02,want*want-dy*dy-dx*dx));
-    zc=clamp(barZ-.03-dz-shoulderOff.z,z0+.22,z1-.2);
+    const sy=pelvisH+shoulderOff.y,dy=barYR-sy,dx=(hw-.07)-.18,want=.47,dz=Math.sqrt(Math.max(.02,want*want-dy*dy-dx*dx));
+    zc=clamp(barZR-.03-dz-shoulderOff.z,z0+.22,z1-.2);
   }
   const hips=new THREE.Group();hips.position.set(0,pelvisH,zc);rider.add(hips);
   const torso=new THREE.Group();hips.add(torso);torso.rotation.x=lean;
@@ -847,7 +849,7 @@ function buildScooter(scooterId,color){
   const hm=RK.helmet(headG,helmShell,visorMat,{r:.135,style:'urban'});hm.position.set(0,.2,-.005);
   for(const s of[-1,1])RK.rod(headG,[s*.1,.2,.02],[s*.07,.08,.06],.005,M.plastic(0x222222),6);
   const joints=[torso,headG];
-  const feet=[[V(-.055,dTop,zc+.15),.0],[V(.07,dTop,zc-.15),.35]];
+  const feet=[[V(-.055,dTopR,zc+.15),.0],[V(.07,dTopR,zc-.15),.35]];
   for(const [s,ft] of[[-1,feet[0]],[1,feet[1]]]){
     const hipJ=V(s*.09,0,0),ankle=ft[0].clone().sub(hips.position).add(V(0,.075,0));
     const knee=RK.ik2(hipJ,ankle,thigh,shin,V(s*.15,0,1));
@@ -860,7 +862,7 @@ function buildScooter(scooterId,color){
   rider.updateMatrixWorld(true);
   const arms=[];
   for(const s of[-1,1]){
-    const shL=V(s*.19,torsoL-.07,.01),grip=V(s*(hw-.065),barY+.004,barZ-.03);
+    const shL=V(s*.19,torsoL-.07,.01),grip=V(s*(hw-.065),barYR+.004,barZR-.03);
     const gT=torso.worldToLocal(rider.localToWorld(grip.clone()));
     const handL=gT.clone().add(V(-s*.0,0,-.015));
     const elb=RK.ik2(shL,handL,upper,fore,V(s*1,-.7,-.5));
@@ -877,7 +879,7 @@ function buildScooter(scooterId,color){
   displayMesh.position.copy(dispC).addScaledVector(dispN,.019);displayMesh.rotation.set(.45,Math.PI,0);displayMesh.renderOrder=5;body.add(displayMesh);
   root.traverse(o=>{if(o.isMesh&&o.material!==lens&&o.material!==logoMat)o.receiveShadow=true});
   root.userData={accent,wheels,tilt,rider,riderBody:body,ragdollJoints:joints,display,displayMesh,dg,displayTexture,designId:scooterId,
-    hips,torso,arms,feet:V(0,dTop,zc),standY:pelvisH-dTop,rearZ:rear,wheelR:R,jrest:joints.map(j=>j.quaternion.clone())};
+    hips,torso,arms,feet:V(0,dTopR,zc),standY:pelvisH-dTopR,rearZ:rear,wheelR:R,jrest:joints.map(j=>j.quaternion.clone())};
   return root;
 }
 
@@ -2216,6 +2218,12 @@ $('#bustBtn').onclick=()=>{$('#ovBusted').hidden=true;GAME.state='play'};
 function rebuildPlayer(){
   if(playerMesh){endCrash();scene.remove(playerMesh);disposeScooter(playerMesh)}
   playerMesh=buildScooter(SV.cur,curOwned().color);scene.add(playerMesh);
+  // vraie trottinette électrique (Sketchfab « Tier scooter » par Niilo Poutanen, CC-BY) à la place des pièces procédurales (supprimées) ; le pilote reste
+  const pm=playerMesh;
+  import(new URL('../../assets/glb.js',location.href).href).then(m=>m.loadGLB(new URL('../../assets/models/tier-scooter.glb',location.href).href).then(g=>{
+    if(pm!==playerMesh)return;const d=pm.userData;m.purge(pm,[d.rider,d.displayMesh]);const D=SCOOTER_DESIGNS[SV.cur]||SCOOTER_DESIGNS.g2,k=(D.front-D.rear)/.97,f=m.fitGLB(g,1.3,Math.PI);
+    /* repère du corps (sol y=0, comme le pilote) : roues du modèle (z=+.49/-.48) calées sur front/rear de la conception ; tilt est lui décalé sur l'essieu arrière */
+    f.scale.setScalar(k);f.position.z=(D.front+D.rear)/2-.005*k;d.riderBody.add(f)})).catch(e=>console.warn('Trottinette non chargée',e));
 }
 
 function disposeScooter(model){

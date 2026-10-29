@@ -1,0 +1,13 @@
+# Configuration Railway : un seul service, construit avec le Dockerfile
+# à la racine du projet (frontend + backend dans la même boîte).
+# Seule variable à ajouter dans Railway : ANTHROPIC_API_KEY.
+# Volume persistant à créer dans Railway, monté sur le chemin /data
+# (il contient la base de données).
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 60

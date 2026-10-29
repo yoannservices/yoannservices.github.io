@@ -1014,6 +1014,10 @@ let bikeObj=null,bikeIdx=0;
 function selectBikeModel(i){
   if(bikeObj)scene.remove(bikeObj.root);
   bikeObj=buildBike(BIKES[i]);scene.add(bikeObj.root);
+  // vraie moto (Sketchfab, CC-BY : Ducati V4R par IrfanMuaz, Yamaha R1 par ejsnowy) à la place de la moto procédurale (supprimée) ; le pilote reste
+  const obj=bikeObj,real=BIKES[i].id==='v4r'?['ducati-v4r',0]:['yamaha-r1',Math.PI];
+  import(new URL('../../assets/glb.js',location.href).href).then(m=>m.loadGLB(new URL('../../assets/models/'+real[0]+'.glb',location.href).href).then(g=>{
+    if(obj!==bikeObj)return;m.purge(obj.inner,[obj.rider]);obj.inner.add(m.fitGLB(g,2.05,real[1]))})).catch(e=>console.warn('Moto non chargée',e));
 }
 
 /* ===== Entrees ===== */

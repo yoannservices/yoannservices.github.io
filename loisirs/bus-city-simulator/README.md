@@ -13,3 +13,7 @@ Puis http://localhost:5200
 Touches : Z/S/Q/D (ou flèches), Espace frein à main, H klaxon, L phares, A/E clignotants, O portes, R rampe PMR,
 N sauter l'arrêt, C vue (externe / cabine / passagers), M carte, Tab menu, I aide. Manette supportée.
 Sauvegarde : localStorage. Debug : `window.game` dans la console.
+
+## Crédits des modèles 3D
+
+Véhicules réels sous licence CC-BY (Sketchfab) : auteurs et licences dans `assets/models/CREDITS.md`.

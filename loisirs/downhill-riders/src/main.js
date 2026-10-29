@@ -76,6 +76,14 @@ function buildPlayer() {
   bikeModel = new BikeModel(spec, find('frame', save.eq.frame), find('wheel', save.eq.wheel));
   rider = new RiderModel(find('outfit', save.eq.outfit), find('helmet', save.eq.helmet));
   frame.add(bikeModel.root, rider.group); rig.init = false;
+  // vrai VTT (Sketchfab « Enduro bicycle DH » par Res1n, CC-BY) à la place des pièces procédurales (supprimées) ; le pilote reste
+  const bm = bikeModel;
+  import('../../../assets/glb.js').then(async (m) => {
+    const f = m.fitGLB(await m.loadGLB(new URL('../../../assets/models/enduro-dh.glb', import.meta.url).href), 1.75);
+    if (bm !== bikeModel) return;
+    m.purge(bm.root);
+    f.position.y = -bm.R; bm.root.add(f);
+  }).catch((e) => console.warn('VTT non chargé', e));
   return spec;
 }
 let player = { spec: buildPlayer() };

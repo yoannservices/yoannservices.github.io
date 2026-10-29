@@ -245,6 +245,12 @@ TS.Models = (function () {
     g.translate(0, 0, -L / 2);
     return new T.Mesh(g, m);
   }
+  const REAL_CARS = { corail: 'queensland_railways_1900s_bl_heritage_carriage.glb', citerne: 'train_liquid_tanker_wagon_queensland_railway_wse.glb' }, realCars = {};
+  function realCar(out, v) {
+    const file = REAL_CARS[v.model]; if (!file) return;
+    realCars[v.model] = realCars[v.model] || import(new URL('../../assets/glb.js', location.href).href).then(async m => ({ m, g: await m.loadGLB(new URL(`../../assets/models/${file}`, location.href).href) }));
+    realCars[v.model].then(({ m, g }) => { out.children.forEach(o => { if (o.isMesh) o.visible = false; }); out.add(m.fitGLB(g.clone(true), v.len, Math.PI / 2)); }).catch(e => console.warn('Modèle GLB non chargé', v.model, e));
+  }
   function car(v) {
     const L = v.len, m = v.model;
     const g = new T.Group();
@@ -320,16 +326,29 @@ TS.Models = (function () {
     return merge(g);
   }
 
+  /* vraie locomotive diesel (Sketchfab « 060 DA Diesel Locomotive » par aocrisan, CC-BY) à la place des locomotives diesel procédurales
+     (supprimées) ; chargée une seule fois puis clonée. */
+  let realP = null;
+  function realLoco(o, L) {
+    realP = realP || import(new URL('../../assets/glb.js', location.href).href).then(m => m.loadGLB(new URL('../../assets/models/queensland_railways_1200_class_diesel_locomotive.glb', location.href).href).then(g => ({ m, g })));
+    realP.then(({ m, g }) => { const real = m.fitGLB(g.clone(true), L, Math.PI / 2); o.visible = false; o.add(real); }).catch(e => console.warn('Locomotive non chargée', e));
+  }
+
   const cache = {};
   function vehicle(v) {
     const key = [v.kind, v.model, v.len, v.liv.join(), v.opt, v.model === 'conteneur' || v.model === 'autos' ? (v.idx || 0) % 3 : 0, v.trac].join('|');
     if (v.kind === 'loco') {
       const o = loco(v);       // éléments dynamiques propres à chaque engin
+      if (v.trac === 'diesel') realLoco(o, v.len);
       if (v.rear) { const w = new T.Group(); o.rotation.y = Math.PI; w.add(o); w.userData = o.userData; return w; }
       return o;
     }
     if (!cache[key]) cache[key] = car(v);
     const c = cache[key].clone();
+    if (REAL_CARS[v.model]) {
+      const f = cache[key].children[0]; if (f) f.visible = false;
+      realCar(c, v);
+    }
     return c;
   }
 

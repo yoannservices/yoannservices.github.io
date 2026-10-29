@@ -58,3 +58,7 @@ Terrain généré par segments chargés et déchargés autour du pilote, végét
 ## Technologies
 
 JavaScript (modules ES) et [Three.js](https://threejs.org/) r186 chargé par import map depuis un CDN. Sans étape de build.
+
+## Crédits des modèles 3D
+
+Véhicules réels sous licence CC-BY (Sketchfab) : auteurs et licences dans `assets/models/CREDITS.md`.

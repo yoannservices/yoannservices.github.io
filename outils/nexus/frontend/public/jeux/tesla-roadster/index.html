@@ -1,0 +1,89 @@
+<!doctype html><html lang="fr"><head>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/theme.css" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Roadster Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css?v=12">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/",
+  "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.6/build/index.module.js"
+} }
+</script>
+</head><body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="clockbox" class="panel"><span id="clockicon">☀️</span> <b id="clock">17:36</b><span class="sub">H : aide</span></div>
+  <canvas id="mini" width="200" height="200" aria-label="Mini-carte"></canvas>
+  <div id="scorebox" class="panel">
+    <div class="lbl">Score</div><div id="scoreval">0</div>
+    <div class="lbl">Meilleure figure</div><div id="bestval">—</div>
+  </div>
+  <div id="msg" role="status"></div>
+  <div id="trick"><div id="tricktitle"></div><div id="tricksub"></div></div>
+  <div id="combo"><div id="comboname"></div><div id="combopts"></div><div class="hint">Atterrissage parfait = x2</div></div>
+  <canvas id="tank" width="120" height="290" aria-label="Jauge de liquide propulseur"></canvas>
+  <canvas id="speedo" width="300" height="300" aria-label="Compteur de vitesse"></canvas>
+  <div id="help" class="panel hide">
+    <h3>Commandes</h3>
+    <div class="grid">
+      <span><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd></span><span>Conduire (au sol)</span>
+      <span><kbd>Maj</kbd></span><span>Boost (sol et air)</span>
+      <span><kbd>Espace</kbd></span><span>Propulseurs : décollage dans l'axe du toit</span>
+      <span><kbd>Z</kbd> / <kbd>S</kbd></span><span>En l'air : piquer / cabrer</span>
+      <span><kbd>Q</kbd> / <kbd>D</kbd></span><span>En l'air : rotation gauche / droite</span>
+      <span><kbd>A</kbd> / <kbd>E</kbd></span><span>En l'air : tonneau gauche / droite</span>
+      <span>Score</span><span>Tout ce qui se passe en l'air rapporte des points (temps de vol, hauteur, rotations, figures). Atterrissage roues à plat = x2, crash = combo perdu.</span>
+      <span><kbd>C</kbd></span><span>Caméra (clic + glisser : tourner autour)</span>
+      <span><kbd>R</kbd></span><span>Retour au départ</span>
+      <span><kbd>K</kbd></span><span>Couleur de la peinture</span>
+      <span><kbd>L</kbd></span><span>Phares</span>
+      <span><kbd>T</kbd> (maintenir)</span><span>Accélérer le temps</span>
+      <span><kbd>N</kbd></span><span>Avancer de 6 h</span>
+      <span><kbd>G</kbd></span><span>Qualité graphique</span>
+      <span><kbd>M</kbd></span><span>Son</span>
+      <span><kbd>Échap</kbd></span><span>Pause</span>
+    </div>
+  </div>
+</div>
+
+<div id="menu">
+  <div class="in">
+    <div class="kicker">Simulateur 3D</div>
+    <h1>Tesla <span>Roadster</span></h1>
+    <p class="lead">Supercar électrique avec propulseurs à gaz froid. Roule sur les murs et les plafonds, décolle, boost et enchaîne les tonneaux dans une ville ouverte et un parc de cascades.</p>
+    <div class="row">
+      <div class="block">
+        <h2>Peinture <span id="paintname"></span></h2>
+        <div id="paints"></div>
+      </div>
+      <div class="block">
+        <h2>Graphismes</h2>
+        <button id="qbtn" class="ghost">Qualité : haute</button>
+      </div>
+    </div>
+    <div class="keys">
+      <div><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> conduire</div>
+      <div><kbd>Maj</kbd> boost</div>
+      <div><kbd>Espace</kbd> décoller (axe du toit)</div>
+      <div>En l'air : <kbd>Z</kbd>/<kbd>S</kbd> piquer/cabrer · <kbd>Q</kbd>/<kbd>D</kbd> pivoter · <kbd>A</kbd>/<kbd>E</kbd> tonneaux</div>
+      <div><kbd>C</kbd> caméra · <kbd>R</kbd> départ · <kbd>H</kbd> aide · <kbd>Échap</kbd> pause</div>
+    </div>
+    <p class="note">La voiture colle aux murs et aux plafonds à toute vitesse, même à l'arrêt : fonce sur un mur pour monter dessus, Espace pour t'en décoller. Chaque saut rapporte des points (temps de vol, hauteur, tonneaux, saltos, vrilles) ; atterris roues bien à plat pour doubler le score. Le liquide propulseur sert au boost et au vol ; il se recharge seul quand tu ne l'utilises pas. Le parc de cascades (tube 360°, tunnel, looping, half-pipe, mur vertical, tremplins) se trouve à l'est de la ville : à droite sur la mini-carte au départ.</p>
+    <button id="go">Démarrer</button>
+  </div>
+</div>
+
+<div id="loading"><div class="spin"></div><div id="loadmsg">Chargement de Three.js…</div></div>
+
+<script src="js/model.js?v=12"></script>
+<script src="js/city.js?v=12"></script>
+<script src="js/hud.js?v=12"></script>
+<script src="js/main.js?v=12"></script>
+</body></html>

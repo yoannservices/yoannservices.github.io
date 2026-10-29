@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="fr" data-cat="outils">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Game Tools Lab</title>
+  <meta name="description" content="Plateforme multi-outils gaming: clickers, tests souris/clavier, calculateurs, performance et ecran." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/theme.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Outils · Gaming</p>
+      <h1>Game Tools Lab</h1>
+      <p class="subtitle">Suite multi-fonctions pour tester ton materiel et tes performances.</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button onclick="showHistory()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:.88rem;display:flex;align-items:center;gap:6px"> Historique <span id="history-count" style="background:var(--ui-accent);color:#fff;font-size:.7rem;padding:2px 7px;border-radius:99px">0</span></button>
+      
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>Categories</h2>
+      <button class="filter-btn active" data-filter="all">Tous</button>
+      <button class="filter-btn" data-filter="clickers">Jeux / Clickers</button>
+      <button class="filter-btn" data-filter="mouse">Souris</button>
+      <button class="filter-btn" data-filter="keyboard">Clavier</button>
+      <button class="filter-btn" data-filter="screen">Ecran</button>
+      <button class="filter-btn" data-filter="audio">Audio</button>
+      <button class="filter-btn" data-filter="network">Reseau</button>
+      <button class="filter-btn" data-filter="performance">Performance</button>
+      <button class="filter-btn" data-filter="calculators">Calculateurs</button>
+    </aside>
+
+    <section class="content">
+      <div class="toolbar">
+        <input id="searchTool" type="text" placeholder="Rechercher un outil..." />
+      </div>
+
+      <section id="toolGrid" class="tool-grid">
+        <article class="tool-card" data-cat="clickers mouse" data-key="cps test click souris">
+          <h3>Test CPS</h3><p>Mesure tes clics par seconde (clic gauche).</p><button data-tool="cps">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="clickers mouse" data-key="cps right click souris">
+          <h3>Test CPS clic droit</h3><p>Version clic droit.</p><button data-tool="rcps">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="clickers keyboard" data-key="apm test clavier">
+          <h3>Test APM</h3><p>Actions par minute au clavier.</p><button data-tool="apm">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="clickers keyboard" data-key="spacebar clicker barre espace">
+          <h3>Spacebar Clicker</h3><p>Vitesse de frappe sur espace.</p><button data-tool="spacebar">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="keyboard" data-key="keyboard clicker key test">
+          <h3>Keyboard Clicker</h3><p>Compteur de frappes clavier global.</p><button data-tool="keyclicker">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse" data-key="reaction time test reflexe">
+          <h3>Test de reaction</h3><p>Clique quand la zone passe au vert.</p><button data-tool="reaction">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="audio" data-key="auditory reaction audio">
+          <h3>Reaction auditive</h3><p>Reagis au bip sonore.</p><button data-tool="areaction">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse" data-key="scroll test molette">
+          <h3>Test scroll souris</h3><p>Compteur de defilement.</p><button data-tool="scroll">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse performance" data-key="polling rate souris">
+          <h3>Mouse Polling Rate</h3><p>Estimation du taux d'events souris.</p><button data-tool="polling">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse" data-key="double click test">
+          <h3>Test double clic</h3><p>Detection des doubles clics.</p><button data-tool="dblclick">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse" data-key="drag test glisser">
+          <h3>Test glisser souris</h3><p>Teste un drag continu.</p><button data-tool="drag">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="screen performance" data-key="fps monitor">
+          <h3>Moniteur FPS</h3><p>Mesure FPS via rendu navigateur.</p><button data-tool="fps">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="screen" data-key="screen info resolution">
+          <h3>Infos ecran</h3><p>Resolution, viewport et pixel ratio.</p><button data-tool="screen">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="network" data-key="ping reseau latency">
+          <h3>Ping test local</h3><p>Latence HTTP sur URL cible.</p><button data-tool="ping">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="audio" data-key="microphone audio test">
+          <h3>Test microphone</h3><p>Niveau audio en temps reel.</p><button data-tool="mic">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="calculators" data-key="edpi sensitivity dpi calculator">
+          <h3>Calculateur eDPI</h3><p>eDPI = DPI x sensibilite.</p><button data-tool="edpi">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="calculators" data-key="sensitivity converter">
+          <h3>Convertisseur sensibilite</h3><p>Conversion de sens entre jeux.</p><button data-tool="sens">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="calculators" data-key="ppi calculator ecran">
+          <h3>Calculateur PPI</h3><p>Densite de pixels de l'ecran.</p><button data-tool="ppi">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="calculators performance" data-key="ram latency calculator">
+          <h3>Latence RAM</h3><p>Latence CAS en nanosecondes.</p><button data-tool="ram">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="keyboard performance" data-key="wpm typing speed test">
+          <h3>Test WPM</h3><p>Vitesse de frappe en mots par minute.</p><button data-tool="wpm">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="mouse performance" data-key="jitter test precision souris">
+          <h3>Jitter Test</h3><p>Précision et stabilité de ta souris.</p><button data-tool="jitter">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="audio" data-key="metronome bpm rhythm">
+          <h3>Métronome</h3><p>Métronome numérique réglable (BPM).</p><button data-tool="metro">Ouvrir</button>
+        </article>
+        <article class="tool-card" data-cat="calculators screen" data-key="frame time fps calculator">
+          <h3>Frame Time</h3><p>Calcul du temps de trame cible.</p><button data-tool="frametime">Ouvrir</button>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="toolDialog">
+    <div class="dialog-head">
+      <h3 id="dialogTitle">Outil</h3>
+      <button id="closeDialog" class="close">Fermer</button>
+    </div>
+    <div id="dialogBody" class="dialog-body"></div>
+  </dialog>
+
+  <template id="tpl-cps">
+    <p class="hint">Clique dans la zone pendant 10 secondes.</p>
+    <div class="stats"><span data-out="count">0</span> clics | <span data-out="cps">0.00</span> CPS</div>
+    <button data-act="start">Demarrer</button>
+    <button data-act="reset" class="ghost">Reset</button>
+    <div class="target" data-act="clickzone">Clique ici</div>
+  </template>
+
+  <template id="tpl-apm">
+    <p class="hint">Appuie sur des touches pendant 30 secondes.</p>
+    <div class="stats"><span data-out="keys">0</span> actions | APM: <span data-out="apm">0</span></div>
+    <button data-act="start">Demarrer</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </template>
+
+  <template id="tpl-reaction">
+    <p class="hint">Clique quand la zone devient verte.</p>
+    <div class="stats">Dernier temps: <span data-out="ms">-</span> ms</div>
+    <button data-act="start">Lancer</button>
+    <div class="target waiting" data-act="hit">Attends...</div>
+  </template>
+
+  <template id="tpl-areaction">
+    <p class="hint">Autorise l'audio puis clique des que tu entends le bip.</p>
+    <div class="stats">Dernier temps: <span data-out="ms">-</span> ms</div>
+    <button data-act="start">Lancer</button>
+    <button data-act="hit" class="ghost">J'ai entendu</button>
+  </template>
+
+  <template id="tpl-scroll">
+    <p class="hint">Fais defiler dans la zone.</p>
+    <div class="stats">Events wheel: <span data-out="wheel">0</span></div>
+    <div class="target" data-act="zone">Scroll ici</div>
+  </template>
+
+  <template id="tpl-polling">
+    <p class="hint">Bouge ta souris dans la zone pendant 3 secondes.</p>
+    <div class="stats">Estimation: <span data-out="hz">0</span> Hz</div>
+    <button data-act="start">Mesurer</button>
+    <div class="target" data-act="zone">Zone de mouvement</div>
+  </template>
+
+  <template id="tpl-dblclick">
+    <p class="hint">Teste la detection des doubles clics.</p>
+    <div class="stats">Doubles clics detectes: <span data-out="dbl">0</span></div>
+    <div class="target" data-act="zone">Double-clique ici</div>
+  </template>
+
+  <template id="tpl-drag">
+    <p class="hint">Clique et glisse le point bleu.</p>
+    <div class="drag-wrap"><div class="drag-dot" data-act="dot"></div></div>
+    <div class="stats">Distance: <span data-out="dist">0</span> px</div>
+  </template>
+
+  <template id="tpl-fps">
+    <p class="hint">Mesure FPS reelle via animation navigateur.</p>
+    <div class="stats">FPS moyen: <span data-out="fps">0</span></div>
+    <button data-act="start">Demarrer</button>
+    <button data-act="stop" class="ghost">Stop</button>
+  </template>
+
+  <template id="tpl-screen">
+    <ul class="meta-list">
+      <li>Resolution ecran: <strong data-out="res"></strong></li>
+      <li>Viewport: <strong data-out="vp"></strong></li>
+      <li>Pixel ratio: <strong data-out="dpr"></strong></li>
+      <li>Orientation: <strong data-out="ori"></strong></li>
+    </ul>
+  </template>
+
+  <template id="tpl-ping">
+    <p class="hint">Mesure la latence HTTP vers une URL (GET).</p>
+    <label>URL <input data-in="url" type="text" value="https://www.google.com/favicon.ico" /></label>
+    <button data-act="run">Tester</button>
+    <div class="stats">Latence: <span data-out="ms">-</span> ms</div>
+    <p class="mini">Note: certains sites bloquent la requete (CORS). Dans ce cas, teste une URL de ton propre domaine.</p>
+  </template>
+
+  <template id="tpl-mic">
+    <p class="hint">Active le micro pour afficher le niveau sonore.</p>
+    <button data-act="start">Activer micro</button>
+    <button data-act="stop" class="ghost">Stop</button>
+    <div class="meter"><span data-out="bar"></span></div>
+    <div class="stats">Niveau: <span data-out="lvl">0</span>%</div>
+  </template>
+
+  <template id="tpl-edpi">
+    <label>DPI <input data-in="dpi" type="number" value="800" /></label>
+    <label>Sensibilite <input data-in="sens" type="number" step="0.01" value="0.35" /></label>
+    <button data-act="calc">Calculer</button>
+    <div class="stats">eDPI: <span data-out="edpi">280</span></div>
+  </template>
+
+  <template id="tpl-sens">
+    <label>Sensibilite source <input data-in="base" type="number" step="0.001" value="1" /></label>
+    <label>Jeu source
+      <select data-in="from">
+        <option value="1">Valorant</option>
+        <option value="3.18">CS2</option>
+        <option value="0.314">Overwatch 2</option>
+        <option value="0.545">Apex Legends</option>
+      </select>
+    </label>
+    <label>Jeu cible
+      <select data-in="to">
+        <option value="3.18">CS2</option>
+        <option value="1">Valorant</option>
+        <option value="0.314">Overwatch 2</option>
+        <option value="0.545">Apex Legends</option>
+      </select>
+    </label>
+    <button data-act="convert">Convertir</button>
+    <div class="stats">Sens convertie: <span data-out="result">-</span></div>
+  </template>
+
+  <template id="tpl-ppi">
+    <label>Largeur px <input data-in="w" type="number" value="1920" /></label>
+    <label>Hauteur px <input data-in="h" type="number" value="1080" /></label>
+    <label>Taille (pouces) <input data-in="inch" type="number" step="0.1" value="24" /></label>
+    <button data-act="calc">Calculer</button>
+    <div class="stats">PPI: <span data-out="ppi">-</span></div>
+  </template>
+
+  <template id="tpl-ram">
+    <label>Frequence RAM (MT/s) <input data-in="freq" type="number" value="3200" /></label>
+    <label>CAS Latency (CL) <input data-in="cl" type="number" value="16" /></label>
+    <button data-act="calc">Calculer</button>
+    <div class="stats">Latence estimee: <span data-out="ns">-</span> ns</div>
+  </template>
+
+  <template id="tpl-wpm">
+    <p class="hint">Recopie le texte ci-dessous le plus vite possible.</p>
+    <div data-out="text" style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.9rem;line-height:1.7;margin-bottom:10px;color:#aaa"></div>
+    <textarea data-in="typed" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:.9rem;resize:none" placeholder="Tapez ici..." disabled></textarea>
+    <div class="stats" style="margin-top:10px">WPM : <span data-out="wpm">—</span> | Précision : <span data-out="acc">—</span>%</div>
+    <button data-act="start">Démarrer (60s)</button>
+    <button data-act="reset" class="ghost">Reset</button>
+  </template>
+
+  <template id="tpl-jitter">
+    <p class="hint">Reste le plus immobile possible dans la zone pendant 5 secondes.</p>
+    <button data-act="start">Démarrer</button>
+    <div class="target" data-act="zone" style="height:200px;cursor:crosshair;position:relative;overflow:hidden">Bouge ta souris ici</div>
+    <div class="stats">Jitter : <span data-out="jitter">—</span> px | Déplacements : <span data-out="moves">0</span></div>
+  </template>
+
+  <template id="tpl-metro">
+    <div style="text-align:center;padding:10px 0">
+      <div data-out="beat" style="font-size:4rem;font-weight:800;color:var(--ui-accent);transition:transform .05s">●</div>
+      <div style="margin:12px 0;display:flex;align-items:center;gap:10px;justify-content:center">
+        <button data-act="slower" style="padding:4px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;cursor:pointer">−10</button>
+        <span data-out="bpm" style="font-size:1.8rem;font-weight:700;min-width:60px;text-align:center">120</span>
+        <span style="color:#888">BPM</span>
+        <button data-act="faster" style="padding:4px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;cursor:pointer">+10</button>
+      </div>
+      <input type="range" data-in="bpm-range" min="40" max="240" value="120" style="width:220px" />
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button data-act="start" style="padding:8px 20px;border-radius:10px;background:var(--ui-accent);color:#fff;border:none;font-weight:700;cursor:pointer">▶ Démarrer</button>
+        <button data-act="stop" class="ghost" style="padding:8px 20px">⏹ Stop</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-frametime">
+    <p class="hint">Calcule le temps de trame et la fréquence d'images.</p>
+    <label>FPS cible <input data-in="fps" type="number" value="60" min="1" max="500" /></label>
+    <button data-act="calc">Calculer</button>
+    <div class="stats" style="margin-top:10px">
+      Frame time: <strong data-out="ft">—</strong> ms<br/>
+      <span style="font-size:.8rem;color:#888" data-out="examples"></span>
+    </div>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

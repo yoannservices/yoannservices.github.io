@@ -86,42 +86,14 @@ for(let i=0;i<30;i++){const a=i/30*Math.PI*2+Math.random()*.2,r=1050+Math.random
 const m=new T.Mesh(new T.ConeGeometry(rad,h,6),new T.MeshStandardMaterial({color:0x6c5a88,flatShading:true,roughness:1}));m.position.set(x,h/2-60,z);scene.add(m);
 const cap=new T.Mesh(new T.ConeGeometry(rad*.36,h*.36,6),new T.MeshStandardMaterial({color:0xfaf0f4,flatShading:true,roughness:1}));cap.position.set(x,h-60-h*.18,z);scene.add(cap)}
 
-// voiture
+// voiture : vraie Ferrari 458 (exemples three.js, par vicent091036 ; licence à vérifier), chargée par assets/glb.js
 const car=new T.Group(),inner=new T.Group();car.add(inner);scene.add(car);
-// voiture : carrosserie extrudée (profil latéral), vitrage, jantes à rayons, aileron, feux
-const cPaint=new T.MeshPhysicalMaterial({color:0x1fb5b0,roughness:.28,metalness:.5,clearcoat:1,clearcoatRoughness:.08});
-const cGlass=new T.MeshPhysicalMaterial({color:0x0c1822,roughness:.05,metalness:.6,clearcoat:1});
-const cDark=new T.MeshStandardMaterial({color:0x14202e,roughness:.55,metalness:.4});
-const cCarbon=new T.MeshStandardMaterial({color:0x0e0f12,roughness:.4,metalness:.6});
-const cChrome=new T.MeshStandardMaterial({color:0xcfd6dc,roughness:.2,metalness:1});
-const cAdd=(g,m,x,y,z)=>{const o=new T.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;inner.add(o);return o};
-const bx=(w,h,d,m,x,y,z,em)=>{const o=cAdd(new T.BoxGeometry(w,h,d),em?new T.MeshStandardMaterial({color:m,emissive:em,emissiveIntensity:1.6}):m,x,y,z);return o};
-// profil (z, y) de bas en haut : caisse arrondie, capot long, hayon fuyant
-function cBody(pts,depth,bev,mat,y0){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),b0=Math.min(...ys),b1=Math.max(...ys);pts=pts.map(([x,y])=>[x0+bev+(x-x0)*(x1-x0-2*bev)/(x1-x0),b0+bev+(y-b0)*(b1-b0-2*bev)/(b1-b0)]);const s=new T.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]);s.closePath();
-const g=new T.ExtrudeGeometry(s,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:4,curveSegments:8});g.translate(0,0,-depth/2);g.rotateY(-Math.PI/2);g.computeVertexNormals();return cAdd(g,mat,0,y0||0,0)}
-cBody([[-2.05,.38],[-2.1,.62],[-1.95,.9],[-1.2,.98],[.6,1.0],[1.5,.86],[2.02,.7],[2.1,.5],[1.95,.38]],1.72,.1,cPaint);
-cBody([[-1.25,.98],[-.95,1.3],[-.2,1.46],[.55,1.4],[1.05,1.0]],1.4,.07,cGlass);
-bx(1.44,.05,1.0,cPaint,0,1.52,-.18);                               // toit
-bx(1.0,.03,.7,cCarbon,0,1.03,1.1);                                  // prise d'air du capot
-bx(2.05,.08,.5,cCarbon,0,.34,2.0);bx(2.0,.07,.34,cCarbon,0,.33,-2.05); // splitter, diffuseur
-bx(.12,.12,3.1,cCarbon,.98,.4,0);bx(.12,.12,3.1,cCarbon,-.98,.4,0);   // bas de caisse
-// aileron
-bx(1.9,.07,.5,cCarbon,0,1.35,-2.0);bx(.07,.34,.2,cCarbon,.62,1.16,-1.95);bx(.07,.34,.2,cCarbon,-.62,1.16,-1.95);
-bx(.05,.2,.5,cCarbon,.96,1.38,-2.0);bx(.05,.2,.5,cCarbon,-.96,1.38,-2.0);
-// rétros, poignées, échappements
-bx(.22,.12,.14,cPaint,.88,1.12,.42);bx(.22,.12,.14,cPaint,-.88,1.12,.42);
-cAdd(new T.CylinderGeometry(.07,.07,.2,12).rotateX(Math.PI/2),cChrome,.45,.4,-2.2);cAdd(new T.CylinderGeometry(.07,.07,.2,12).rotateX(Math.PI/2),cChrome,-.45,.4,-2.2);
-// feux
-bx(.5,.1,.06,0xfff4d0,.62,.74,2.12,0xffd890);bx(.5,.1,.06,0xfff4d0,-.62,.74,2.12,0xffd890);
-bx(1.5,.07,.05,0xff2a40,0,.84,-2.16,0xff2040);
-bx(.5,.16,.05,cDark,.6,.52,2.14);bx(.5,.16,.05,cDark,-.6,.52,2.14); // calandre basse
-// roues : pneu, jante, 5 rayons, disque de frein
-const cTg=new T.CylinderGeometry(.36,.36,.3,24).rotateZ(Math.PI/2),cTm=new T.MeshStandardMaterial({color:0x15131a,roughness:.85});
-const cRg=new T.CylinderGeometry(.25,.25,.31,24).rotateZ(Math.PI/2),cSp=new T.BoxGeometry(.32,.04,.34),cDg=new T.CylinderGeometry(.2,.2,.1,20).rotateZ(Math.PI/2),cDm=new T.MeshStandardMaterial({color:0x80848a,roughness:.4,metalness:.8});
 const wheels=[];
-for(const[x,z,f]of[[1.02,1.35,1],[-1.02,1.35,1],[1.02,-1.3,0],[-1.02,-1.3,0]]){const piv=new T.Group();piv.position.set(x,.36,z);const w=new T.Mesh(cTg,cTm);w.castShadow=true;
-const rim=new T.Mesh(cRg,cChrome);w.add(rim);const sx=x>0?.02:-.02;for(let k=0;k<5;k++){const s=new T.Mesh(cSp,cDark);s.position.x=sx;s.rotation.x=k*Math.PI*2/5;w.add(s)}
-const d=new T.Mesh(cDg,cDm);d.position.x=x>0?-.08:.08;w.add(d);piv.add(w);inner.add(piv);wheels.push({piv,w,f})}
+import(new URL('../../assets/glb.js',location.href).href).then(m=>m.loadGLB(new URL('../../assets/models/ferrari.glb',location.href).href)).then(g=>{
+const m=new T.Group();m.rotation.y=Math.PI;m.add(g);                       // le modèle regarde vers -Z
+g.traverse(o=>{if(o.isMesh){o.castShadow=true;if(o.material.name==='Body_Color')o.material.color.set(0x1fb5b0)}});
+for(const[n,f]of[['wheel_fl',1],['wheel_fr',1],['wheel_rl',0],['wheel_rr',0]]){const w=g.getObjectByName(n),piv=new T.Group();piv.position.copy(w.position);w.position.set(0,0,0);w.parent.add(piv);piv.add(w);wheels.push({piv,w,f,s:-1})} // s : le modèle est retourné, la roue tourne dans l'autre sens
+inner.add(m)}).catch(e=>console.warn('Ferrari non chargée',e));
 
 // particules
 const smk=glow('rgba(245,232,226,1)'),SM=[];
@@ -216,7 +188,7 @@ car.position.set(st.x,st.y,st.z);
 const gr=Gr[st.idx]*(Tn[st.idx].x*sn+Tn[st.idx].z*cs_),pt=-Math.atan(gr);st.pitch+=(pt-st.pitch)*Math.min(1,dt*10);
 st.br+=(clamp(st.om*spd*.004,-.12,.12)-st.br)*Math.min(1,dt*6);st.bp+=(clamp(-(thr?1:0)*.03+(K.KeyS&&running?.04:0),-.05,.05)-st.bp)*Math.min(1,dt*5);
 car.rotation.set(st.pitch,st.th,0,'YXZ');inner.rotation.set(st.bp,0,st.br);
-for(const w of wheels){if(w.f)w.piv.rotation.y=st.steer*.5*(spd>25?.6:1);w.w.rotation.x+=f1*dt/.36}
+for(const w of wheels){if(w.f)w.piv.rotation.y=st.steer*.5*(spd>25?.6:1);w.w.rotation.x+=(w.s||1)*f1*dt/.36}
 // fumée / traces
 const slipping=running&&spd>6&&(Math.abs(l1)>2.4||(hb&&spd>8));
 const rx=st.x-sn*1.3,rz=st.z-cs_*1.3,wl=[[rx+cs_*.95,rz-sn*.95],[rx-cs_*.95,rz+sn*.95]];

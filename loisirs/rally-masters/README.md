@@ -29,3 +29,7 @@ src/audio    audio
 src/ui       hud, menus
 src/main.js  boucle et enchaînement
 ```
+
+## Crédits des modèles 3D
+
+Véhicules réels sous licence CC-BY (Sketchfab) : auteurs et licences dans `assets/models/CREDITS.md`.

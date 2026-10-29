@@ -1,0 +1,23 @@
+# Ce fichier permet de lancer TOUT ton projet sur ton ordinateur avec Docker,
+# exactement comme il tournera sur Railway : une seule boîte construite avec
+# le Dockerfile à la racine (frontend + backend ensemble).
+# C'est pratique pour tester avant de déployer.
+#
+# Commande : docker compose up --build   (ou ./local.sh)
+
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    ports:
+      # 127.0.0.1 : l'application n'est accessible que depuis ton PC (pas depuis le réseau local)
+      - "127.0.0.1:3000:80"
+    # Volume nommé : la base des comptes et des chats (/data/nexus.db) survit à la recréation du conteneur,
+    # comme le volume Railway en ligne. Pour repartir de zéro : docker compose down -v
+    volumes:
+      - nexus-data:/data
+    restart: unless-stopped
+
+volumes:
+  nexus-data:

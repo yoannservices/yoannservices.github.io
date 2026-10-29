@@ -254,6 +254,18 @@ function buildTrailer(tr, spinners) {
   for (const dz of [0, -1.3, -2.6]) { cyl(g, 0.08, 2.1, STEEL, 0, 0.5, az + dz, 'x', 10); box(g, 1.9, 0.14, 0.2, DARK, 0, 0.85, az + dz); }
   box(g, 2.4, 0.18, 0.12, DARK, 0, 0.62, -len - 0.04);                                       // pare-chocs arrière
   box(g, 0.5, 0.12, 0.02, mat(0xf4f4f4), 0, 0.95, -len - 0.04);                              // plaque
+  if (tr.id === 'tanker') {
+    import('../../../../assets/glb.js').then(async m => {
+      const f = m.fitGLB(await m.loadGLB(new URL('../../../../assets/models/trailer.glb', import.meta.url).href), len);
+      f.position.z = mid; g.visible = false; g.add(f);
+    }).catch(e => console.warn('Remorque non chargée', tr.id, e));
+  }
+  if (tr.id === 'tarp') {
+    import('../../../../assets/glb.js').then(async m => {
+      const f = m.fitGLB(await m.loadGLB(new URL('../../../../assets/models/trailer (1).glb', import.meta.url).href), len);
+      f.position.z = mid; g.visible = false; g.add(f);
+    }).catch(e => console.warn('Remorque non chargée', tr.id, e));
+  }
   return g;
 }
 
@@ -263,6 +275,11 @@ export function buildTruck(cab, trailer) {
   const root = new THREE.Group();
   const tractor = buildTractor(cab, spinners, steerers, lights);
   tractor.rotation.order = 'YXZ';
+  // vrai tracteur (Sketchfab « MAN TGX 2010 V8 » par DevPoly3D, CC-BY) à la place du tracteur procédural et de sa cabine (supprimés) ; la remorque reste procédurale faute de modèle réel
+  import('../../../../assets/glb.js').then(async (m) => {
+    const f = m.fitGLB(await m.loadGLB(new URL('../../../../assets/models/man-tgx.glb', import.meta.url).href), 6.8);
+    f.position.z = 1.58; m.purge(tractor); tractor.add(f);
+  }).catch((e) => console.warn('Tracteur non chargé', e));
   const trailerG = buildTrailer(trailer, spinners);
   root.add(tractor, trailerG);
   return {

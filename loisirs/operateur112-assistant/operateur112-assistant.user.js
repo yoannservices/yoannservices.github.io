@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Operateur112 – Assistant d'envoi (semi-auto)
 // @namespace    loisirs.operateur112
-// @version      0.4.1
+// @version      0.5.2
 // @description  Affiche les besoins de la mission et pré-coche les véhicules manquants. C'est TOI qui cliques sur « Déployer ».
 // @match        https://operateur112.fr/*
 // @match        https://www.operateur112.fr/*
@@ -12,9 +12,9 @@
 (function () {
   'use strict';
 
-  // Le script ne clique JAMAIS sur « Déployer » : il coche des cases et met
-  // le bouton en évidence. Seuls les transports vers l'hôpital / la cellule
-  // sont automatiques (désactivable ci-dessous).
+  // Par défaut le script ne clique pas sur « Déployer » : il coche des cases.
+  // Le mode « Auto 1 min » (bouton sur la carte, désactivé au départ) envoie aussi
+  // les véhicules tout seul : c'est de l'automatisation, interdite par les CGU.
   const AUTO_TRANSPORT = true;
   const AUTO_DELAY = 400; // ms avant chaque clic automatique
 
@@ -60,6 +60,8 @@
     #o112-panel{position:fixed;bottom:64px;right:8px;z-index:99999;width:280px;max-height:50vh;overflow:auto;opacity:.95;
       background:#1f2430;color:#eee;font:13px/1.4 system-ui,sans-serif;border-radius:8px;
       box-shadow:0 4px 16px rgba(0,0,0,.4);padding:10px}
+    #o112-auto{position:fixed;bottom:12px;right:12px;z-index:99999;padding:8px 12px;border:0;border-radius:6px;
+      color:#fff;font:bold 13px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
     #o112-panel h4{margin:0 0 6px;font-size:14px;color:#ffb347}
     #o112-panel ul{margin:4px 0 8px;padding-left:18px}
     #o112-panel .ok{color:#7ddc7d}#o112-panel .ko{color:#ff7b7b}
@@ -121,9 +123,35 @@
         return cb ? { tr, cb, type: norm(caption), dist } : null;
       })
       .filter(Boolean)
+      .filter((r) => !badVehicles().has(r.cb.value))
       // Un même véhicule peut apparaître dans plusieurs onglets (Tout, Ambulance…).
       .filter((r, i, all) => all.findIndex((x) => x.cb.value === r.cb.value) === i)
       .sort((a, b) => a.dist - b.dist);
+  }
+
+  // Véhicules refusés par le jeu (« manque d'effectifs… ») : écartés 10 min.
+  const BAD_KEY = 'o112_bad';
+  function badVehicles() {
+    let bad = {};
+    try { bad = JSON.parse(sessionStorage.getItem(BAD_KEY) || '{}'); } catch (e) { /* illisible */ }
+    return new Set(Object.keys(bad).filter((id) => Date.now() - bad[id] < 600000));
+  }
+
+  // Lit les erreurs rouges qui nomment un véhicule ; retourne combien de nouveaux véhicules sont écartés.
+  function collectErrors() {
+    let bad = {};
+    try { bad = JSON.parse(sessionStorage.getItem(BAD_KEY) || '{}'); } catch (e) { /* illisible */ }
+    let added = 0;
+    document.querySelectorAll('.alert-danger, .alert-error').forEach((al) => {
+      if (!/manque d.effectifs|pas qualifi|personnel/i.test(al.textContent)) return;
+      al.querySelectorAll('a[href^="/vehicles/"]').forEach((a) => {
+        const id = a.getAttribute('href').match(/vehicles\/(\d+)/)[1];
+        if (!bad[id] || Date.now() - bad[id] > 600000) added++;
+        bad[id] = Date.now();
+      });
+    });
+    try { sessionStorage.setItem(BAD_KEY, JSON.stringify(bad)); } catch (e) { /* bloqué */ }
+    return added;
   }
 
   // Le texte du jeu peut être au pluriel ou abrégé : on accepte une correspondance partielle.
@@ -427,6 +455,7 @@
   }
 
   async function missionPage() {
+    const retry = collectErrors() > 0; // erreur d'effectifs : on renvoie un autre véhicule
     const panel = document.createElement('div');
     panel.id = 'o112-panel';
     panel.innerHTML = '<h4>Assistant 112</h4><div id="o112-prison"></div><div id="o112-body">Chargement…</div>';
@@ -501,8 +530,83 @@
       return;
     }
     // Pré-cochage à l'ouverture ; l'envoi reste toujours manuel.
-    render(run());
+    const res = run();
+    render(res);
     highlightAlarm();
+    autoStep(retry);
+  }
+
+  // ---------- Mode auto : toutes les minutes, traite les missions rouges / jaunes ----------
+  const AUTO_KEY = 'o112_auto_on';   // localStorage : mode activé
+  const BUSY_KEY = 'o112_busy';      // sessionStorage : un tour est en cours
+  const VISITS_KEY = 'o112_visits';  // sessionStorage : visites par mission pendant le tour
+  const autoOn = () => { try { return localStorage.getItem(AUTO_KEY) === '1'; } catch (e) { return false; } };
+  const ss = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { /* bloqué */ } return null; };
+
+  // Sur la page d'une mission : « Déployer + mission suivante » si des véhicules sont cochés,
+  // sinon flèche « mission suivante ». Fin de chaîne (ou mission déjà vue) : retour à la carte.
+  function autoStep(retry) {
+    if (window.top !== window) return; // pas dans une fenêtre intégrée
+    if (!autoOn()) return;
+    const home = () => { location.href = '/'; };
+    let chain = [];
+    try { chain = JSON.parse(ss('o112_chain') || '[]'); } catch (e) { /* illisible */ }
+    if (chain.includes(location.pathname) && !retry) { setTimeout(home, 2000); return; }
+    chain.push(location.pathname);
+    ss('o112_chain', JSON.stringify(chain));
+
+    const sendNext = document.querySelector('#alert_next_btn') || document.querySelector('#mission_alarm_btn');
+    const nextBtn = document.querySelector('#mission_next_mission_btn');
+    const key = 'o112_deployed_' + location.pathname;
+    const recent = Date.now() - parseInt(ss(key) || '0', 10) < 60000;
+    const ticked = vehicleRows().filter((r) => r.cb.checked).length;
+    if (sendNext && ticked && (!recent || retry)) {
+      setTimeout(() => {
+        ss(key, String(Date.now()));
+        sendNext.click();
+        setTimeout(home, 8000); // le jeu n'a pas changé de page : retour à la carte
+      }, 1500);
+    } else if (nextBtn && nextBtn.offsetParent !== null && !nextBtn.disabled) {
+      setTimeout(() => { nextBtn.click(); setTimeout(home, 8000); }, 1500);
+    } else {
+      setTimeout(home, 2500);
+    }
+  }
+
+  // Carte principale : ouvre les missions rouges / jaunes une à une (3 visites max chacune par tour).
+  function mainPage() {
+    const btn = document.createElement('button');
+    btn.id = 'o112-auto';
+    document.body.appendChild(btn);
+    const label = () => {
+      btn.textContent = autoOn() ? '⏸ Auto 1 min : ON' : '▶ Auto 1 min : OFF';
+      btn.style.background = autoOn() ? '#27ae60' : '#c0392b';
+    };
+    btn.onclick = () => {
+      try { localStorage.setItem(AUTO_KEY, autoOn() ? '0' : '1'); } catch (e) { /* bloqué */ }
+      ss(BUSY_KEY, null);
+      label();
+      if (autoOn()) cycle(true);
+    };
+    label();
+    ss('o112_chain', null);
+
+    function cycle(fresh) {
+      if (!autoOn()) return;
+      if (fresh) { ss(BUSY_KEY, '1'); ss(VISITS_KEY, '{}'); }
+      if (ss(BUSY_KEY) !== '1') return;
+      const visits = JSON.parse(ss(VISITS_KEY) || '{}');
+      const todo = [...document.querySelectorAll('#mission_list .missionSideBarEntry')]
+        .filter((e) => e.offsetParent !== null && e.querySelector('.mission_panel_red, .mission_panel_yellow'))
+        .find((e) => (visits[e.id] || 0) < 3);
+      if (!todo) { ss(BUSY_KEY, null); return; } // plus rien de rouge / jaune : on attend la prochaine minute
+      visits[todo.id] = (visits[todo.id] || 0) + 1;
+      ss(VISITS_KEY, JSON.stringify(visits));
+      const link = todo.querySelector('a[href*="/missions/"]');
+      if (link) location.href = link.getAttribute('href');
+    }
+    if (autoOn() && ss(BUSY_KEY) === '1') setTimeout(() => cycle(false), 3000); // retour d'une mission en plein tour
+    setInterval(() => cycle(true), 60000);
   }
 
   // ---------- Transports automatiques ----------
@@ -554,5 +658,6 @@
   }
 
   if (/^\/missions\/\d+/.test(location.pathname)) missionPage();
+  else if (location.pathname === '/' && document.querySelector('#mission_list')) mainPage();
   else if (/^\/vehicles\/\d+/.test(location.pathname)) vehiclePage();
 })();

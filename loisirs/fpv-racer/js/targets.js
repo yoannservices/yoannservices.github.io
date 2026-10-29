@@ -29,43 +29,10 @@ const Targets = (() => {
   }
   const _t1 = new V3(), _t2 = new V3();
 
-  // ── Modèle de voiture (avant = -Z) ──
-  function carModel(color, accent) {
-    const g = new THREE.Group();
-    const paint = new THREE.MeshPhongMaterial({ color, shininess: 90, specular: 0x666666 });
-    const acc = new THREE.MeshPhongMaterial({ color: accent, shininess: 60 });
-    const glass = new THREE.MeshPhongMaterial({ color: 0x0d141c, shininess: 120, specular: 0xaaaaaa });
-    const dark = new THREE.MeshLambertMaterial({ color: 0x151515 });
-    const body = new THREE.Group(); g.add(body);
-    const add = (geo, mat, x, y, z, parent = body) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m; };
-    add(new THREE.BoxGeometry(1.84, 0.5, 4.3), paint, 0, 0.56, 0);
-    add(new THREE.BoxGeometry(1.8, 0.18, 1.45), paint, 0, 0.9, -1.4).rotation.x = 0.06;
-    add(new THREE.BoxGeometry(1.8, 0.2, 0.95), paint, 0, 0.9, 1.65);
-    add(new THREE.BoxGeometry(1.56, 0.52, 2.0), glass, 0, 1.08, 0.2);
-    add(new THREE.BoxGeometry(1.52, 0.08, 1.6), paint, 0, 1.36, 0.25);
-    add(new THREE.BoxGeometry(0.4, 0.02, 4.32), acc, -0.3, 0.82, 0);
-    add(new THREE.BoxGeometry(0.4, 0.02, 1.62), acc, -0.3, 1.41, 0.25);
-    add(new THREE.BoxGeometry(1.86, 0.18, 0.2), dark, 0, 0.42, -2.18);
-    add(new THREE.BoxGeometry(1.86, 0.18, 0.2), dark, 0, 0.42, 2.18);
-    add(new THREE.BoxGeometry(1.7, 0.05, 0.38), acc, 0, 1.3, 2.0);
-    add(new THREE.BoxGeometry(0.06, 0.28, 0.2), dark, -0.6, 1.14, 2.0);
-    add(new THREE.BoxGeometry(0.06, 0.28, 0.2), dark, 0.6, 1.14, 2.0);
-    const hl = new THREE.MeshBasicMaterial({ color: 0xfff6d8 }), tl = new THREE.MeshBasicMaterial({ color: 0xff2a1a });
-    for (const s of [-1, 1]) { add(new THREE.BoxGeometry(0.42, 0.12, 0.05), hl, s * 0.62, 0.7, -2.16); add(new THREE.BoxGeometry(0.42, 0.1, 0.05), tl, s * 0.62, 0.72, 2.16); }
-    // roues
-    const tire = new THREE.CylinderGeometry(0.34, 0.34, 0.27, 16); tire.rotateZ(Math.PI / 2);
-    const rim = new THREE.CylinderGeometry(0.2, 0.2, 0.28, 6); rim.rotateZ(Math.PI / 2);
-    const rimMat = new THREE.MeshPhongMaterial({ color: 0xc8c8c8, shininess: 80 });
-    const wheels = [], steer = [];
-    for (const [x, z, front] of [[-0.86, -1.35, 1], [0.86, -1.35, 1], [-0.86, 1.35, 0], [0.86, 1.35, 0]]) {
-      const pivot = new THREE.Group(); pivot.position.set(x, 0.34, z); g.add(pivot);
-      const w = new THREE.Group(); pivot.add(w);
-      add(tire, dark, 0, 0, 0, w); add(rim, rimMat, x > 0 ? 0.01 : -0.01, 0, 0, w);
-      wheels.push(w); if (front) steer.push(pivot);
-    }
-    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    scene.add(g);
-    return { g, body, wheels, steer };
+  // ── Voiture : coque vide, la vraie Ferrari 458 est ajoutée plus bas (avant = -Z) ──
+  function carModel() {
+    const g = new THREE.Group(), body = new THREE.Group(); g.add(body); scene.add(g);
+    return { g, body, wheels: [], steer: [] };
   }
 
   // ── Traces de pneus (décals) ──
@@ -107,7 +74,7 @@ const Targets = (() => {
   function makeCar(name, path, color, accent, o) {
     const m = carModel(color, accent);
     const car = Object.assign({
-      name, path, ...m, s: o.s0 || 0, v: o.v, drift: 0, heading: 0, yawRate: 0, spin: 0, pos: new V3(), tan: new V3(), center: new V3(),
+      name, path, color, ...m, s: o.s0 || 0, v: o.v, drift: 0, heading: 0, yawRate: 0, spin: 0, pos: new V3(), tan: new V3(), center: new V3(),
       col: World.addDynamicBox(new V3(0.95, 0.72, 2.2)), smokeAcc: 0,
     }, o);
     car.col.w = new V3(); car.col.pivot = car.pos;
@@ -117,6 +84,20 @@ const Targets = (() => {
   makeCar('Donut', pDonut, 0xd4261c, 0xf2f2f2, { v: 10.5, mode: 'donut' });
   makeCar('Huit', pEight, 0xf4f4f4, 0x1e6fe0, { v: 12.5, mode: 'eight', grip: 6 });
   makeCar('Circuit', pTrack, 0xf2c21b, 0x111111, { v: 20, vmax: 32, mode: 'track', grip: 11, s0: 40 });
+
+  // vraie Ferrari 458 (exemples three.js, par vicent091036 ; licence à vérifier)
+  import(new URL('../../assets/glb.js', location.href).href).then(m => m.loadGLB(new URL('../../assets/models/ferrari.glb', location.href).href)).then(src => {
+    for (const c of cars) {
+      const m = src.clone(true), body = new THREE.Group(), wheels = [], steer = [];
+      m.traverse(o => { if (o.isMesh) { o.castShadow = true; if (o.material.name === 'Body_Color') { o.material = o.material.clone(); o.material.color.set(c.color); } } });
+      for (const [n, front] of [['wheel_fl', 1], ['wheel_fr', 1], ['wheel_rl', 0], ['wheel_rr', 0]]) {
+        const w = m.getObjectByName(n), piv = new THREE.Group(), spin = new THREE.Group();
+        piv.position.copy(w.position); w.position.set(0, 0, 0); spin.add(w); piv.add(spin); c.g.add(piv);
+        wheels.push(spin); if (front) steer.push(piv);
+      }
+      body.add(m); c.g.add(body); c.body = body; c.wheels = wheels; c.steer = steer;
+    }
+  }).catch(e => console.warn('Ferrari non chargée', e));
 
   const _p = new V3(), _q = new THREE.Quaternion(), _wl = new V3(), UPY = new V3(0, 1, 0);
   const wrap = a => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };

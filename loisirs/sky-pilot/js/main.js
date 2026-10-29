@@ -807,6 +807,8 @@ function buildPVInterior(){
 function updatePV(dt){
   const vt=Math.sin(S.tilt);
   PV.tilt.rotation.x=S.tilt;
+  // nacelles du vrai modèle : il est posé en configuration verticale (90°) ; elles basculent autour de l'axe d'aile, rotors contrarotatifs
+  for(const k of PV.nac||[]){k.n.rotation.x=S.tilt-Math.PI/2;if(k.r)k.r.rotation.z=PV.propAng*k.dir}
   // les 4 hélices sont liées : elles tournent ensemble, en moulinet même gaz coupés
   const om=S.crashed?0:(S.thr>.02?16+42*S.thr:Math.min(S.aspd*.35,22));
   PV.propAng+=om*dt;
@@ -1127,7 +1129,7 @@ const AIRCRAFT={
    cd0:.0175,cdSuper:.0075,wave:.008,k:.065,cla:5,clmax:1.35,gmax:13,
    vrot:48,vstall:44,pitchLo:.08,pitchHi:.47,pitchFast:.78,rollLo:1.2,rollHi:3.8,rollV:[80,260],yaw:.45,
    gearH:2.05,bellyH:1.15,hit:[[-8.2,-.2,3],[8.2,-.2,3],[0,0,-8.5],[0,.4,5.5,.5]],
-   camDist:21,camH:4.6,cockpit:[0,.91,-2.48],tips:[[-8.3,-.2,3.4],[8.3,-.2,3.4]],exhaust:[0,0,7],shadow:22},
+   camDist:21,camH:4.6,cockpit:[0,1,-4.85],tips:[[-8.3,-.2,3.4],[8.3,-.2,3.4]],exhaust:[0,0,7],shadow:22},
  pv40:{id:'pv40',name:'PV-40',kind:'tiltwing',
    tstat:12,tvtol:14.5,power:1080,                      // 4 turbopropulseurs : poussée statique 1,2 g (aile à plat) à 1,5 g (aile verticale)
    cd0:.0165,k:.05,cla:5.2,clmax:1.55,gmax:7,
@@ -1369,7 +1371,7 @@ function spawn(ai,mode){
   else{S.p.addScaledVector(a.dir,-1200);S.p.y=a.elev+650;S.v.copy(a.dir).multiplyScalar(200);S.thr=.7;S.gear=false;S.gearPos=0;S.flaps=0;S.onGround=false}
   S.mach=S.v.length()/speedOfSound(S.p.y);S.supersonic=S.mach>=1;
   if(dest===ai)dest=(ai+1)%AIRPORTS.length;
-  planeG.visible=!isInside();inp.pitch=inp.roll=inp.yaw=0;
+  planeG.visible=true;inp.pitch=inp.roll=inp.yaw=0;
   cockpitG.visible=isInside();
   const t=$('thr');if(t)t.value=Math.round(S.thr*100);
   camInit=false;trail.length=0;clearMsg();P.age.fill(99);
@@ -1402,7 +1404,7 @@ function updateCamera(dt,time){
   if(!camInit){cam.q.copy(S.q);camInit=true}
   const kq=1-Math.exp(-(camMode===1?12:10)*dt);cam.q.slerp(S.q,kq);
   const inside=isInside(),A=ACF;
-  planeG.visible=!S.crashed&&!inside;
+  planeG.visible=!S.crashed;
   cockpitG.visible=!S.crashed&&inside;
   let tfov=camMode===1?74:inside?72:60+clamp(speed/600,0,1)*28+S.abL*8;
   if(S.crashed){cam.orb+=dt*.3;_cp.set(Math.sin(cam.orb)*60,22,Math.cos(cam.orb)*60).add(p);camera.position.copy(_cp);camera.lookAt(p.x,p.y+4,p.z);tfov=60}
@@ -1675,6 +1677,10 @@ const timeIdxShadow=()=>[.55,.4,.12][timeIdx];
 function init(){
   buildHeights();buildTerrain();buildAirports();buildTrees();buildClouds();
   buildPlane();f35G=new THREE.Group();while(planeG.children.length)f35G.add(planeG.children[0]);planeG.add(f35G,pvG);buildPV();
+  // vrais avions (Sketchfab, CC-BY : F-35 par andertan, V-22 Osprey par Muhamad Mirza Arrafi) à la place des modèles procéduraux et des habitacles procéduraux (supprimés) ; la caméra cabine se place dans le vrai modèle
+  import(new URL('../../assets/glb.js',location.href).href).then(m=>{for(const[g,file,len,yaw,h]of[[f35G,'f35',15.5,Math.PI,2.05],[pvG,'v22-osprey-tilt',33,0,3.05]])
+    m.loadGLB(new URL('../../assets/models/'+file+'.glb',location.href).href).then(s=>{m.purge(g);const f=m.fitGLB(s,len,yaw,true);f.position.y=-h;g.add(f);if(g===pvG){PV.nac=[];f.traverse(o=>{if(/^nacelle_/.test(o.name))PV.nac.push({n:o,r:o.children.find(c=>/^rotor_/.test(c.name)),dir:o.name.endsWith('L')?1:-1})})}}).catch(e=>console.warn('Avion non chargé',e))});
+  import(new URL('../../assets/glb.js',location.href).href).then(m=>m.purge(cockpitG));
   buildCockpit();f35CockpitG=new THREE.Group();while(cockpitG.children.length)f35CockpitG.add(cockpitG.children[0]);cockpitG.add(f35CockpitG,pvInteriorG);buildPVInterior();
   buildParticles();buildSonicWave();buildChute();buildSpeedLines();buildShadow();buildMapImage();
   setTime(0);buildMenu();resize();spawn(0,'runway');

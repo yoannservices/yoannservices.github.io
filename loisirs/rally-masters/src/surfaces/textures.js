@@ -49,15 +49,6 @@ export function bannerTexture(text, bg = '#d90429', checker = false) {
   return tex(c);
 }
 
-/* Disque de portière avec numéro de course */
-export function numberTexture(n, accent = '#111') {
-  const c = cv(128, 128), g = c.getContext('2d');
-  g.fillStyle = '#f7f7f2'; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill();
-  g.strokeStyle = accent; g.lineWidth = 6; g.stroke();
-  g.fillStyle = '#111'; g.font = '800 72px Inter, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(n), 64, 70);
-  return tex(c);
-}
-
 /* Bande de pare-brise / lunette (dégradé) non utilisée par la carrosserie, réservée aux feux */
 export function glowTexture() {
   const c = cv(64, 64), g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
