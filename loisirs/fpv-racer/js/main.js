@@ -505,5 +505,6 @@
   applySettings();
   UI.open();
   requestAnimationFrame(frame);
+  window.GameLoader.ready();
   window.FPV = { renderer, camera, scene, Post, sig, get statBurst() { return statBurst; } }; // accès console (debug)
 })();

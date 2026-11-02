@@ -78,6 +78,7 @@ const Post = (() => {
   function render(renderer, scene, camera, p) {
     const u = mat.uniforms;
     for (const k in p) if (u[k]) u[k].value = p[k];
+    renderer.hudView = { scene, camera };
     renderer.setRenderTarget(rt);
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
