@@ -126,7 +126,7 @@ function updateCamera(dt) {
   game.camH += wrap(phys.h - game.camH) * Math.min(1, 3 * dt);
   if (game.camMode === 'cabin') {
     const s = Math.sin(phys.h), c = Math.cos(phys.h);
-    camera.position.set(phys.x + s * 3.95 + c * 0.55, 1.0 + cab.cabH * 0.7, phys.z + c * 3.95 - s * 0.55); // yeux du conducteur (cabine à gauche)
+    camera.position.set(phys.x + s * 3.8 + c * 0.55, 2.5, phys.z + c * 3.8 - s * 0.55); // yeux du conducteur (cabine à gauche)
     camera.lookAt(camera.position.x + s * 30, camera.position.y - 0.4, camera.position.z + c * 30);
     camera.fov = 70;
   } else {
