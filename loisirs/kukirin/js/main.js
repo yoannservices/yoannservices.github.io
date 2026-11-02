@@ -2383,6 +2383,7 @@ function boot(){
   $('#btnPlay').onclick=startGame;
   const nb=$('#btnNew');if(nb)nb.onclick=()=>{SV=defaultSave();ensureQuests();startGame()};
   requestAnimationFrame(frame);
+  window.GameLoader.ready();
 }
 GAME.state='menu';
 boot();

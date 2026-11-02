@@ -18,7 +18,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* ---------- HUD ---------- */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
 .corner{position:absolute;display:flex;flex-direction:column;gap:8px}
-.tl{top:max(12px,env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
+.tl{top:calc(max(8px,env(safe-area-inset-top,0px)) + 46px);left:50%;transform:translateX(-50%);align-items:center}
 .tr{top:max(12px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));align-items:flex-end}
 .chip{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;backdrop-filter:blur(4px)}
 #money{font:600 26px/1 var(--mono);color:var(--gold);letter-spacing:.02em}
@@ -65,7 +65,7 @@ body.first-person #speedBox{display:none}
 #prompt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(max(14px,env(safe-area-inset-bottom,0px)) + 104px);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
 .keyhint{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:14px}
 kbd{font:600 12px/1 var(--mono);background:#27323f;border:1px solid #3a4756;border-bottom-width:2px;border-radius:4px;padding:3px 6px;color:var(--fg)}
-#toasts{position:absolute;left:50%;transform:translateX(-50%);top:max(12px,env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;align-items:center;width:min(440px,calc(100% - 420px))}
+#toasts{position:absolute;left:50%;transform:translateX(-50%);top:max(190px,env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;align-items:center;width:min(440px,calc(100% - 420px))}
 .toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:8px 14px;font-size:14px;font-weight:500;animation:tin .25s ease-out;max-width:100%}
 .toast.good{border-left-color:var(--gold)} .toast.bad{border-left-color:var(--red)} .toast.dim{border-left-color:#6c7a88;color:var(--mute)}
 @keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
