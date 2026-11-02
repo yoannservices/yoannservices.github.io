@@ -8,15 +8,15 @@
     :root { --cream: #f5f2ec; --ink: #2c3140; --red: #e8363b; --cyan: #7fe8e8; }
     html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--cyan); font-family: Inter, system-ui, sans-serif; color: var(--ink); }
     #game { position: fixed; inset: 0; }
-    #hud { position: fixed; left: 16px; top: 16px; display: grid; gap: 6px; pointer-events: none; }
-    .row { display: flex; gap: 6px; }
+    #hud { position: fixed; left: 50%; transform: translateX(-50%); top: 54px; display: grid; gap: 6px; pointer-events: none; }
+    .row { display: flex; gap: 6px; justify-content: center; }
     .pill { background: var(--cream); padding: 6px 14px; border-radius: 3px; font-weight: 700; letter-spacing: .04em; min-width: 60px; box-shadow: 0 2px 0 rgba(0,0,0,.12); }
     .pill small { font-size: 11px; opacity: .6; margin-right: 10px; }
     .pill.num { min-width: 110px; text-align: right; }
     #chain { color: var(--red); display: none; }
-    #meter { position: fixed; left: 16px; bottom: 16px; font-weight: 700; background: var(--cream); padding: 6px 14px; border-radius: 3px; pointer-events: none; }
+    #meter { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; white-space: nowrap; font-weight: 700; background: var(--cream); padding: 6px 14px; border-radius: 3px; pointer-events: none; }
     #hint { position: fixed; right: 16px; bottom: 16px; font-size: 12px; background: rgba(245,242,236,.85); padding: 6px 10px; border-radius: 3px; pointer-events: none; }
-    #popups { position: fixed; left: 0; right: 0; top: 110px; text-align: center; pointer-events: none; }
+    #popups { position: fixed; left: 0; right: 0; top: 170px; text-align: center; pointer-events: none; }
     .popup { position: absolute; left: 0; right: 0; font-size: 26px; font-weight: 800; color: var(--ink); text-shadow: 0 2px 0 rgba(255,255,255,.6); animation: rise 1.2s ease-out forwards; }
     .popup.near { color: #0a8f8f; } .popup.lost { color: var(--red); } .popup.bank { color: #1e7a3a; }
     @keyframes rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-40px); opacity: 0; } }
@@ -29,6 +29,8 @@
   </style>
 <link rel="stylesheet" href="../../assets/theme.css" />
 <link rel="stylesheet" href="../../assets/simulateur.css" />
+<script src="../../assets/loader.js" data-name="Drift Zone" data-driving="drift-zone" data-menu="#card" data-menu-hide="h1|p:nth-of-type(1)" data-description="Entraîne-toi au drift dans une arène, frôle les obstacles et garde ton combo avant la fin du chrono." data-controls="ZQSD / flèches : conduire|Espace : frein à main|R : recommencer|Échap : pause|M : son · G : debug"></script>
+<script src="../../assets/driving-base.js"></script>
 <script src="../../assets/site.js"></script>
 </head>
 <body>
