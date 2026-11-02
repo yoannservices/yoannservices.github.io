@@ -14,7 +14,7 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #msg .big.good{color:var(--hud)}
 #msg .sub{margin-top:8px;font-size:clamp(13px,2vw,17px);color:var(--fg);text-shadow:0 1px 4px #000}
 #cockpitHud{position:fixed;inset:0;z-index:4;pointer-events:none;color:var(--hud);font-family:var(--mono);text-shadow:0 1px 5px #000}
-#cockpitReadout{position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:clamp(14px,4vw,48px);align-items:center;padding:8px 18px;background:rgba(4,13,17,.72);border:1px solid rgba(141,255,203,.5);border-radius:4px;white-space:nowrap}
+#cockpitReadout{position:absolute;bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 62px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(14px,4vw,48px);align-items:center;padding:8px 18px;background:rgba(4,13,17,.72);border:1px solid rgba(141,255,203,.5);border-radius:4px;white-space:nowrap}
 #cockpitReadout .unit{font-size:10px;letter-spacing:.12em;color:#b4d8ca}
 #cockpitReadout strong{display:block;font-size:clamp(18px,3.2vw,28px);line-height:1.1}
 #cockpitMach.supersonic{color:#ffbd62}
@@ -23,7 +23,7 @@ canvas.full{position:fixed;inset:0;width:100%;height:100%;display:block}
 #cockpitPowerTrack{height:8px;background:#15252a;border:1px solid rgba(141,255,203,.45);overflow:hidden}
 #cockpitPowerFill{height:100%;width:0;background:linear-gradient(90deg,#42c997,#8dffcb);transition:width .12s linear}
 #cockpitPowerFill.boost{background:linear-gradient(90deg,#ff8a3d,#ffe080)}
-#mini{position:fixed;left:16px;bottom:16px;width:170px;height:170px;border-radius:50%;border:1px solid var(--line);background:#06101a;box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+#mini{position:fixed;right:16px;top:max(12px,env(safe-area-inset-top,0px));width:170px;height:170px;border-radius:50%;border:1px solid var(--line);background:#06101a;box-shadow:0 0 0 3px rgba(0,0,0,.35)}
 #touch{position:fixed;right:12px;bottom:16px;display:none;gap:8px;align-items:flex-end}
 #touch .col{display:flex;flex-direction:column;gap:8px}
 #touch button{font:600 13px var(--display);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-width:64px}
@@ -70,5 +70,4 @@ label.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--dim
 #pvColor input[type=range]{width:160px;accent-color:var(--hud)}
 #pvSwatch{width:44px;height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.3)}
 #pvColor .btn{font-size:13px;padding:8px 12px}
-#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:18px;letter-spacing:.2em;color:var(--hud);z-index:9}
 #gl.drag{cursor:grabbing}

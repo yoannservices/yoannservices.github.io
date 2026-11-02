@@ -58,7 +58,8 @@ function worldH(x,z){
 }
 /* Grille de hauteurs (même maillage que le rendu) */
 const HGT=new Float32Array(NV*NV);
-function buildHeights(){for(let j=0;j<NV;j++)for(let i=0;i<NV;i++)HGT[j*NV+i]=worldH(-HALF+i*CELL,-HALF+j*CELL)}
+const yieldLoad=()=>new Promise(resolve=>setTimeout(resolve,0));
+async function buildHeights(){for(let j=0;j<NV;j++){for(let i=0;i<NV;i++)HGT[j*NV+i]=worldH(-HALF+i*CELL,-HALF+j*CELL);if(j%64===63){window.GameLoader.stage('Calcul du relief… '+Math.round(j/N*100)+'%');await yieldLoad()}}}
 function groundH(x,z){ // hauteur exacte du maillage (sans l'eau)
   const gx=(x+HALF)/CELL,gz=(z+HALF)/CELL;
   if(gx<0||gz<0||gx>=N||gz>=N)return -30;
@@ -384,10 +385,10 @@ function detailTexture(){const c=document.createElement('canvas');c.width=c.heig
   for(let j=0;j<256;j++)for(let i=0;i<256;i++){const n=.78+.22*(vnoise(i/8,j/8)*.5+vnoise(i/3,j/3)*.3+rnd()*.2);const v=Math.min(255,n*255);const k=(j*256+i)*4;d.data[k]=d.data[k+1]=d.data[k+2]=v;d.data[k+3]=255}
   x.putImageData(d,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;return t}
 let terrain;
-function buildTerrain(){
+async function buildTerrain(){
   const g=new THREE.PlaneGeometry(SIZE,SIZE,N,N);g.rotateX(-Math.PI/2);
   const pos=g.attributes.position,uv=g.attributes.uv,n=pos.count,col=new Float32Array(n*3);
-  for(let k=0;k<n;k++){pos.setY(k,HGT[k]);uv.setXY(k,pos.getX(k)/90,pos.getZ(k)/90)}
+  for(let k=0;k<n;k++){pos.setY(k,HGT[k]);uv.setXY(k,pos.getX(k)/90,pos.getZ(k)/90);if(k>0&&k%65536===0)await yieldLoad()}
   g.computeVertexNormals();const nor=g.attributes.normal;
   const c=new THREE.Color();
   for(let k=0;k<n;k++){
@@ -407,6 +408,7 @@ function buildTerrain(){
       r=lerp(r,.95,snow);gg=lerp(gg,.96,snow);b=lerp(b,.98,snow);
     }
     col[k*3]=r;col[k*3+1]=gg;col[k*3+2]=b;
+    if(k>0&&k%65536===0){window.GameLoader.stage('Colorisation du relief… '+Math.round(k/n*100)+'%');await yieldLoad()}
   }
   g.setAttribute('color',new THREE.BufferAttribute(col,3));
   terrain=new THREE.Mesh(g,new THREE.MeshLambertMaterial({vertexColors:true,map:detailTexture()}));
@@ -448,11 +450,12 @@ function buildAirports(){
 }
 
 /* Arbres */
-function buildTrees(){
+async function buildTrees(){
   const geo=new THREE.ConeGeometry(7,28,6);geo.translate(0,12,0);
   const mat=new THREE.MeshLambertMaterial({color:0xffffff});
   const max=16000,im=new THREE.InstancedMesh(geo,mat,max);const m=new THREE.Matrix4(),col=new THREE.Color(),qq=new Q4(),sc=new V3(),ps=new V3();let c=0;
-  for(let z=-HALF+2000;z<HALF-2000&&c<max;z+=130)for(let x=-HALF+2000;x<HALF-2000&&c<max;x+=130){
+  let row=0;
+  for(let z=-HALF+2000;z<HALF-2000&&c<max;z+=130){for(let x=-HALF+2000;x<HALF-2000&&c<max;x+=130){
     const px=x+(rnd()-.5)*120,pz=z+(rnd()-.5)*120,h=groundH(px,pz);
     if(h<6||h>1350)continue;
     let near=false;for(const a of AIRPORTS)if(Math.hypot(px-a.x,pz-a.z)<1350){near=true;break}
@@ -461,7 +464,7 @@ function buildTrees(){
     const s=Math.abs(groundH(px+60,pz)-groundH(px-60,pz))+Math.abs(groundH(px,pz+60)-groundH(px,pz-60));if(s>110)continue;
     const k=.7+rnd()*.9;sc.set(k,k*(.9+rnd()*.5),k);ps.set(px,h-1,pz);m.compose(ps,qq,sc);im.setMatrixAt(c,m);
     col.setHSL(.27+rnd()*.07,.45,.17+rnd()*.1);im.setColorAt(c,col);c++;
-  }
+  }if(row++%32===31){window.GameLoader.stage('Placement des forêts… '+Math.min(100,Math.round(row/280*100))+'%');await yieldLoad()}}
   im.count=c;im.instanceMatrix.needsUpdate=true;im.instanceColor.needsUpdate=true;im.frustumCulled=false;scene.add(im);
 }
 
@@ -1674,16 +1677,26 @@ function frame(now){
 const timeIdxShadow=()=>[.55,.4,.12][timeIdx];
 
 /* ===== Démarrage ===== */
-function init(){
-  buildHeights();buildTerrain();buildAirports();buildTrees();buildClouds();
+async function init(){
+  window.GameLoader.stage('Calcul du relief…');
+  await window.GameLoader.trackPromise('Carte : calcul du relief',buildHeights());
+  window.GameLoader.stage('Construction du terrain…');await window.GameLoader.trackPromise('Carte : maillage et textures',buildTerrain());
+  window.GameLoader.stage('Construction des pistes…');buildAirports();
+  window.GameLoader.stage('Placement des forêts…');await window.GameLoader.trackPromise('Carte : végétation',buildTrees());
+  window.GameLoader.stage('Génération des nuages…');buildClouds();
   buildPlane();f35G=new THREE.Group();while(planeG.children.length)f35G.add(planeG.children[0]);planeG.add(f35G,pvG);buildPV();
   // vrais avions (Sketchfab, CC-BY : F-35 par andertan, V-22 Osprey par Muhamad Mirza Arrafi) à la place des modèles procéduraux et des habitacles procéduraux (supprimés) ; la caméra cabine se place dans le vrai modèle
-  import(new URL('../../assets/glb.js',location.href).href).then(m=>{for(const[g,file,len,yaw,h]of[[f35G,'f35',15.5,Math.PI,2.05],[pvG,'v22-osprey-tilt',33,0,3.05]])
-    m.loadGLB(new URL('../../assets/models/'+file+'.glb',location.href).href).then(s=>{m.purge(g);const f=m.fitGLB(s,len,yaw,true);f.position.y=-h;g.add(f);if(g===pvG){PV.nac=[];f.traverse(o=>{if(/^nacelle_/.test(o.name))PV.nac.push({n:o,r:o.children.find(c=>/^rotor_/.test(c.name)),dir:o.name.endsWith('L')?1:-1})})}}).catch(e=>console.warn('Avion non chargé',e))});
+  window.GameLoader.stage('Chargement des avions et de leurs modèles 3D…');
+  const m=await import(new URL('../../assets/glb.js',location.href).href);
+  await Promise.all([[f35G,'f35',15.5,Math.PI,2.05],[pvG,'v22-osprey-tilt',33,0,3.05]].map(async([g,file,len,yaw,h])=>{
+    const s=await m.loadGLB(new URL('../../assets/models/'+file+'.glb',location.href).href);
+    m.purge(g);const f=m.fitGLB(s,len,yaw,true);f.position.y=-h;g.add(f);
+    if(g===pvG){PV.nac=[];f.traverse(o=>{if(/^nacelle_/.test(o.name))PV.nac.push({n:o,r:o.children.find(c=>/^rotor_/.test(c.name)),dir:o.name.endsWith('L')?1:-1})})}
+  }));
   import(new URL('../../assets/glb.js',location.href).href).then(m=>m.purge(cockpitG));
   buildCockpit();f35CockpitG=new THREE.Group();while(cockpitG.children.length)f35CockpitG.add(cockpitG.children[0]);cockpitG.add(f35CockpitG,pvInteriorG);buildPVInterior();
   buildParticles();buildSonicWave();buildChute();buildSpeedLines();buildShadow();buildMapImage();
   setTime(0);buildMenu();resize();spawn(0,'runway');
-  window.__sim={S,AIRPORTS,groundH,spawn,setMenu,physics,keys,inp,AIRCRAFT,PV,camera,renderer,scene,get ACF(){return ACF},set ACF(v){ACF=v},get camMode(){return camMode},set camMode(v){camMode=v}};$('loading').remove();requestAnimationFrame(frame);
+  window.__sim={S,AIRPORTS,groundH,spawn,setMenu,physics,keys,inp,AIRCRAFT,PV,camera,renderer,scene,get ACF(){return ACF},set ACF(v){ACF=v},get camMode(){return camMode},set camMode(v){camMode=v}};requestAnimationFrame(frame);window.GameLoader.ready();
 }
-setTimeout(init,40);
+setTimeout(()=>init().catch(error=>window.GameLoader.fail(error)),40);
