@@ -20,7 +20,8 @@ export class Vehicle {
   // vrai bus (Sketchfab « Generic Town Bus » par own.guest, CC-BY) : remplace le modèle procédural, son intérieur, ses voyageurs et ses portes (supprimés) ; mis à l'échelle de la longueur de chaque type
   _loadReal() {
     const s = this.stats, tilt = this.model.root.children[0];
-    new GLTFLoader().loadAsync(new URL('../../assets/models/town-bus.glb', location.href).href).then((g) => {
+    const load = new GLTFLoader().loadAsync(new URL('../../assets/models/town-bus.glb', location.href).href);
+    window.GameLoader.trackPromise('Modèle 3D town-bus.glb', load).then((g) => {
       const f = fitGLB(g.scene, s.length, Math.PI); f.position.z = s.wheelbase + s.frontOverhang - s.length / 2;
       purge(this.model.root); tilt.add(f);
     }).catch((e) => console.warn('Bus non chargé', e));

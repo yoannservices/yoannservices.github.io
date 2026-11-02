@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { patch } from "../../../assets/perf.js";
-patch({ WebGLRenderer: THREE.WebGLRenderer });
+patch(THREE);
 import { Vehicle } from './bus/Vehicle.js';
 import { City } from './city/City.js';
 import { TrafficLights } from './city/TrafficLights.js';
@@ -239,3 +239,4 @@ class Game {
 }
 
 window.game = new Game();
+window.GameLoader.ready();
