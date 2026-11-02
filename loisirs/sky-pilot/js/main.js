@@ -485,6 +485,8 @@ const planeG=new THREE.Group();scene.add(planeG);
 const cockpitG=new THREE.Group();scene.add(cockpitG);
 let flameMesh,gearGroup,nozG,chuteG,navMats=[];
 let liftFanG,liftFanRotor,liftFanDoors=[],cockpitScreens=[],cockpitScreenTime=0;
+const GEAR={f35:[],pv40:[]};let NOZR=null;
+function animateRig(list,gp){const rt=1-smooth(0,.8,gp);for(const k of list){if(k.y0===undefined)k.y0=k.g.position.y;k.g.rotation[k.ax]=k.ang*rt;k.g.position.y=k.y0+(k.lift||0)*rt}}
 function buildPlane(){
   // Chasseur furtif STOVL fictif, inspiré des proportions d'un appareil de 5e génération (nez vers -Z).
   const M=RK.M,A=(geo,mat,x,y,z,par,rx,ry,rz)=>{const m=RK.add(par||planeG,geo,mat,x,y,z,rx,ry,rz);m.castShadow=false;return m};
@@ -1649,6 +1651,7 @@ function frame(now){
     cockpitG.position.copy(S.p);cockpitG.quaternion.copy(S.q);
     const isPV=ACF.id==='pv40';f35G.visible=!isPV;pvG.visible=isPV;f35CockpitG.visible=!isPV;pvInteriorG.visible=isPV;
     if(isPV)updatePV(dt);
+    animateRig(GEAR[isPV?'pv40':'f35'],S.gearPos);if(NOZR)NOZR.rotation.x=S.noz*Math.PI/2;
     nozG.rotation.x=S.noz*Math.PI/2;chuteG.visible=S.chuteP>.02;chuteG.scale.setScalar(Math.max(S.chuteP,.01));
     const fanOpen=clamp(S.noz,0,1);
     for(const door of liftFanDoors)door.hinge.rotation.z=-door.side*fanOpen*1.28;
@@ -1690,8 +1693,11 @@ async function init(){
   const m=await import(new URL('../../assets/glb.js',location.href).href);
   await Promise.all([[f35G,'f35',15.5,Math.PI,2.05],[pvG,'v22-osprey-tilt',33,0,3.05]].map(async([g,file,len,yaw,h])=>{
     const s=await m.loadGLB(new URL('../../assets/models/'+file+'.glb',location.href).href);
-    m.purge(g);const f=m.fitGLB(s,len,yaw,true);f.position.y=-h;g.add(f);
-    if(g===pvG){PV.nac=[];f.traverse(o=>{if(/^nacelle_/.test(o.name))PV.nac.push({n:o,r:o.children.find(c=>/^rotor_/.test(c.name)),dir:o.name.endsWith('L')?1:-1})})}
+    m.purge(g);const f=m.fitGLB(s,len,yaw,true);const wrap=new THREE.Group();wrap.add(f);
+    // train et tuyère découpés dans le modèle d'un seul bloc (assets/glb.js) : pièces articulées animées dans frame()/updatePV()
+    const rig=m.AIRCRAFT_RIGS[file==='f35'?'f35':'pv40'](wrap);GEAR[file==='f35'?'f35':'pv40']=rig.gear;if(rig.nozR)NOZR=rig.nozR;
+    wrap.position.y=-h;g.add(wrap);
+    if(g===pvG){PV.nac=[];wrap.traverse(o=>{if(/^nacelle_/.test(o.name))PV.nac.push({n:o,r:o.children.find(c=>/^rotor_/.test(c.name)),dir:o.name.endsWith('L')?1:-1})})}
   }));
   import(new URL('../../assets/glb.js',location.href).href).then(m=>m.purge(cockpitG));
   buildCockpit();f35CockpitG=new THREE.Group();while(cockpitG.children.length)f35CockpitG.add(cockpitG.children[0]);cockpitG.add(f35CockpitG,pvInteriorG);buildPVInterior();
