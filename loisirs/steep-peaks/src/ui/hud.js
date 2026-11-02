@@ -21,8 +21,8 @@ export class HUD {
       <div id="hint">ZQSD diriger · Espace (maintenir) sauter · A/E/F/G grabs · Tab (maintenir) roue des disciplines · Échap menu · M carte</div>
       <div id="wheel"><svg></svg><div class="wcenter"></div></div>
       <div id="menu" class="hidden"></div>
-      <div id="loading"><div><h1>Steep Peaks</h1><p>Génération du massif…</p></div></div>`;
-    this.el = Object.fromEntries(['disc', 'compass', 'wx', 'toasts', 'chal', 'spd', 'alt', 'info', 'score', 'combo', 'lvl', 'live', 'popups', 'crash', 'menu', 'loading', 'hint'].map((k) => [k, $('#' + k)]));
+      `;
+    this.el = Object.fromEntries(['disc', 'compass', 'wx', 'toasts', 'chal', 'spd', 'alt', 'info', 'score', 'combo', 'lvl', 'live', 'popups', 'crash', 'menu', 'hint'].map((k) => [k, $('#' + k)]));
     this.g = this.el.compass.getContext('2d');
     this.tab = 'equip'; this.open = false;
     this.hooks = {};
@@ -51,7 +51,7 @@ export class HUD {
     el.innerHTML = `<small>Défi réussi</small><h2>${d.name}</h2><div class="medal">${MEDALS[m]}</div><p>${t}${unit}${better ? ' · record !' : ''}</p>`;
     this.root.append(el); setTimeout(() => el.remove(), 4200);
   }
-  ready() { this.el.loading.classList.add('gone'); setTimeout(() => this.el.loading.remove(), 800); }
+  ready() { window.GameLoader.ready(); }
 
   compass(bearing) {
     const g = this.g, W = 420, H = 34, ppd = 3;
