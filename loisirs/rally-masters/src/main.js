@@ -328,3 +328,4 @@ class Game {
 const fmt = (s) => { const m = Math.floor(s / 60), r = s - m * 60; return `${m}:${r < 10 ? '0' : ''}${r.toFixed(2)}`; };
 
 window.game = new Game();
+window.GameLoader.ready();
