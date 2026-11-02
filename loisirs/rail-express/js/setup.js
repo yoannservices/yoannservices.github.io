@@ -473,6 +473,7 @@ TS.Setup = (function () {
     $('#suPrev').onclick = () => { if (st.step) { st.step--; render(); } };
     $('#suNext').onclick = () => { if (st.step === 4) start(); else if (canGo(st.step + 1)) { st.step++; render(); } };
     render();
+    window.GameLoader.ready();
   }
   return { init, show() { $('#setup').hidden = false; render(); } };
 })();

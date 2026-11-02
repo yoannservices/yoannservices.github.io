@@ -253,9 +253,8 @@ TS.Cab = (function () {
     if (!cfg.help) as.hidden = true;
     const btns = el('div', ''); btns.style.cssText = 'display:grid;gap:6px;';
     const bv = el('button', 'hudbtn', 'Vue (C)'); bv.onclick = () => TS.Main.toggleView();
-    const bp = el('button', 'hudbtn', 'Pause'); bp.onclick = () => pauseModal();
     const bh = el('button', 'hudbtn', 'Pupitre (H)'); bh.onclick = () => $('#game').classList.toggle('nopup');
-    btns.append(bv, bh, bp);
+    btns.append(bv, bh);
     r.append(as, btns);
     h.append(l, r);
   }
@@ -613,6 +612,7 @@ TS.Cab = (function () {
     });
   }
   C.pause = pauseModal;
+  window.__pauseGame = pauseModal; // bouton pause commun (assets/site.js)
 
   C.report = function () {
     const P = TS.Sim.P;

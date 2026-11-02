@@ -135,7 +135,7 @@ dl.sum dd { margin: 0; }
 /* HUD haut */
 #hud { position: absolute; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; display: flex; justify-content: space-between; gap: 10px; pointer-events: none; font-family: var(--cond); }
 .hudbox { pointer-events: auto; background: rgba(12, 13, 17, .78); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 8px 12px; color: #e8edf3; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
-.hud-l { display: flex; gap: 14px; align-items: center; }
+.hud-l { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; align-items: center; }
 .clock { font: 400 1.7rem/1 var(--seg); letter-spacing: .03em; }
 .clock small { font-size: .55em; color: #9aa6b5; }
 .tscale { display: flex; gap: 2px; }
@@ -145,7 +145,7 @@ dl.sum dd { margin: 0; }
 .nexts b { font-size: 1.1rem; letter-spacing: .02em; }
 .nexts span { color: #9aa6b5; font-size: .85rem; }
 .nexts .late { color: #ff8a7a; } .nexts .ok { color: #7ee2a8; }
-.hud-r { display: flex; gap: 8px; align-items: stretch; }
+.hud-r { display: flex; gap: 8px; align-items: stretch; margin: 170px 0 0 auto; }
 .assist { display: flex; gap: 12px; align-items: center; }
 .asig { display: flex; align-items: center; gap: 8px; }
 .asig .mini { width: 22px; height: 46px; background: #111; border-radius: 4px; border: 2px solid #ddd; display: grid; grid-template-rows: repeat(4, 1fr); padding: 2px; gap: 2px; }
@@ -328,7 +328,6 @@ dl.sum dd { margin: 0; }
 .report li.neg { color: #f87171; } .report li.pos { color: #4ade80; }
 
 /* Chargement */
-#loading { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg); z-index: 50; }
 .ld-box { text-align: center; color: var(--muted); }
 .ld-bar { width: 240px; height: 4px; border-radius: 4px; background: var(--surface3); overflow: hidden; }
 .ld-bar i { display: block; height: 100%; width: 40%; background: var(--acc); animation: ld 1s ease-in-out infinite alternate; }
@@ -342,3 +341,4 @@ dl.sum dd { margin: 0; }
 .toast .fix { display: block; margin-top: 4px; color: #b9f5cf; font-size: .8rem; line-height: 1.35; }
 .toast.warn .fix { color: #ffe3a3; }
 .dmi p.warn, .dmi p.bad { white-space: normal; }
+.su-brand { display: none; } /* titre et présentation : bloc commun du menu (assets/driving-base.js) */

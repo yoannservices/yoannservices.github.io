@@ -12,7 +12,7 @@ TS.Main = (function () {
   M.start = function (config) {
     cfg = config;
     $('#game').hidden = false;
-    $('#loading').hidden = false;
+    window.GameLoader.start('Génération de la ligne et préparation du train…');
     TS.Audio.resume();
     setTimeout(() => {
       route = TS.buildRoute(cfg);
@@ -22,7 +22,7 @@ TS.Main = (function () {
       TS.Sim.onFinish = () => TS.Cab.report();
       mode = 'cab'; paused = false;
       TS.World.preload(TS.Sim.P.s, () => {
-        $('#loading').hidden = true;
+        window.GameLoader.ready();
         running = true; last = performance.now();
         cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
         setTimeout(() => TS.Sim.say('Commencez par la visite au sol, puis suivez la check-list (Tab pour la replier).', 'info'), 600);
@@ -148,5 +148,6 @@ TS.Main = (function () {
   document.addEventListener('visibilitychange', () => { if (document.hidden) last = performance.now(); });
 
   TS.Setup.init();     // scripts en fin de <body> : le DOM est prêt
+  window.__railMap = () => { const p = TS.Sim.P, r = TS.Sim.R; if (!p || !r) return null; const point = r.sample(p.s, {}); return { x: point.x, z: point.z, heading: point.h }; };
   return M;
 })();

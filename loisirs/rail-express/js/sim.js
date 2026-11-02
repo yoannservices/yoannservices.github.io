@@ -104,7 +104,7 @@ TS.Sim = (function () {
 
   /* ══════════ Initialisation ══════════ */
   S.init = function (config, route) {
-    cfg = config; R = route; msgs = [];
+    cfg = config; R = S.R = route; msgs = [];
     const St0 = R.stations[0];
     const elec = cfg.loco.trac === 'elec';
     P = S.P = {

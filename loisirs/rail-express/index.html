@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Barlow+Condensed:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/simulateur.css" />
+<script src="../../assets/loader.js" data-name="Rail Express" data-driving="rail-express" data-menu="#suBody" data-menu-when='#suSteps li.on[data-step="0"]' data-description="Prépare ton train, trace ton itinéraire et conduis-le en respectant signaux et arrêts." data-controls="Z / ↑ : traction|S / ↓ : frein|Q / ← · D / → : aiguillages|K : avertisseur|U : urgence|P : portes|C : cabine ou vue extérieure|Tab : check-list|M : documents|Échap : pause"></script>
+<script src="../../assets/driving-base.js"></script>
 <script src="../../assets/site.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -41,7 +43,6 @@
   <aside id="checklist"></aside>
   <div id="pupitre"></div>
   <div id="toasts"></div>
-  <div id="loading" hidden><div class="ld-box"><div class="ld-bar"><i></i></div><p>Génération de la ligne…</p></div></div>
 </section>
 
 <div id="modal" hidden><div class="md-box" role="dialog" aria-modal="true"></div></div>
