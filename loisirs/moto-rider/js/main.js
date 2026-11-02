@@ -1312,3 +1312,4 @@ placeOnRoad(bikeState,40);bikeState.y=RY[bikeState.idx];
 updateChunks(bikeState.x,bikeState.z,0,1);updateRoad(bikeState.idx);
 window.__sim={orb,bikeState,stepPhysics,placeOnRoad,get playing(){return playing},startRun,chunks,BIKES,setCam,scene,camera};
 requestAnimationFrame(frame);
+window.GameLoader.ready();
