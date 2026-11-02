@@ -9,7 +9,6 @@ Modèles téléchargés sur [Sketchfab](https://sketchfab.com), licence **Creati
 | `ducati-v4r.glb` | DucatiV4R | IrfanMuaz | moto-rider |
 | `yamaha-r1.glb` | Yamaha R1 | ejsnowy | moto-rider, monde-ouvert |
 | `town-bus.glb` | Generic Town Bus | own.guest | bus-city-simulator |
-| `man-tgx.glb` | MAN TGX 2010 V8 – High-Detail Semi-Truck | DevPoly3D | truck-france-simulator |
 | `tier-scooter.glb` | Tier scooter | Niilo Poutanen | kukirin, monde-ouvert |
 | `kick-scooter.glb` | Scooter | Deza | trottinette-freestyle |
 | `enduro-dh.glb` | Enduro bicycle DH | Res1n | downhill-riders |
@@ -17,7 +16,6 @@ Modèles téléchargés sur [Sketchfab](https://sketchfab.com), licence **Creati
 | `f35.glb` | Lockheed Martin F35 Lightning II | andertan | sky-pilot, monde-ouvert |
 | `v22-osprey.glb` | Bell Boeing V-22 Osprey Military Helicopter | Muhamad Mirza Arrafi | sky-pilot, monde-ouvert |
 | `diesel-locomotive.glb` | 060 DA Diesel Locomotive | aocrisan | rail-express |
-| `trailer.glb` | Remorque routière (type non vérifié) | À renseigner | truck-france-simulator (citerne visuelle) |
 | `trailer (1).glb` | Variante remorque routière | À renseigner | non utilisée |
 | `train_liquid_tanker_wagon_queensland_railway_wse.glb`, `train_liquid_tanker_wagon_queensland_railway_wse (1).glb` | Wagon-citerne ferroviaire | À renseigner | rail-express (fichier principal utilisé) |
 | `queensland_railways_1900s_bl_heritage_carriage.glb` | Voiture voyageurs Queensland Railways | À renseigner | rail-express (voitures Corail/couchettes) |
