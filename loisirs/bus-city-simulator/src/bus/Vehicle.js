@@ -1,3 +1,4 @@
+import { Box3, Matrix4 } from 'three';
 import { BUS_TYPES, energyPerMeter } from './BusStats.js';
 import { BusPhysics } from './BusPhysics.js';
 import { createBusModel } from './BusModel.js';
@@ -24,6 +25,13 @@ export class Vehicle {
     window.GameLoader.trackPromise('Modèle 3D town-bus.glb', load).then((g) => {
       const f = fitGLB(g.scene, s.length, Math.PI); f.position.z = s.wheelbase + s.frontOverhang - s.length / 2;
       purge(this.model.root); tilt.add(f);
+      // caméras intérieures : le vrai bus est plus bas que les cotes du type (minibus), les ancres suivent sa boîte réelle
+      tilt.updateMatrixWorld(true);
+      const inv = tilt.matrixWorld.clone().invert(), b = new Box3(), m4 = new Matrix4(), c = new Box3();
+      f.traverse((o) => { if (o.isMesh) { o.geometry.computeBoundingBox(); c.copy(o.geometry.boundingBox).applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld)); b.union(c); } });
+      const H = b.max.y, k = s.length / 12;
+      this.model.eye.position.set(0.24 * (b.max.x - b.min.x), 0.69 * H, b.max.z - 1.7 * k);
+      this.model.eyeInt.position.y = 0.67 * H;
     }).catch((e) => console.warn('Bus non chargé', e));
   }
   place(x, z, heading) { this.phys.reset(x, z, heading); }
