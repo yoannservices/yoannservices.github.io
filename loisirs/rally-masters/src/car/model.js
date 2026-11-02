@@ -17,7 +17,7 @@ export class CarModel {
     const mk = (name, x, y, z) => { const o = new THREE.Object3D(); o.position.set(x, y, z); this.shell.add(o); return (this.markers[name] = o); };
     this.markers = {};
     const zWF = (WF[v.shape] - 0.5) * v.L;
-    mk('eye', 0.36, v.belt + 0.3, zWF - 0.95); mk('hood', 0, v.hood + 0.5, (WF[v.shape] + 0.04 - 0.5) * v.L); mk('bumper', 0, 0.52, v.L / 2 + 0.1); mk('smoke', 0, v.hood + 0.05, v.L * 0.25);
+    mk('eye', 0.36, v.belt + 0.3, zWF - 0.95); mk('hood', 0, v.hood + 0.22, (WF[v.shape] + 0.04 - 0.5) * v.L); mk('bumper', 0, 0.52, v.L / 2 + 0.1); mk('smoke', 0, v.hood + 0.05, v.L * 0.25);
     // repères de roues pour les effets (poussière, éclaboussures) : fl, fr, rl, rr
     this.wheels = [0, 1, 2, 3].map((i) => {
       const g = new THREE.Object3D(); g.position.set(i % 2 === 0 ? v.W / 2 - 0.075 : -(v.W / 2 - 0.075), def.wheelR, i < 2 ? this.a : -this.b); this.root.add(g); return { g };
