@@ -2,7 +2,6 @@
 /* ===== Tesla Roadster — simulateur : rendu, physique, trafic, jour/nuit, audio ===== */
 (async function () {
   const $ = id => document.getElementById(id);
-  const loadMsg = $('loadmsg');
   const THREE = await import('three');
   const { mergeGeometries } = await import('three/addons/utils/BufferGeometryUtils.js');
   const { Sky } = await import('three/addons/objects/Sky.js');
@@ -73,16 +72,17 @@
   composer.addPass(new OutputPass());
 
   // ---------- Monde ----------
-  loadMsg.textContent = 'Construction de la ville…';
+  window.GameLoader.stage('Construction de la ville…');
   await new Promise(r => setTimeout(r, 30));
   const city = window.buildCity(THREE, mergeGeometries, renderer, scene);
   const bvh = new MeshBVH(city.colGeom, { maxLeafTris: 8 });
-  loadMsg.textContent = 'Préparation de la Roadster…';
+  window.GameLoader.stage('Chargement de la Roadster et de son modèle 3D…');
   await new Promise(r => setTimeout(r, 10));
   const model = window.buildRoadster(THREE);
   scene.add(model.root);
   // vrai Tesla Roadster (Sketchfab « Tesla Roadster » par Mona x Supercars, CC-BY)
-  import(new URL('../../assets/glb.js', location.href).href).then(async (m) => model.body.add(m.fitGLB(await m.loadGLB(new URL('../../assets/models/tesla-roadster.glb', location.href).href), 4.3))).catch((e) => console.warn('Tesla non chargée', e));
+  const glb = await import(new URL('../../assets/glb.js', location.href).href);
+  model.body.add(glb.fitGLB(await glb.loadGLB(new URL('../../assets/models/tesla-roadster.glb', location.href).href), 4.3));
 
   // ---------- Requêtes de collision ----------
   const _ray = new THREE.Ray();
@@ -940,11 +940,10 @@
     else if (frameAvg < 14 && resScale < 1) ns = Math.min(1, resScale + 0.05);
     if (ns !== resScale) { resScale = ns; const pr = maxPR() * resScale; renderer.setPixelRatio(pr); composer.setPixelRatio(pr); onResize(); }
   }
-  $('loading').classList.add('hide');
   requestAnimationFrame(frame);
+  window.GameLoader.ready();
   window.__sim = { car, camera, scene, renderer, city, model, traffic, P, setTime: h => { timeOfDay = h; }, step, snapCam: () => { camInit = true; } };
 })().catch(err => {
   console.error(err);
-  const el = document.getElementById('loadmsg');
-  if (el) el.textContent = 'Erreur : ' + (err && err.message ? err.message : err) + ' — vérifiez la connexion internet (Three.js est chargé depuis un CDN) et que WebGL est activé.';
+  window.GameLoader.fail(err);
 });

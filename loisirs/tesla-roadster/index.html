@@ -1,15 +1,17 @@
-<!doctype html><html class="sim" lang="fr"><head>
+<!doctype html><html class="sim" lang="fr" data-hk-skip="map"><head>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../assets/theme.css" />
 <link rel="stylesheet" href="../../assets/simulateur.css" />
+<script src="../../assets/loader.js" data-name="Tesla Roadster" data-driving="tesla-roadster" data-menu="#menu .in" data-menu-hide=".kicker|h1|.lead|.keys|.note" data-description="Supercar électrique : roule sur les murs, décolle et enchaîne les figures en ville." data-controls="ZQSD / flèches : conduire|Maj : boost|Espace : décoller|En l’air, Z / S : piquer ou cabrer|Q / D : pivoter · A / E : tonneaux|C : caméra|R : départ · H : aide · Échap : pause"></script>
+<script src="../../assets/driving-base.js"></script>
 <script src="../../assets/site.js"></script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Roadster Simulator</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
@@ -77,8 +79,6 @@
     <button id="go">Démarrer</button>
   </div>
 </div>
-
-<div id="loading"><div class="spin"></div><div id="loadmsg">Chargement de Three.js…</div></div>
 
 <script src="js/model.js?v=17"></script>
 <script src="js/city.js?v=12"></script>
