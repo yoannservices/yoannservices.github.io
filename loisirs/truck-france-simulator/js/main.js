@@ -222,4 +222,5 @@ function frame(now) {
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
+window.GameLoader.ready();
 window.__game = { game, get phys() { return phys; }, get world() { return world; }, get traffic() { return traffic; }, weather }; // debug
