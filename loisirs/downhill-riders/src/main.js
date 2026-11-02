@@ -119,7 +119,7 @@ function startRun(sel) {
   G.run = new Run(sel.mode, diff); G.score = new Score(diff.mult); G.cps = new Checkpoints(track); G.objs = makeObjectives(track);
   G.trickSet = new Set(); G.longestRun = 0; G.crashT = 0; G.finishT = 0; G.acc = 0; G.ready = 1.6; G.ragdollOn = false; G.state = 'play'; G.paused = false;
   G.chunks.update(G.bike.pos.x, G.bike.pos.z, Infinity); renderer.compile(scene, camera); rig.init = false; rig.mode = Math.min(rig.mode, 2);
-  hud.show(true); hud.pop(track.biome.name + ' · ' + diff.name, 'Graine ' + sel.seed, diff.col); hud.el.map.hidden = !hud.mapOn;
+  hud.mapOn = true; hud.show(true); hud.pop(track.biome.name + ' · ' + diff.name, 'Graine ' + sel.seed, diff.col); hud.el.map.hidden = false;
 }
 
 function setPause(on) { if (G.state !== 'play' && !on) { return; } G.paused = on; if (on) menu.show('pause'); else menu.hide(); }
@@ -282,3 +282,5 @@ function frameLoop(now) {
 }
 addEventListener('pointerdown', () => sfx.start(), { once: true });
 setBiome('forest'); menu.show('main'); requestAnimationFrame(frameLoop);
+window.__downhillMap = () => ({ x: player.pos.x, z: player.pos.z, heading: downhillHeading(player.pos.x, player.pos.z) });
+window.GameLoader.ready();

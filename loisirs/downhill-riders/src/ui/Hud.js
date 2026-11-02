@@ -7,7 +7,7 @@ const COL = (q) => (q > 0.66 ? '#35c759' : q > 0.35 ? '#ffd23f' : '#ff5d5d');
 export class Hud {
   constructor() {
     this.el = { hud: $('hud'), mode: $('h-mode'), score: $('h-score'), time: $('h-time'), lives: $('h-lives'), obj: $('h-obj'), speed: $('h-speed'), line: $('h-line'), combo: $('h-combo'), names: $('h-names'), ctot: $('h-ctot'), cmult: $('h-cmult'), cbar: $('h-cbar'), pop: $('h-pop'), land: $('h-land'), landbar: $('h-landbar'), landtxt: $('h-landtxt'), hint: $('h-hint'), map: $('h-map'), toasts: $('toasts') };
-    this.mapOn = false; this._objKey = '';
+    this.mapOn = true; this.el.map.hidden = false; this._objKey = '';
   }
   show(on) { this.el.hud.hidden = !on; }
   update(s) {
