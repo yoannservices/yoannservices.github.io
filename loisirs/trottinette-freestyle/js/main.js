@@ -1074,6 +1074,7 @@
   show('hud', false);
   $('hud-hint').hidden = !game.helpOpen;
   requestAnimationFrame(frame);
+  window.GameLoader.ready();
 
   // Accès console pour le débogage
   window.__trott = {

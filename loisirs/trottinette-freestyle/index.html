@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../../assets/theme.css" />
 <link rel="stylesheet" href="../../assets/simulateur.css" />
+  <script src="../../assets/loader.js" data-name="Trottinette Freestyle" data-driving="trottinette-freestyle" data-menu="#menu-start .card" data-menu-hide=".eyebrow|h1|.lede" data-description="Skatepark en trottinette : enchaîne sauts, rotations et figures pour marquer des points." data-controls="ZQSD / flèches : conduire|Espace : sauter|A / E / F / G : figures|C : caméra|R : replacer|Échap : menu"></script>
+  <script src="../../assets/driving-base.js"></script>
   <script src="../../assets/site.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -24,8 +26,8 @@
     </div>
     <div class="hud-tr panel">
       <span class="timer" id="hud-timer" hidden>2:00</span>
-      <span class="spd"><b id="hud-speed">0</b> km/h</span>
     </div>
+    <div class="hud-speed panel"><b id="hud-speed">0</b> km/h</div>
     <div id="hud-live"></div>
     <div id="hud-trick" aria-live="polite"></div>
     <div id="hud-balance"><span>Équilibre</span><div class="bar"><i></i></div></div>
