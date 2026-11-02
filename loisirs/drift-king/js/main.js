@@ -204,4 +204,6 @@ eng.frequency.setTargetAtTime(55+r*70+g*14+thr*12,tt,.05);engG.gain.setTargetAtT
 hud(spd,f1);renderer.render(scene,camera)}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();reset(0);requestAnimationFrame(frame);
+window.__driftMap=()=>({x:st.x,z:st.z,heading:st.th});
+window.GameLoader.ready();
 })();
