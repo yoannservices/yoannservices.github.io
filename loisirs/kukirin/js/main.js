@@ -1119,7 +1119,20 @@ function makeVehicle(kind,color){
     const b=new THREE.Mesh(RK.rbox(0.36,0.12,0.26,.03,1),SIREN_B);b.position.set(0.4,1.2,-0.9);bar.add(a,b);tu.add(bar);u.bar=bar;
     grp.add(tu);u.turret=tu;
   }
-  scene.add(grp);vehicles.push(u);return u;
+  scene.add(grp);vehicles.push(u);realBody(u,body);return u;
+}
+/* vrais véhicules (Sketchfab « Generic passenger car pack » / « civil service vehicles pack » de Comrade1280, CC-BY) à la place des carrosseries procédurales, qui servent jusqu'au chargement ; sirènes recalées sur le toit réel */
+const REAL_CARS=['car-compact','car-coupe','car-hatchback','car-minivan','car-offroad','car-pickup','car-sedan','car-sport','car-suv','car-wagon','veh-taxi'],realCache={};
+function realBody(u,old){
+  const f=u.kind==='car'?REAL_CARS[Math.floor(Math.random()*REAL_CARS.length)]:u.kind==='cop'?'veh-police_sedan':u.kind==='van'?'veh-postvan':null;
+  if(!f)return;
+  const p=realCache[f]||(realCache[f]=import(new URL('../../assets/glb.js',location.href).href).then(m=>m.loadGLB(new URL('../../assets/models/npc/'+f+'.glb',location.href).href)));
+  p.then(g=>{
+    if(!u.grp.parent)return;
+    const b=g.clone(true),box=new THREE.Box3().setFromObject(b),c=box.getCenter(new THREE.Vector3()),h=new THREE.Group();
+    b.position.set(-c.x,-box.min.y,-c.z);h.add(b);u.grp.remove(old);u.grp.add(h);
+    if(u.bar){const y=u.bar.children[0].position.y;u.bar.position.y=box.max.y+.09-y}
+  }).catch(e=>console.warn('Véhicule non chargé',f,e));
 }
 
 const matRotor=RK.M.dark(0x1d2126);
