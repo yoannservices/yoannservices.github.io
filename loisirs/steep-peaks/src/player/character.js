@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { G, clamp, lerp } from '../core/config.js';
 import { heightAt } from '../world/heightmap.js';
 import { prog } from '../gameplay/progression.js';
+import { loadGLB, carve } from '../../../../assets/glb.js';
 
 const Y = new THREE.Vector3(0, 1, 0), X = new THREE.Vector3(1, 0, 0), Z = new THREE.Vector3(0, 0, 1);
 const q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion(), q2 = new THREE.Quaternion(), q3 = new THREE.Quaternion();
@@ -71,11 +72,57 @@ export class Character {
     this.chute.add(lines); this.chute.visible = false; this.root.add(this.chute);
     this.chute.position.y = -0.2;
 
+    // anciens volumes du corps (cachés quand le vrai modèle est chargé) ; les groupes d'articulation, bâtons, skis et planche restent
+    this.proc = [];
+    for (const g of [this.torso, this.head, ...this.arms, ...this.legs, ...this.legs.map((l) => l.knee)]) for (const c of g.children) if (c.isMesh && c !== g.pole) this.proc.push(c);
+    this.bodies = {};
+    this.loadBodies();
     this.show = { board: 1, ski: 0, wing: 0, chute: 0 };
     this.pose = { crouch: 0.3, lean: 0, prone: 0, stance: 0, armX: [0, 0], armZ: [0.3, 0.3], legZ: 0, torsoX: 0, boardLift: 0 };
     this.parts = [this.torso, this.head, this.legs[0], this.legs[1], this.board, this.skis].map((o) => ({ o, parent: o.parent, pos: o.position.clone(), quat: o.quaternion.clone(), scl: o.scale.clone(), v: new THREE.Vector3(), w: new THREE.Vector3() }));
     this.rag = false;
     this.applyLook();
+  }
+
+  // vrais personnages (Sketchfab, CC-BY : « Skier low poly character » de Sweed, « Low Poly Snowboarder » de gamedevme).
+  // Chaque modèle, d'un seul bloc en T, est découpé en tête / torse / bras / cuisses / tibias qui prennent la place des articulations du squelette.
+  async loadBodies() {
+    const files = { ski: 'skier_low_poly_character', snowboard: 'low_poly_snowboarder' };
+    for (const [disc, f] of Object.entries(files)) {
+      try { this.bodies[disc] = this.carveBody(await loadGLB(new URL(`../../assets/models/${f}.glb`, location.href).href)); }
+      catch (e) { console.warn('Personnage non chargé', f, e); }
+    }
+    if (Object.keys(this.bodies).length) for (const m of this.proc) m.visible = false;
+  }
+  carveBody(model) {
+    const H = 1.8, wrap = new THREE.Group(), box = new THREE.Box3(), size = new THREE.Vector3(), c = new THREE.Vector3();
+    wrap.add(model); wrap.updateMatrixWorld(true); box.setFromObject(model).getSize(size);
+    model.scale.setScalar(H / size.y); wrap.updateMatrixWorld(true); box.setFromObject(model); box.getCenter(c);
+    model.position.set(-c.x, -box.min.y, -c.z); wrap.updateMatrixWorld(true);
+    const K = carve(wrap, (o, p) => {
+      if (p.y > 0.86 * H) return 'H';
+      const side = p.x > 0 ? 0 : 1;
+      if (Math.abs(p.x) > 0.16 * H && p.y > 0.55 * H) return 'A' + side;
+      if (p.y < 0.5 * H) return (p.y > 0.27 * H ? 'T' : 'S') + side;
+    });
+    const used = new Set(Object.values(K).flat()), rest = [];
+    wrap.traverse((o) => { if (o.isMesh && !used.has(o)) rest.push(o); });
+    // joints : repère « pieds à l'origine » de fig, comme le squelette procédural
+    const J = { H: [this.head, 0, 1.61], A0: [this.arms[0], 0.27, 1.47], A1: [this.arms[1], -0.27, 1.47], T0: [this.legs[0], 0.12, 0.95], T1: [this.legs[1], -0.12, 0.95], S0: [this.legs[0].knee, 0.12, 0.49], S1: [this.legs[1].knee, -0.12, 0.49] };
+    const put = (meshes, [joint, jx, jy], rotZ = 0) => {
+      const grp = new THREE.Group(); joint.add(grp);
+      for (const m of meshes) {
+        m.updateMatrixWorld(true);
+        const g = m.geometry.clone().applyMatrix4(m.matrixWorld).translate(-jx, -jy, 0);
+        if (rotZ) g.rotateZ(rotZ);
+        grp.add(new THREE.Mesh(g, m.material));
+      }
+      return grp;
+    };
+    const groups = [put(rest, [this.torso, 0, 0.95])];
+    for (const k in K) groups.push(put(K[k], J[k], k[0] === 'A' ? (k[1] === '0' ? -Math.PI / 2 : Math.PI / 2) : 0));
+    for (const g of groups) g.visible = false;
+    return groups;
   }
 
   wingGeometry() {
@@ -149,6 +196,7 @@ export class Character {
     this.wing.visible = this.show.wing > 0.02; this.wing.scale.set(Math.max(0.001, this.show.wing), 1, 1);
     this.chute.visible = this.show.chute > 0.02; this.chute.scale.setScalar(Math.max(0.001, this.show.chute));
     this.arms.forEach((a) => (a.pole.visible = p.disc === 'ski' && !wing));
+    for (const d in this.bodies) for (const g of this.bodies[d]) g.visible = d === (p.disc === 'snowboard' ? 'snowboard' : 'ski');
 
     // pose cible
     const T = { crouch: 0.3, lean: 0, prone: 0, stance: 0, armX: [0, 0], armZ: [0.3, 0.3], legZ: 0, torsoX: 0.1, boardLift: 0 };
