@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { chevronTexture } from '../surfaces/textures.js';
+import { loadGLB, bakeParts } from '../../../../assets/glb.js';
 
 const lin = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);
 
@@ -124,6 +125,9 @@ export function instancedRocks(items, tint) {
   mesh.castShadow = true; mesh.frustumCulled = false; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   return mesh;
 }
+// vrai spectateur (Sketchfab « Proportional Low Poly Man » de Robin Butler, CC-BY), chargé une fois pour toutes les foules
+let personKit = null;
+const loadPerson = () => personKit || (personKit = loadGLB(new URL('../../../../assets/models/proportional_low_poly_man__free_download.glb', import.meta.url).href).then((g) => bakeParts(g, 1.7 / 5.75)));
 const JACKETS = [[0.9, 0.2, 0.2], [0.2, 0.4, 0.9], [0.95, 0.8, 0.2], [0.2, 0.7, 0.4], [0.9, 0.5, 0.15], [0.85, 0.85, 0.9], [0.55, 0.25, 0.7], [0.2, 0.2, 0.25]];
 export function spectators(items) {
   const L = lib(), g = new THREE.Group();
@@ -134,7 +138,19 @@ export function spectators(items) {
     body.setMatrixAt(i, m); head.setMatrixAt(i, m); const j = JACKETS[Math.floor(Math.abs(it.r) * 97) % JACKETS.length]; c.setRGB(j[0], j[1], j[2]); body.setColorAt(i, c);
   });
   body.castShadow = head.castShadow = true; body.frustumCulled = head.frustumCulled = false;
-  g.add(body, head); return g;
+  g.add(body, head);
+  // les silhouettes ci-dessus servent jusqu'au chargement du vrai modèle (une pièce instanciée, teintée comme avant)
+  loadPerson().then((kit) => {
+    g.remove(body, head);
+    const meshes = kit.parts.map((p) => new THREE.InstancedMesh(p.geo, p.mat, items.length));
+    items.forEach((it, i) => {
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), it.r); m.compose(new THREE.Vector3(it.x, it.y, it.z), q, new THREE.Vector3(it.s, it.s, it.s));
+      const j = JACKETS[Math.floor(Math.abs(it.r) * 97) % JACKETS.length]; c.setRGB(j[0], j[1], j[2]);
+      for (const mesh of meshes) { mesh.setMatrixAt(i, m); mesh.setColorAt(i, c); }
+    });
+    for (const mesh of meshes) { mesh.castShadow = true; mesh.frustumCulled = false; mesh.instanceColor.needsUpdate = true; g.add(mesh); }
+  }).catch((e) => console.warn('Spectateur non chargé', e));
+  return g;
 }
 export function signBoards(dir, items) {
   const L = lib(), mesh = new THREE.InstancedMesh(L.signGeo, L.signMat[dir > 0 ? 1 : 0], items.length), m = new THREE.Matrix4(), q = new THREE.Quaternion();
