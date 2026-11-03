@@ -498,6 +498,21 @@
     traffic.push(t);
   }
   tBody.instanceColor.needsUpdate = true;
+  // vrais véhicules du trafic (packs Sketchfab « Generic passenger car pack » / « civil service vehicles » de Comrade1280, CC-BY) : un modèle par type, les boîtes ci-dessus servent jusqu'au chargement.
+  // Ici l'avant est -Z, les modèles ont l'avant en +Z : demi-tour appliqué à la géométrie.
+  let realCars = null;
+  Promise.all(['car-compact', 'car-coupe', 'car-hatchback', 'car-minivan', 'car-offroad', 'car-pickup', 'car-sedan', 'car-sport', 'car-suv', 'car-wagon', 'veh-taxi', 'veh-police_sedan', 'veh-postvan'].map(async (f) => {
+    const kit = glb.bakeParts(await glb.loadGLB(new URL(`../../assets/models/npc/${f}.glb`, location.href).href));
+    for (const p of kit.parts) p.geo.rotateY(Math.PI);
+    return kit;
+  })).then((kits) => {
+    realCars = kits.map((kit, kk) => {
+      const ids = traffic.map((_, i) => i).filter((i) => i % kits.length === kk);
+      ids.forEach((i, slot) => { traffic[i].kit = kk; traffic[i].slot = slot; });
+      return kit.parts.map((p) => { const m = new THREE.InstancedMesh(p.geo, p.mat, ids.length); m.frustumCulled = false; m.castShadow = m.receiveShadow = true; scene.add(m); return m; });
+    });
+    for (const m of [tBody, tCab, tWheel, tHead, tTail]) scene.remove(m);
+  }).catch((e) => console.warn('Voitures du trafic non chargées', e));
   const _m = new THREE.Matrix4(), _mo = new THREE.Matrix4(), _tp = new V3(), _tq = new Q(), _one = new V3(1, 1, 1);
   const WHEEL_OFF = [[0.85, 0.34, -1.4], [-0.85, 0.34, -1.4], [0.85, 0.34, 1.4], [-0.85, 0.34, 1.4]];
   function updateTraffic(dt) {
@@ -553,12 +568,13 @@
       }
       // matrices d'instance
       _m.compose(t.pos, t.quat, _one);
+      if (realCars) { for (const m of realCars[t.kit]) m.setMatrixAt(t.slot, _m); continue; }
       tBody.setMatrixAt(k, _m); tCab.setMatrixAt(k, _m);
       for (let w = 0; w < 4; w++) { _mo.makeTranslation(...WHEEL_OFF[w]); tWheel.setMatrixAt(k * 4 + w, _tmpMul(_m, _mo)); }
       _mo.makeTranslation(0, 0.66, -2.2); tHead.setMatrixAt(k, _tmpMul(_m, _mo));
       _mo.makeTranslation(0, 0.72, 2.2); tTail.setMatrixAt(k, _tmpMul(_m, _mo));
     }
-    for (const m of [tBody, tCab, tWheel, tHead, tTail]) m.instanceMatrix.needsUpdate = true;
+    for (const m of realCars ? realCars.flat() : [tBody, tCab, tWheel, tHead, tTail]) m.instanceMatrix.needsUpdate = true;
   }
   const _mm = new THREE.Matrix4();
   function _tmpMul(a, b) { return _mm.multiplyMatrices(a, b); }
