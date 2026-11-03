@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { nodes, DIRS, rightOf, inGrid, axisOfDir } from '../city/grid.js';
 import { lightState, timeToGreen } from '../city/TrafficLights.js';
+import { PERSON_FILE, PERSON_SCALE, loadKit, instanceKit } from './Kits.js';
 
 const MAX = 120, HALF_W = 7.4, SPEED = 1.4;
 
@@ -21,6 +22,14 @@ export class Pedestrians {
     for (const m of [this.body, this.head]) { m.frustumCulled = false; m.count = 0; m.castShadow = true; scene.add(m); }
     this.d = new THREE.Object3D();
     this.crossing = [];
+    this.scene = scene;
+    // vrai piéton (Sketchfab « Proportional Low Poly Man » de Robin Butler, CC-BY) : remplace le cylindre et la tête une fois chargé
+    loadKit(PERSON_FILE, PERSON_SCALE).then((kit) => {
+      this.real = instanceKit(scene, kit, MAX);
+      for (let i = 0; i < MAX; i++) this.real.tint(i, new THREE.Color(pal[i % pal.length]));
+      for (const m of this.real.meshes) m.instanceColor.needsUpdate = true;
+      scene.remove(this.body); scene.remove(this.head);
+    }).catch((e) => console.warn('Piéton non chargé', e));
   }
 
   update(dt, t, bus) {
@@ -50,6 +59,15 @@ export class Pedestrians {
       if (p.state === 'cross') this.crossing.push(p);
     }
     const d = this.d;
+    if (this.real) {
+      this.list.forEach((p, i) => {
+        const bob = p.state === 'cross' ? Math.abs(Math.sin(t * 7 + p.ph)) * 0.05 : 0, cw = p.cw, dir = p.side === 0 ? 1 : -1;
+        d.rotation.set(0, Math.atan2((cw.bx - cw.ax) * dir, (cw.bz - cw.az) * dir), 0); d.scale.set(1, 1, 1);
+        d.position.set(p.x, bob, p.z); d.updateMatrix(); this.real.set(i, d.matrix);
+      });
+      this.real.commit(this.list.length);
+      return;
+    }
     this.list.forEach((p, i) => {
       const bob = p.state === 'cross' ? Math.abs(Math.sin(t * 7 + p.ph)) * 0.05 : 0;
       d.rotation.set(0, 0, 0); d.scale.set(1, 1, 1);

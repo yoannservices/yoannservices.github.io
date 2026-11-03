@@ -1,6 +1,6 @@
 # Bus City Simulator
 
-Three.js seul (copie locale dans `lib/`, r186), aucun npm, aucun asset externe : tout est généré par code.
+Three.js seul (copie locale dans `lib/`, r186), aucun npm, la ville est générée par code ; bus, voitures du trafic et piétons sont de vrais modèles .glb.
 
 Les modules ES exigent un serveur HTTP (double-clic sur `index.html` ne marche pas) :
 

@@ -22,6 +22,18 @@ Modèles téléchargés sur [Sketchfab](https://sketchfab.com), licence **Creati
 | `queensland_railways_1200_class_diesel_locomotive.glb` | Locomotive diesel Queensland Railways 1200 class | À renseigner | rail-express (locomotives diesel) |
 | `gros helico.glb`, `petit helico.glb` | Hélicoptères (modèles à confirmer) | À renseigner | non utilisés : pivots rotor/cockpit à adapter |
 | `sydney_l1_inner_west_light_rail_tram.glb`, `sydney_metro_driverless_train__alstom_metropolis.glb` | Tramway et métro de Sydney | À renseigner | non utilisés : aucun véhicule correspondant dans le jeu |
+| `npc/car-*.glb` (10 voitures), `npc/veh-*.glb` (taxi, police, fourgon postal, ambulance, bus, camions) | Generic passenger car pack / Generic civil service vehicles pack, découpés un véhicule par fichier, repère redressé, textures 512 px | Comrade1280 | bus-city-simulator, tesla-roadster (trafic) |
+| `skier_low_poly_character.glb` | Skier low poly character | Sweed | steep-peaks (joueur à ski, découpé en articulations) |
+| `low_poly_snowboarder.glb` | Low Poly Snowboarder | gamedevme | steep-peaks (joueur en snowboard, découpé en articulations) |
+| `proportional_low_poly_man__free_download.glb` | Proportional Low Poly Man | Robin Butler | bus-city-simulator (piétons, voyageurs), rally-masters (spectateurs) |
+| `fairheaven_lt_80_cop_cruiser_-_low_poly_model.glb`, `lct_3000_95_-_low_poly_model.glb` | Fairheaven LT '80 Cop Cruiser, LCT 3000 '95 | Daniel Zhabotinsky | non utilisés (roues nommées, prêts pour `rigWheels`) |
+| `low_poly_car_-_chevrolet_c10_pickup_1963.glb` | Chevrolet C10 Pickup 1963 | tedpermana | non utilisé (un seul bloc, sans roues séparées) |
+| `stylized_low_poly_animated_character.glb` | Stylized Low poly Animated Character | Karthik Naidu | non utilisé (personnage animé, aucun jeu de piétons animés) |
+| `low-poly_psx_pilot_flying_a_plane_animated.glb` | Low-poly PSX Pilot flying a plane (animated) | Jungle Jim | non utilisé (blanc, sans texture) |
+| `race_car_driver_-_low_poly.glb` | Race Car Driver - Low Poly | tomkart | non utilisé (debout, 21 pièces rigides) |
+| `snowboader_with_gear.glb` | Snowboader with gear | gamedevme | non utilisé |
+| `off_road_helmet.glb` | off road helmet | Pieter Ferreira | non utilisé (coque intérieure ouverte, sans visière) |
+| `hero_unit001.glb` | Hero_Unit001 (robot) | Christian Rudorff | non utilisé (aucun jeu de robots) |
 
 ## Licence à vérifier
 

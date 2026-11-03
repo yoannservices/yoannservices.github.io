@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { G, P, HALF, LANE, DIRS, rightOf, axisOfDir, nodeAt, inGrid, ekey, coord } from '../city/grid.js';
 import { lightState } from '../city/TrafficLights.js';
+import { CAR_FILES, loadKit, instanceKit } from './Kits.js';
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -55,7 +56,7 @@ const turnType = (k, k2) => (k2 - k + 4) % 4;   // 0 tout droit, 1 droite, 3 gau
 export class Traffic {
   constructor(scene, count = 70) {
     this.cars = []; this.occ = new Map(); this.closed = new Set(); this.jam = new Set();
-    this.n = count;
+    this.n = count; this.scene = scene;
     const body = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 0.75, 4.2), new THREE.MeshStandardMaterial({ color: '#fff', roughness: 0.5 }), count);
     const cab = new THREE.InstancedMesh(new THREE.BoxGeometry(1.6, 0.6, 2.2), new THREE.MeshStandardMaterial({ color: '#27313c', roughness: 0.2 }), count);
     this.lamps = new THREE.InstancedMesh(new THREE.BoxGeometry(0.4, 0.16, 0.06), new THREE.MeshBasicMaterial({ color: '#fff' }), count * 4);
@@ -70,6 +71,19 @@ export class Traffic {
     }
     // lampes avant (blanches) et arrière (rouges)
     for (let i = 0; i < count; i++) for (let j = 0; j < 4; j++) this.lamps.setColorAt(i * 4 + j, new THREE.Color(j < 2 ? '#fff3c0' : '#c01010'));
+    this._loadReal();
+  }
+
+  // vrais véhicules (packs Sketchfab CC-BY) : un modèle par type, les voitures se répartissent entre eux ; les boîtes ci-dessus servent jusqu'au chargement
+  _loadReal() {
+    Promise.all(CAR_FILES.map((f) => loadKit(f))).then((kits) => {
+      this.real = kits.map((kit, k) => {
+        const ids = this.cars.map((_, i) => i).filter((i) => i % kits.length === k);
+        ids.forEach((i, slot) => { this.cars[i].slot = slot; this.cars[i].kit = k; });
+        return { inst: instanceKit(this.scene, kit, ids.length), n: ids.length };
+      });
+      for (const m of [this.body, this.cab, this.lamps]) this.scene.remove(m);
+    }).catch((e) => console.warn('Voitures non chargées', e));
   }
 
   place(c, a, k, s) {
@@ -198,6 +212,15 @@ export class Traffic {
 
   render() {
     const d = this.dummy;
+    if (this.real) {
+      this.cars.forEach((c) => {
+        const s = c.active ? 1 : 0;
+        d.rotation.set(0, c.h, 0); d.position.set(c.x, 0, c.z); d.scale.set(s, s, s); d.updateMatrix();
+        this.real[c.kit].inst.set(c.slot, d.matrix);
+      });
+      for (const k of this.real) k.inst.commit(k.n);
+      return;
+    }
     this.cars.forEach((c, i) => {
       const s = c.active ? 1 : 0, sn = Math.sin(c.h), cs = Math.cos(c.h);
       d.rotation.set(0, c.h, 0);
