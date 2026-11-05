@@ -5,6 +5,7 @@ import { DS } from './spline.js';
 import { ENVS } from '../core/data.js';
 import { SURFACES, ASPHALTE } from '../surfaces/surfaces.js';
 import { terrainAtlas, bannerTexture, waterTexture } from '../surfaces/textures.js';
+const A_TREES = false; // true = remettre les arbres
 import { lib, StaticBatch, instancedTrees, instancedRocks, spectators, signBoards, TREE_H, TREE_R } from './scenery.js';
 import { mulberry32, clamp, lerp, smooth } from '../core/util.js';
 
@@ -205,7 +206,7 @@ export class Track {
         if (rnd() < 0.16 * env.density && wall - hw[i] > 3.6) {
           const kind = env.trees[Math.floor(rnd() * env.trees.length)], d = hw[i] + 3.2 + rnd() * (wall - hw[i] - 3.8);
           const p = at(i, sd, d, (rnd() - 0.5) * DS), sc = 0.8 + rnd() * 0.5;
-          (treesBy[kind] ||= []).push({ x: p.x, y: p.y - 0.1, z: p.z, s: sc, r: rnd() * 6.28 }); cols.push({ x: p.x, z: p.z, r: TREE_R[kind] * sc + 0.15, k: 0 });
+          (treesBy[kind] ||= []).push({ x: p.x, y: p.y - 0.1, z: p.z, s: sc, r: rnd() * 6.28 }); /* arbres retirés : pas de collision */
         }
         // rochers
         if (rnd() < env.rocks * 0.3) {
@@ -282,7 +283,8 @@ export class Track {
     }
     // instances
     const tint = this.snow ? [1.15, 1.15, 1.2] : [1, 1, 1];
-    for (const kind in treesBy) group.add(instancedTrees(kind, treesBy[kind], tint));
+    // arbres retirés du décor (demande de Yoann) : treesBy est rempli mais jamais affiché
+    if (A_TREES) for (const kind in treesBy) group.add(instancedTrees(kind, treesBy[kind], tint));
     if (rocks.length) group.add(instancedRocks(rocks, this.snow ? [0.95, 0.97, 1] : st.env === 'gravier' ? [1.3, 1.2, 1] : [1, 1, 1]));
     if (specs.length) group.add(spectators(specs));
     for (const d of [-1, 1]) if (signs[d].length) group.add(signBoards(d, signs[d]));

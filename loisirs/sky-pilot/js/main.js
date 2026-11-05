@@ -451,6 +451,7 @@ function buildAirports(){
 
 /* Arbres */
 async function buildTrees(){
+  return; // forêts retirées (demande de Yoann)
   const geo=new THREE.ConeGeometry(7,28,6);geo.translate(0,12,0);
   const mat=new THREE.MeshLambertMaterial({color:0xffffff});
   const max=16000,im=new THREE.InstancedMesh(geo,mat,max);const m=new THREE.Matrix4(),col=new THREE.Color(),qq=new Q4(),sc=new V3(),ps=new V3();let c=0;

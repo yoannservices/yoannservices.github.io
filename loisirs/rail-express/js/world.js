@@ -497,6 +497,7 @@ TS.World = (function () {
       }
     });
     const d = new T.Object3D();
+    trees.length = 0; // arbres retirés (demande de Yoann)
     if (trees.length) {
       const trunk = new T.InstancedMesh(W.trunkGeo, W.trunkMat, trees.length);
       const crowns = [new T.InstancedMesh(W.crownGeo, W.leafMat, trees.length), new T.InstancedMesh(W.coneGeo, W.leafMat, trees.length)];

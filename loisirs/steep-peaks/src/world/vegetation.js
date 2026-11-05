@@ -43,7 +43,7 @@ export function buildVegetation(cx, cz) {
   for (let gz = 0; gz < CHUNK / CELL; gz++) for (let gx = 0; gx < CHUNK / CELL; gx++) {
     const x = x0 + (gx + r()) * CELL, z = z0 + (gz + r()) * CELL, rr = r(), h = heightAt(x, z), sl = slopeAt(x, z);
     const f = forest(x, z, h, sl);
-    if (f > 0 && rr < Math.min(0.95, f * 2.4)) trees.push([x, h, z, 0.8 + r() * 0.9, r() * 6.28]);
+    if (false && f > 0 && rr < Math.min(0.95, f * 2.4)) trees.push( /* sapins retirés (demande de Yoann) */ [x, h, z, 0.8 + r() * 0.9, r() * 6.28]);
   }
   for (let i = 0; i < 26; i++) {
     const x = x0 + r() * CHUNK, z = z0 + r() * CHUNK, h = heightAt(x, z), sl = slopeAt(x, z), s = 0.7 + r() * r() * 3;

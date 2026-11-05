@@ -70,7 +70,7 @@ const terrain=new T.Mesh(tg,new T.MeshStandardMaterial({vertexColors:true,flatSh
 function heightAt(x,z){const fx=(x+S/2)/cs,fz=(z+S/2)/cs,ix=Math.floor(fx),iz=Math.floor(fz);if(ix<0||iz<0||ix>=G||iz>=G)return 0;const u=fx-ix,v=fz-iz,i=iz*(G+1)+ix;return hs[i]*(1-u)*(1-v)+hs[i+1]*u*(1-v)+hs[i+G+1]*(1-u)*v+hs[i+G+2]*u*v}
 
 // sapins
-const TC=1700,tm=new T.MeshStandardMaterial({flatShading:true,roughness:1}),
+const TC=0,tm=new T.MeshStandardMaterial({flatShading:true,roughness:1}),
 t1=new T.InstancedMesh(new T.ConeGeometry(3,7,7),tm,TC),t2=new T.InstancedMesh(new T.ConeGeometry(2.2,5.5,7),tm,TC),dm=new T.Object3D(),tc=new T.Color();
 let k=0;for(let tr=0;tr<12000&&k<TC;tr++){const x=(Math.random()-.5)*S*.9,z=(Math.random()-.5)*S*.9,h=heightAt(x,z);if(h>155)continue;
 if(Math.abs(heightAt(x+4,z)-heightAt(x-4,z))>5||Math.abs(heightAt(x,z+4)-heightAt(x,z-4))>5)continue;

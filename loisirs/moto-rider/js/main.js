@@ -731,7 +731,7 @@ function* chunkGen(cx,cz){
     }
     im.position.set(x0,0,z0);im.frustumCulled=false;grp.add(im);
   };
-  mk(con,TREEG.con);mk(rnd,TREEG.rnd);
+  /* arbres retirés (demande de Yoann) : mk(con,TREEG.con);mk(rnd,TREEG.rnd); */
   return grp;
 }
 function disposeGroup(g){g.traverse(o=>{if(o.geometry&&o.geometry!==TREEG.con&&o.geometry!==TREEG.rnd)o.geometry.dispose();if(o.dispose&&o.isInstancedMesh)o.dispose()})}

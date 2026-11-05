@@ -253,6 +253,7 @@ window.buildCity = function (THREE, mergeGeometries, renderer, scene) {
   }
 
   function tree(x, z, s) {
+    return; // arbres retirés (demande de Yoann)
     const h = (3 + R() * 2) * s;
     inst.trunk.push([x, 0, z, s, h]);
     const c = new THREE.Color().setHSL(0.24 + R() * 0.1, 0.45 + R() * 0.2, 0.2 + R() * 0.12);
@@ -466,7 +467,7 @@ window.buildCity = function (THREE, mergeGeometries, renderer, scene) {
       for (let k = 0; k < tuv.count; k++) tuv.setXY(k, tuv.getX(k) * BLK / 8, tuv.getY(k) * 26 / 8);
       const top = new THREE.Mesh(tg, parkMat);
       top.rotation.x = -Math.PI / 2; top.position.set(cx, 12.03, cz); top.receiveShadow = true; stuntMeshes.add(top);
-      for (let k = 0; k < 8; k++) { const t = new V3(cx + (R() - 0.5) * (BLK - 10), 0, cz + (R() - 0.5) * 18); inst.trunk.push([t.x, 12, t.z, 0.9, 3]); inst.leaf.push([t.x, 12 + 4.2, t.z, 2.4, new THREE.Color(0x2f5a24)]); }
+      for (let k = 0; k < 0; k++) { const t = new V3(cx + (R() - 0.5) * (BLK - 10), 0, cz + (R() - 0.5) * 18); inst.trunk.push([t.x, 12, t.z, 0.9, 3]); inst.leaf.push([t.x, 12 + 4.2, t.z, 2.4, new THREE.Color(0x2f5a24)]); }
       continue;
     }
     slab(cx, cz, half, false);
@@ -544,7 +545,7 @@ window.buildCity = function (THREE, mergeGeometries, renderer, scene) {
           const [px, pz] = axis === 'x' ? [u, off] : [off, u];
           // ne pas planter sur les îlots spéciaux
           tree(px, pz, 0.8 + R() * 0.3);
-          inst.trunk[inst.trunk.length - 1][1] = CURB; inst.leaf[inst.leaf.length - 1][1] += CURB;
+          if (inst.trunk.length) { inst.trunk[inst.trunk.length - 1][1] = CURB; inst.leaf[inst.leaf.length - 1][1] += CURB; }
         }
       }
     }

@@ -525,7 +525,7 @@ function buildWorld(){
   for(let i=0;i<NB;i++)for(let j=0;j<NB;j++){
     const d=districtOfBlock(i,j),rng=mulberry32(i*977+j*131+5),x0=i*PITCH+12,z0=j*PITCH+12,W=76;
     const walls=new Mesher(),plain=new Mesher();
-    const tree=(x,z,sc)=>{sc=sc||1;plain.add(G.cyl5,x,0.9*sc,z,0.3*sc,1.8*sc,0.3*sc,0,'#6b4a2f');
+    const tree=(x,z,sc)=>{return;sc=sc||1;plain.add(G.cyl5,x,0.9*sc,z,0.3*sc,1.8*sc,0.3*sc,0,'#6b4a2f');
       plain.add(G.cone6,x,3.5*sc,z,2.5*sc,3.4*sc,2.5*sc,0,'#4f8a46');plain.add(G.cone6,x,5.2*sc,z,1.7*sc,2.4*sc,1.7*sc,0,'#5c9d4e');addCircle(x,z,0.5*sc)};
     const roofCap=(cx,cz,w,dd,h)=>plain.add(G.box,cx,h+0.35,cz,w+0.6,0.7,dd+0.6,0,'#d3d8dc');
     if(d==='tours'){

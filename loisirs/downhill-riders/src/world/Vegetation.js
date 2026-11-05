@@ -39,6 +39,7 @@ export function* buildVegetation(track, biome, cx, cz, size = 40) {
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
     if (j === 0 && i % 2 === 1) yield;
     biome.veg.forEach((v, vi) => {
+      if (v.kind !== 'rock' && v.kind !== 'lava') return; // arbres, buissons et feuillages retirés (demande de Yoann)
       const h = hash2(cx * n + i, cz * n + j, 100 + vi);
       if (h > v.d * 6) return;
       const x = x0 + (i + hash2(cx * n + i, cz * n + j, 200 + vi)) * cell, z = z0 + (j + hash2(cx * n + i, cz * n + j, 300 + vi)) * cell;

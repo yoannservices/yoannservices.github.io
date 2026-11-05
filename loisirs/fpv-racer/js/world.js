@@ -963,7 +963,7 @@ const World = (() => {
   windmill();
   trackZone();
   playground();
-  plantTrees();
+  // plantTrees(); // arbres et buissons retirés (demande de Yoann)
 
   // Parcours de course : 9 checkpoints
   {

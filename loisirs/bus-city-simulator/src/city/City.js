@@ -255,7 +255,7 @@ export class City {
         }
       }
     }
-    trees.push(...(this.parkTrees ?? []), ...(this.islandTrees ?? []));
+    trees.length = 0; // arbres retirés (demande de Yoann)
     const trunkM = [], leafM = [], leafC = [];
     for (const [x, z] of trees) {
       const sc = 0.8 + rand() * 0.6;
@@ -264,8 +264,10 @@ export class City {
       leafC.push(new THREE.Color().setHSL(0.27 + rand() * 0.08, 0.5, 0.25 + rand() * 0.1));
       this.col.addCircle(x, z, 0.5, 'tree');
     }
-    this.instanced(new THREE.CylinderGeometry(0.15, 0.22, 2, 6), new THREE.MeshStandardMaterial({ color: '#5a3c25' }), trunkM);
-    this.instanced(new THREE.IcosahedronGeometry(1.6, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }), leafM, leafC);
+    if (trunkM.length) {
+      this.instanced(new THREE.CylinderGeometry(0.15, 0.22, 2, 6), new THREE.MeshStandardMaterial({ color: '#5a3c25' }), trunkM);
+      this.instanced(new THREE.IcosahedronGeometry(1.6, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', flatShading: true }), leafM, leafC);
+    }
 
     // lampadaires : 4 par arête, deux côtés
     const poles = [], heads = [];

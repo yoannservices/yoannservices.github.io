@@ -497,6 +497,7 @@ const Park = (() => {
 
   function tree(x, z, s) {
     const g = new THREE.Group();
+    if (true) return g; // arbres retirés (demande de Yoann)
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * s, 0.26 * s, 3 * s, 8), mats.trunk);
     trunk.position.y = 1.5 * s;
     g.add(trunk);
