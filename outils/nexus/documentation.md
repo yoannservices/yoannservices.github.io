@@ -105,11 +105,18 @@ Fonctions actuelles :
 
 - `useChats` ne fait plus que rassembler `useChatList` et `useChatMessages` ; `ChatRow` dans son fichier ; hook commun
   `useEscapeKey` (remplace six copies) ; CSS de l'aperçu HTML dans `styles/htmlPreview.css`.
-- uvicorn tourne sous un utilisateur non-root ; en-têtes de sécurité nginx ; port Docker publié sur `127.0.0.1` seulement.
+- À cette date, le déploiement utilisait nginx et une image Docker ; cette configuration a été retirée le 29 octobre (voir 2.7).
 - `stop.sh` ne tue que les serveurs en écoute. `start.sh` réinstalle `npm ci` si `package-lock.json` a changé.
 - `requirements.txt` nettoyé (pydantic épinglé). `@types/node` ajouté en devDependency (seule nouvelle dépendance).
-- `.dockerignore` exclut `**/*.db` : la base locale ne part jamais dans l'image.
 - `.claude/worktrees/` est exclu de Git.
+
+### 2.7 Retrait de Docker et lancement sans conteneur (29 octobre 2026)
+
+- Suppression des fichiers Docker et de la configuration nginx.
+- En local, `start.sh` lance le backend FastAPI et le frontend Vite ; sous Windows, utiliser Git Bash.
+- Sur Railway, Nixpacks installe Python et Node, construit le frontend, puis démarre Uvicorn. FastAPI sert le site et l'API depuis le même service.
+- Les en-têtes de sécurité sont ajoutés par FastAPI. L'adresse IP cliente est lue dans `X-Forwarded-For` transmis par le proxy Railway.
+- Pour conserver les comptes et les chats sur Railway, monter un volume sur `/data` et définir `DATABASE_PATH=/data/nexus.db`.
 
 ---
 

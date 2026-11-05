@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["python313", "nodejs_22"]
+
+[phases.install]
+cmds = [
+  "python -m venv .venv && .venv/bin/pip install -r backend/requirements.txt",
+  "cd frontend && npm ci"
+]
+
+[phases.build]
+cmds = ["cd frontend && npm run build"]
+
+[start]
+cmd = ".venv/bin/uvicorn --app-dir backend main:app --host 0.0.0.0 --port $PORT"

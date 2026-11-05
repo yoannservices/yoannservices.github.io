@@ -102,6 +102,7 @@
 
   // ---------- Entrées clavier (touches physiques : ZQSD en AZERTY = WASD en QWERTY) ----------
   const keys = {};
+  if (window.GP) GP.air = () => !car.grounded;
   const GAME_CODES = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'Space', 'ShiftLeft', 'ShiftRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
   addEventListener('keydown', e => {
     if (GAME_CODES.has(e.code)) e.preventDefault();

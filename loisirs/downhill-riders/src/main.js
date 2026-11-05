@@ -139,7 +139,9 @@ function finishRun(finished, quit = false) {
 
 /* ───────── entrées -> commandes du vélo ───────── */
 const I = {};
+if (window.GP) GP.air = () => Input.air;
 function readInput() {
+  Input.air = !!G.bike && !G.bike.grounded;
   const man = Input.down('manual');
   Object.assign(I, { steer: Input.steer(), pedal: Input.down('pedal'), brakeR: Input.down('brakeR'), brakeF: Input.down('brakeF'), manual: man, jump: Input.down('jump'), flip: Input.flip(), spin: Input.spin(),
     table: Input.down('grab') && !man, grab: Input.down('grab'), whipL: Input.down('whipL'), whipR: Input.down('whipR'), bar: Input.down('bar'), barB: Input.down('barB'), nohand: Input.down('nohand'), revert: Input.pressed('revert') });

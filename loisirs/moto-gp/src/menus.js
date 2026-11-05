@@ -9,7 +9,7 @@
   const CONTROLS = [
     ['Z / ↑ · S / ↓', 'Accélérer · freiner (avant + arrière)'], ['Q / D · ← →', 'Pencher la moto à gauche / à droite'], ['Espace', 'Frein arrière seul'], ['E / Maj · F / Ctrl', 'Rapport supérieur · inférieur (boîte manuelle)'],
     ['X', 'Demander / annuler un arrêt au stand'], ['C', 'Changer de caméra'], ['V (maintenu)', 'Regarder derrière'],
-    ['G', 'Mode économie de carburant'], ['T', "Point de l'ingénieur"], ['Y / N', "Répondre à l'ingénieur"], ['R · Maj+R', 'Replacer la moto · recommencer'], ['Échap / P', 'Pause'], ['Manette', 'Gâchettes gaz/frein, stick gauche, X stand, Y caméra, bumpers rapports, Start pause'],
+    ['G', 'Mode économie de carburant'], ['T', "Point de l'ingénieur"], ['Y / N', "Répondre à l'ingénieur"], ['R · Maj+R', 'Replacer la moto · recommencer'], ['Échap / P', 'Pause'], ['Manette', 'Gâchettes gaz/frein, stick gauche pencher, croix haut stand, Y caméra, X remettre en piste (maintenir : redémarrer), bumpers rapports, Start pause'],
   ];
 
   A.Menus = {

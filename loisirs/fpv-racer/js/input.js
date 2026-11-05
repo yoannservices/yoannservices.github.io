@@ -80,7 +80,18 @@ const Input = (() => {
 
     // ── Manette ──
     let pv = null;
-    if (pad && !learning) {
+    if (pad && !learning && pad.mapping === 'standard') {
+      // Manette Xbox (mode 2) : stick G = lacet + tangage, stick D = roulis, RT/LT = gaz +/-, A armer, B Angle/Acro, Y caméra, X reset, Start menu
+      const ax = i => dead(pad.axes[i] || 0, 0.12), bt = i => !!(pad.buttons[i] && pad.buttons[i].pressed);
+      const rt = pad.buttons[7] ? pad.buttons[7].value : 0, lt = pad.buttons[6] ? pad.buttons[6].value : 0;
+      kb.thr = Math.max(0, Math.min(1, kb.thr + (rt - lt) * 0.7 * dt));
+      pv = { thr: kb.thr, yaw: ax(0), pitch: -ax(1), roll: ax(2) };
+      const edge = { 0: 'Space', 1: 'KeyM', 3: 'KeyC', 2: 'KeyR', 9: 'Escape' };
+      for (const i in edge) if (bt(i) && !lastPadButtons[i]) pressed.push(edge[i]);
+      if (Math.abs(pv.yaw) + Math.abs(pv.pitch) + Math.abs(pv.roll) + rt + lt > 0.3) out.src = 'pad';
+      out.armLevel = null;
+      pad.buttons.forEach((b, i) => { lastPadButtons[i] = b.pressed; });
+    } else if (pad && !learning) {
       const m = S.map, db = S.deadband;
       let thr = (chan(pad, m.thr) + 1) / 2;
       thr = Math.max(0, Math.min(1, (thr - db / 2) / (1 - db)));

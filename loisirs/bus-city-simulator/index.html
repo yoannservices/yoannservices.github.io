@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bus City Simulator</title>
 <link rel="stylesheet" href="../../assets/theme.css" />
-<script src="../../assets/loader.js" data-name="Bus City Simulator" data-driving="bus-city-simulator" data-menu="#menu .panel" data-menu-hide=".head h1" data-description="Conduis un bus urbain : lignes, arrêts, voyageurs et développement de ton réseau." data-controls="Z / ↑ : accélérer|S / ↓ : freiner ou reculer|Q D / ← → : braquer|Espace : frein à main|H : klaxon · L : phares|A / E : clignotants|O : portes · R : rampe PMR|V : changer de vue|M : carte|Tab : menu · I : aide"></script>
+<script src="../../assets/loader.js" data-name="Bus City Simulator" data-driving="bus-city-simulator" data-menu="#menu .panel" data-menu-hide=".head h1" data-description="Conduis un bus urbain : lignes, arrêts, voyageurs et développement de ton réseau." data-controls="Z / ↑ : accélérer|S / ↓ : freiner ou reculer|Q D / ← → : braquer|Espace : frein à main|H : klaxon · L : phares|A / E : clignotants|O : portes · R : rampe PMR|V : changer de vue|M : carte|Tab : menu · I : aide|Manette : RT accélérer · LT freiner · stick gauche volant · stick droit caméra · A frein à main · Y vue · croix gauche/droite clignotants · croix haut phares · croix bas klaxon · RB portes · Start pause"></script>
 <script src="../../assets/driving-base.js"></script>
 <script src="../../assets/site.js"></script>
+<script src="../../assets/gamepad.js" data-profile="none"></script>
 <style>
   :root { --bg: #0f1218; --panel: #151a23ee; --line: #ffffff22; --acc: #7fd1ff; --ok: #3ddc84; --warn: #ffb000; --bad: #ff453a; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, sans-serif; color: #e8ecf2; }
@@ -76,10 +77,10 @@
   <b>Z / ↑</b> accélérer<br><b>S / ↓</b> frein / marche arrière<br><b>Q D / ← →</b> braquer<br><b>Espace</b> frein à main<br>
   <b>H</b> klaxon<br><b>L</b> phares<br><b>A / E</b> clignotants gauche / droit<br><b>O</b> portes<br><b>R</b> rampe PMR<br><b>N</b> sauter l'arrêt<br>
   <b>V</b> vue : externe / cabine / passagers<br><b>M</b> carte<br><b>Tab</b> menu<br><b>I</b> aide<br>
-  <b>Manette</b> stick · RT/LT · A frein à main · B klaxon · X phares · Y vue · LB/RB clignotants · ← portes · → rampe · ↑ carte · Start menu
+  <b>Manette</b> stick gauche volant · RT/LT · stick droit caméra · A frein à main · Y vue · X aide · croix : ← → clignotants, ↑ phares, ↓ klaxon · RB portes · LB rampe · Back carte · Start menu
 </div>
 <div id="maparea"><canvas id="mapfull" width="760" height="760"></canvas></div>
 <div id="menu"></div>
-<script src="./game.js?v=6"></script>
+<script src="./game.js?v=7"></script>
 </body>
 </html>

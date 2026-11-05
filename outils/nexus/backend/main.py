@@ -33,12 +33,13 @@ from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
-from anthropic import Anthropic
+from anthropic import Anthropic, AuthenticationError
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, StringConstraints
 
 # Journal du serveur : c'est là qu'on voit le détail d'une erreur.
@@ -160,6 +161,7 @@ MESSAGES = {
         "compte_introuvable": "Compte introuvable.",
         "mot_de_passe_incorrect": "Mot de passe incorrect.",
         "service_ia_absent": "Le service IA n'est pas configuré pour le moment.",
+        "cle_ia_invalide": "La clé API Anthropic est invalide ou révoquée. Vérifie ANTHROPIC_API_KEY dans .env, puis redémarre NEXUS.",
         "inscription_impossible": "Impossible de créer le compte pour le moment.",
         "connexion_impossible": "La connexion est impossible pour le moment.",
         "deconnexion_impossible": "La déconnexion est impossible pour le moment.",
@@ -188,6 +190,7 @@ MESSAGES = {
         "compte_introuvable": "Account not found.",
         "mot_de_passe_incorrect": "Incorrect password.",
         "service_ia_absent": "The AI service is not configured right now.",
+        "cle_ia_invalide": "The Anthropic API key is invalid or revoked. Check ANTHROPIC_API_KEY in .env, then restart NEXUS.",
         "inscription_impossible": "Creating the account is not possible right now.",
         "connexion_impossible": "Logging in is not possible right now.",
         "deconnexion_impossible": "Logging out is not possible right now.",
@@ -1094,15 +1097,14 @@ def get_current_username(
 def adresse_client(requete: Request) -> str:
     """
     Renvoie l'adresse IP de la personne qui envoie la requête.
-    En production, le navigateur parle à nginx, et nginx parle au backend : l'adresse
-    directe est alors toujours 127.0.0.1, pour tout le monde. nginx écrit donc la vraie
-    adresse dans X-Real-IP, en remplaçant ce que le navigateur aurait pu envoyer : on peut
-    lui faire confiance. En développement (sans nginx), on prend l'adresse directe.
-    La longueur est limitée : un en-tête géant ne doit pas grossir la mémoire du serveur.
+    Sur Railway, le proxy ajoute l'adresse cliente en dernier dans X-Forwarded-For.
+    En développement, sans cet en-tête, on prend l'adresse directe.
     """
-    reelle = requete.headers.get("x-real-ip", "").strip()[:64]
-    if reelle:
-        return reelle
+    adresses_transmises = requete.headers.get("x-forwarded-for", "")
+    if adresses_transmises:
+        adresse = adresses_transmises.rsplit(",", 1)[-1].strip()[:64]
+        if adresse:
+            return adresse
     return requete.client.host if requete.client else "inconnue"
 
 
@@ -1146,6 +1148,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next: Any) -> Any:
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 
 @app.exception_handler(RequestValidationError)
@@ -1304,6 +1315,12 @@ def upload_file(
         analyse = "".join(block.text for block in response.content if block.type == "text").strip()
         if not analyse:
             raise ValueError("Analyse vide renvoyée par Claude")
+    except AuthenticationError:
+        logger.warning("Échec de l'analyse d'un fichier : clé API Anthropic refusée (chat %s).", chat_id)
+        raise HTTPException(
+            status_code=502,
+            detail=lire_message(langue, "cle_ia_invalide"),
+        )
     except Exception:
         logger.exception("Échec de l'analyse d'un fichier (chat %s).", chat_id)
         raise HTTPException(
@@ -1436,6 +1453,10 @@ def flux_reponse_nexus(
         # Le navigateur a coupé la connexion en plein flux : on n'enregistre pas de demi-réponse.
         logger.info("Flux interrompu par le client (chat %s).", chat_id)
         raise
+    except AuthenticationError:
+        logger.warning("Échec de l'appel à l'API Claude pendant le flux : clé API Anthropic refusée (chat %s).", chat_id)
+        yield ligne_ndjson({"type": "erreur", "detail": lire_message(langue, "cle_ia_invalide")})
+        return
     except Exception as err:
         # Seul le TYPE de l'erreur est journalisé : ni le message de l'élève, ni le texte généré.
         logger.warning("Échec de l'appel à l'API Claude pendant le flux (chat %s, %s).", chat_id, type(err).__name__)
@@ -1548,7 +1569,7 @@ def add_message(
     return StreamingResponse(
         flux_reponse_nexus(chat_id, chat, history, fichiers_envoyes, request.message, client, langue, request.effort),
         media_type="application/x-ndjson; charset=utf-8",
-        # Sans ces en-têtes, nginx pourrait retenir les morceaux au lieu de les envoyer tout de suite.
+        # Sans ces en-têtes, un proxy pourrait retenir les morceaux au lieu de les envoyer tout de suite.
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
@@ -1773,3 +1794,8 @@ def delete_account(
             fichiers_storage.pop(fichier_id, None)
     logger.info("Compte supprimé (%d chat(s) retiré(s)).", len(chats_du_compte))
     return {"success": True}
+
+
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if FRONTEND_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")

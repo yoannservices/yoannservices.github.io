@@ -22,8 +22,8 @@ addEventListener('keyup', (e) => {
 });
 addEventListener('blur', () => { down.clear(); held.clear(); });
 
-// boutons de manette -> actions : A frein à main, Y vue, X relance, B remise en piste, Start pause, Back carte, LB phares
-const PAD_BTN = { 0: 'hand', 1: 'rescue', 2: 'restart', 3: 'view', 4: 'lights', 8: 'map', 9: 'pause', 5: 'voice' };
+// boutons de manette -> actions : A frein à main, Y vue, X relance (2 fois), croix bas remise en piste, Start pause, Back carte, LB phares
+const PAD_BTN = { 0: 'hand', 13: 'rescue', 2: 'restart', 3: 'view', 4: 'lights', 8: 'map', 9: 'pause', 5: 'voice' };
 const dz = (v, d = 0.08) => (Math.abs(v) < d ? 0 : (v - Math.sign(v) * d) / (1 - d));
 
 export const Input = {

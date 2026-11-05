@@ -47,7 +47,7 @@ export class Menu {
 
   help() {
     this.root.innerHTML = `<div class="card"><p class="eyebrow">Commandes</p><h2>Clavier AZERTY (comme Trottinette Freestyle)</h2><table class="keys">${KEYS.map(([k, a]) => `<tr><td>${k.split(' / ').map((x) => `<kbd>${x}</kbd>`).join(' ')}</td><td>${a}</td></tr>`).join('')}</table>
-      <p class="lede">Manette : stick gauche = direction, A = saut, RT = pédaler, B = frein arrière, LT = frein avant, X = tabletop, Y = no-hander, LB / RB = whips, stick droit = flips et rotations en l'air.</p>
+      <p class="lede">Manette : stick gauche = direction (en l'air : rotations et flips), A = saut, RT = pédaler, LT = frein avant, croix gauche = frein arrière, stick droit = caméra (en l'air : barre et vélo de côté), B = sans les mains, Y = vue, X = recommencer, LB = revert, RB = manual, croix haut = tabletop, croix bas = superman, Start = pause.</p>
       <div class="row"><button class="btn primary" data-a="${this.back || 'main'}">Retour</button></div></div>`;
     this._bind();
   }

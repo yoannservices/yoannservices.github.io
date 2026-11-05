@@ -22,17 +22,24 @@ addEventListener('keydown', (e) => heldCodes.add(e.code));
 addEventListener('keyup', (e) => heldCodes.delete(e.code));
 addEventListener('blur', () => { down.clear(); heldCodes.clear(); });
 
-// boutons de manette -> actions : A saut, B frein arrière, X grab, Y no-hander, LB/RB whips, LT frein avant, RT pédale, Start pause, Back carte
-const PAD_BTN = { 0: 'jump', 1: 'brakeR', 2: 'grab', 3: 'nohand', 4: 'whipL', 5: 'whipR', 6: 'brakeF', 7: 'pedal', 8: 'map', 9: 'pause', 10: 'bar', 11: 'barB', 12: 'manual', 13: 'revert', 14: 'camera', 15: 'reset' };
+// boutons de manette -> actions : A saut, B caméra, croix gauche frein arrière, X grab, Y no-hander, LB/RB whips, LT frein avant, RT pédale, Start pause, Back carte
+const PAD_BTN = { 0: 'jump', 1: 'nohand', 2: 'reset', 3: 'camera', 4: 'revert', 5: 'manual', 6: 'brakeF', 7: 'pedal', 8: 'map', 9: 'pause', 12: 'grab', 13: ['grab', 'manual'] };
 
 export const Input = {
+  air: false, // posé par main.js : vrai quand le vélo est en l'air
   update() {
     pad.clear();
     const gp = (navigator.getGamepads?.() ?? []).find(Boolean);
     if (!gp) { padAxes = { x: 0, y: 0, rx: 0, ry: 0 }; padPrev = new Set(); return; }
     const dz = (v) => (Math.abs(v) < 0.15 ? 0 : v);
     padAxes = { x: dz(gp.axes[0] || 0), y: dz(gp.axes[1] || 0), rx: dz(gp.axes[2] || 0), ry: dz(gp.axes[3] || 0) };
-    gp.buttons.forEach((b, i) => { const a = PAD_BTN[i]; if (a && b.pressed) { pad.add(a); if (!padPrev.has(a)) edge.add(a); } });
+    // en l'air : seuls les sticks comptent (gâchettes ignorées) ; stick gauche = rotations + flips, stick droit x = barre, y = whips
+    gp.buttons.forEach((b, i) => { const v = PAD_BTN[i]; if (!v || !b.pressed || (Input.air && (i === 6 || i === 7))) return; for (const a of [].concat(v)) pad.add(a); });
+    if (Input.air) {
+      if (padAxes.rx > 0.5) pad.add('bar'); else if (padAxes.rx < -0.5) pad.add('barB');
+      if (padAxes.ry < -0.5) pad.add('whipL'); else if (padAxes.ry > 0.5) pad.add('whipR');
+    }
+    for (const a of pad) if (!padPrev.has(a)) edge.add(a);
     padPrev = new Set(pad);
   },
   down: (a) => down.has(a) || pad.has(a),
@@ -41,7 +48,7 @@ export const Input = {
   endFrame() { edge.clear(); },
   steer: () => (down.has('right') || pad.has('right') ? 1 : 0) - (down.has('left') || pad.has('left') ? 1 : 0) + padAxes.x,
   /* >0 frontflip, <0 backflip (Z / S en l'air, ou stick droit) */
-  flip: () => (down.has('pedal') ? 1 : 0) - (down.has('brakeR') ? 1 : 0) - padAxes.ry,
-  spin: () => (down.has('right') ? 1 : 0) - (down.has('left') ? 1 : 0) + padAxes.rx + padAxes.x,
+  flip: () => (down.has('pedal') ? 1 : 0) - (down.has('brakeR') ? 1 : 0) - (Input.air ? padAxes.y : 0),
+  spin: () => (down.has('right') ? 1 : 0) - (down.has('left') ? 1 : 0) + (Input.air ? padAxes.x : 0),
   clear() { down.clear(); edge.clear(); },
 };

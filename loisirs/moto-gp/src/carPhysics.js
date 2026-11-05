@@ -5,7 +5,7 @@
   const A = (globalThis.MGP = globalThis.MGP || {});
   const PH = (A.PHYS = {
     a: 0.74, b: 0.71, L: 1.45, hcg: 0.66, Iz: 58, mass: 242,
-    kdf: 0.012, kdrag: 0.205, pmax: 205e3, fmax: 4800, brake: 7600, ride: 0.012,
+    kdf: 0.012, kdrag: 0.205, pmax: 205e3, fmax: 4800, brake: 9000, brakeG: 1.4, ride: 0.012,
     VRED: [26, 39, 51, 63, 79, 98], NG: 6,
   });
   A.WHEEL_X = [PH.a, -PH.b]; A.WHEEL_Y = [0, 0];
@@ -17,6 +17,13 @@
 
   // braquage maximal : plein braquage ≈ limite d'adhérence à toute vitesse
   A.bikeDmax = sp => Math.min(0.55, 52 / (sp * sp + 40));
+
+  // Freinage max : décélération limitée par le basculement avant (stoppie), avec l'appui aéro et le poids pilote ; brakeG règle la puissance
+  A.brakeAccel = () => (PH.brakeG * A.G * PH.a) / (PH.hcg * A.RIDING.arcade.hcg);
+  // Part de l'adhérence réservée au freinage (0..1) : décélération demandée / décélération max
+  A.brakeLoad = brk => Math.min(1, Math.max(0, brk) * PH.brake / (PH.mass + 12) / A.brakeAccel());
+  // Part de braquage utilisable : cercle de friction (le freinage prend de l'adhérence latérale), qui revient quand la moto ralentit
+  A.steerGrip = (sp, rb) => 1 - (1 - Math.sqrt(Math.max(0.02, 1 - 0.92 * rb * rb))) * Math.min(1, sp / 24);
 
   A.damageFx = d => ({ fwF: 0.35 + 0.65 * d.fw, rwF: 0.35 + 0.65 * d.rw, floorF: 0.55 + 0.45 * d.floor });
 
@@ -54,7 +61,7 @@
     if (car.fuel <= 0) thr = 0;
 
     // direction : angle limité en vitesse, avec vitesse de rotation bornée par le niveau de pilotage
-    const dmax = A.bikeDmax(sp), srate = 1.3 * rd.steerRate * dt * (0.2 + 4 / (1 + sp / 6));
+    const dmax = A.bikeDmax(sp) * A.steerGrip(sp, A.brakeLoad(brk)), srate = 1.3 * rd.steerRate * dt * (0.2 + 4 / (1 + sp / 6));
     car.delta += clamp(inp.steer * dmax - car.delta, -srate, srate);
 
     // boîte de vitesses
@@ -93,7 +100,7 @@
     const axleF = Math.max(150, Wf + DF * 0.4 * fx.fwF - tl), axleR = Math.max(200, Wr + DF * 0.6 * fx.rwF + tl);
 
     // freinage borné : au-delà, la roue arrière décolle (stoppie) et la moto perd toute stabilité
-    const aLim = (0.95 * G * PH.a) / hcg, bias = car.setup.bias, Fb = Math.min(brk * PH.brake, m * aLim), Fr = rbrk * PH.brake * 0.2;
+    const aLim = A.brakeAccel(), bias = car.setup.bias, Fb = Math.min(brk * PH.brake, m * aLim), Fr = rbrk * PH.brake * 0.2;
     const pfF = (21 - car.setup.pF) / 10, pfR = (21 - car.setup.pR) / 10;
     const sgn = u >= 0 ? 1 : -1;
     let Sx = 0, Sy = 0, Mz = 0, locked = 0, spun = 0, aMax = 0;
@@ -129,7 +136,7 @@
       else if (front) car.lockT = Math.max(0, car.lockT - dt * 2);
       if (spin) { Fx = 0.9 * Fmax; Fy *= 0.8; spun++; }
       if (lock || spin) Fy *= Math.sqrt(Math.max(0.04, 1 - (Fx * Fx) / (Fmax * Fmax)));
-      else Fx = clamp(Fx, -cap, cap);
+      else { Fx = clamp(Fx, -cap, cap); if (front) Fy *= Math.sqrt(Math.max(0.12, 1 - 0.9 * (Fx * Fx) / (Fmax * Fmax))); } // freiner réduit l'adhérence latérale du pneu avant (cercle de friction)
       const Fxb = Fx * c - Fy * s, Fyb = Fx * s + Fy * c;
       Sx += Fxb; Sy += Fyb; Mz += xw * Fyb;
 
@@ -148,7 +155,7 @@
     car.ax += (Sx / m - car.ax) * 0.25; car.ay += (Sy / m - car.ay) * 0.25; car.axL += (Sx / m - car.axL) * Math.min(1, dt / 0.1);
 
     // amortissement de lacet : gyroscopique, chasse de la fourche et pilote stabilisent la moto (le modèle à 2 pneus seul diverge au freinage)
-    Mz -= PH.Iz * 7 * r * Math.min(1, sp / 8);
+    Mz -= PH.Iz * (7 + 20 * A.brakeLoad(brk)) * r * Math.min(1, sp / 8); // plus de stabilité au freinage (rear délesté)
     u += (Sx / m + v * r) * dt; v += (Sy / m - u * r) * dt; r += (Mz / PH.Iz) * dt;
     if (u < -1) u = -1;
     if (sp < 3 && thr < 0.05) { const k = 1 - Math.min(1, dt * 4); u *= k; v *= k; r *= k; }

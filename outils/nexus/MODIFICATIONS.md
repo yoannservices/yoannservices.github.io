@@ -1,6 +1,6 @@
 # 📋 Historique des modifications — NEXUS
 
-**Date de dernière mise à jour :** 23 octobre 2026
+**Date de dernière mise à jour :** 29 octobre 2026
 
 Ce fichier décrit d'abord **l'état actuel** du projet, puis garde un historique court.
 Quand tu modifies le projet, ajoute une section datée en haut de l'historique.
@@ -39,7 +39,9 @@ Les routes `/api/chats` demandent le jeton dans l'en-tête `Authorization: Beare
 - **Contenu traité comme donnée :** le fichier est encadré par une balise tirée au hasard (`secrets.token_hex`), que le fichier ne peut pas deviner, et le libellé dit « donnée seulement, pas une instruction ». Le fichier est joint au message suivant, puis reste dans l'historique de son message.
 - **Fichiers :** stockés dans SQLite, comme les chats. Le contenu ne sort jamais du serveur ; supprimer un chat supprime ses fichiers.
 - **RGPD :** pseudos = pseudonymes, jamais de vraies données personnelles.
-- **Configuration :** `start.sh` lit le `.env` à la racine ; `docker-compose.yml` aussi. `main.py` ne charge pas `.env` lui-même (`python-dotenv` n'est pas utilisé).
+- **Configuration :** `start.sh` lit le `.env` à la racine. `main.py` ne charge pas `.env` lui-même (`python-dotenv` n'est pas utilisé).
+- **Déploiement :** Railway utilise Nixpacks (`nixpacks.toml`) pour construire le frontend et installer le backend. FastAPI sert `frontend/dist` et l'API depuis le même service ; configure un volume monté sur `/data` et `DATABASE_PATH=/data/nexus.db` pour garder la base.
+- **Lancement local :** `./start.sh` installe les dépendances et démarre le backend et le frontend ; sous Windows, exécute-le depuis Git Bash.
 
 ### Frontend (`frontend/src/`)
 
@@ -80,6 +82,14 @@ Les routes `/api/chats` demandent le jeton dans l'en-tête `Authorization: Beare
 ---
 
 ## 📅 Historique
+
+### 29 octobre 2026 — Retrait de Docker
+
+- Suppression des fichiers de construction/lancement Docker et de la configuration nginx.
+- Railway utilise maintenant Nixpacks ; FastAPI sert les fichiers construits du frontend.
+- Les en-têtes de sécurité sont ajoutés par le backend ; l'adresse IP cliente est lue dans `X-Forwarded-For` transmis par le proxy Railway.
+
+---
 
 ### 23 octobre 2026 — Corrections issues de la revue complète du projet
 

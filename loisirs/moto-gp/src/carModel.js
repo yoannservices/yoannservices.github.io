@@ -139,7 +139,13 @@
     if (m.shadowOn !== cast) { m.shadowOn = cast; m.casters.forEach(o => (o.castShadow = cast)); }
     // inclinaison et tangage ; le pilote se décale vers l'intérieur du virage
     m.leanG.rotation.z = -lean; m.pitchG.rotation.x = -car.pitch;
-    m.rider.position.x = A.clamp(lean * 0.55, -0.38, 0.38); // bassin déporté vers l'intérieur
+    // pilote : poses lissées (freinage, accélération, virage) pour éviter les à-coups
+    const bl = A.brakeLoad(car.in.brk), pz = m.pz || (m.pz = { b: 0, a: 0, hang: 0, turn: 0 }), k = Math.min(1, dt * 7);
+    pz.b += (bl * A.clamp(car.u / 25, 0, 1) - pz.b) * k;                          // charge de freinage : buste redressé, bassin reculé
+    pz.a += (A.clamp(car.axL / 8, 0, 1) * (car.wheelie > 0.1 ? 1 : 0.7) - pz.a) * k; // accélération : couché sur le réservoir
+    pz.hang += (A.clamp(lean * 0.8, -0.55, 0.55) - pz.hang) * Math.min(1, dt * 9);   // hang-off : bassin vers l'intérieur
+    pz.turn += (A.clamp(car.delta * 3, -0.4, 0.4) - pz.turn) * k;                    // épaules et regard suivent le guidon
+    m.rider.position.set(pz.hang, -0.035 * Math.abs(pz.hang) / 0.55, -0.12 * pz.b + 0.05 * pz.a);
     m.st.rotation.y = A.clamp(car.delta * 2.4, -0.6, 0.6);
     m.blob.visible = true;
     m.fwG.visible = d.wheel[0]; m.rwG.visible = d.wheel[1]; m.hl.visible = !d.fwOff; m.tail.visible = !d.rwOff;
@@ -158,11 +164,11 @@
     m.spinF.rotation.x = m.spin[0]; m.spinR.rotation.x = m.spin[1];
     if (m.gWF) m.gWF.rotation.x = m.spin[0]; if (m.gWR) m.gWR.rotation.x = m.spin[1];
     // buste : penché vers l'intérieur autour des hanches (hang-off), se redresse au freinage, se couche à l'accélération
-    const up = A.clamp(-car.ax / 12, -0.4, 1), extra = A.clamp(lean * 0.4, -0.6, 0.6);
-    _q.setFromAxisAngle(_zf, -extra).multiply(_q2.setFromAxisAngle(_ax, -0.42 * up));
+    const up = A.clamp(pz.b * 1.25 - pz.a * 0.55, -0.55, 1.25), extra = A.clamp(lean * 0.4 + pz.hang * 0.25, -0.7, 0.7);
+    _q.setFromAxisAngle(_zf, -extra).multiply(_q2.setFromAxisAngle(_ax, -0.5 * up)).multiply(_q2.setFromAxisAngle(_yUp, pz.turn * 0.5));
     m.torso.quaternion.copy(_q).multiply(m.torsoQ0);
     m.headG.position.copy(m.headP0).sub(m.torso.position).applyQuaternion(_q).add(m.torso.position);
-    m.headG.rotation.set(0.25 * up, 0, -extra * 0.6);
+    m.headG.rotation.set(0.35 * up - 0.12 * pz.a, -pz.turn * 0.6, -extra * 0.6);
     if (car.isPlayer && m.armRig) {
       for (const r of m.armRig) {
         const sh = _v.copy(r.shd0).sub(m.torso.position).applyQuaternion(_q).add(m.torso.position), gp = _v3.copy(r.grip).sub(m.rider.position);

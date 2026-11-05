@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr" data-cat="loisirs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokédex Complet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <script src="../../assets/site.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="" class="ball-icon" /> Pokédex <span class="accent">Complet</span></h1>
+    <p class="subtitle">Encyclopédie interactive  -  Données via PokéAPI</p>
+  </header>
+
+  <main>
+    <!-- Filters -->
+    <div class="filters">
+      <input type="text" id="search" placeholder="Rechercher un Pokémon..." />
+      <select id="type-filter">
+        <option value="">Tous les types</option>
+      </select>
+      <select id="gen-filter">
+        <option value="">Toutes les générations</option>
+        <option value="1">Génération I (1-151)</option>
+        <option value="2">Génération II (152-251)</option>
+        <option value="3">Génération III (252-386)</option>
+        <option value="4">Génération IV (387-493)</option>
+        <option value="5">Génération V (494-649)</option>
+        <option value="6">Génération VI (650-721)</option>
+        <option value="7">Génération VII (722-809)</option>
+        <option value="8">Génération VIII (810-905)</option>
+        <option value="9">Génération IX (906-1025)</option>
+      </select>
+      <select id="sort-filter">
+        <option value="id">Tri par N°</option>
+        <option value="name">Tri par Nom</option>
+        <option value="hp">Tri par PV</option>
+        <option value="attack">Tri par Attaque</option>
+        <option value="speed">Tri par Vitesse</option>
+      </select>
+    </div>
+
+    <div class="stats-bar">
+      <span id="result-count">Chargement...</span>
+    </div>
+
+    <!-- Pokemon Grid -->
+    <div class="poke-grid" id="poke-grid">
+      <div class="loader" id="loader"><i class="fas fa-spinner fa-spin"></i> Chargement des Pokémon...</div>
+    </div>
+
+    <button class="btn-loadmore" id="btn-loadmore" style="display:none"><i class="fas fa-plus"></i> Charger plus</button>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal">
+        <button class="modal-close" id="modal-close"><i class="fas fa-xmark"></i></button>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

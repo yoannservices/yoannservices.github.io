@@ -284,7 +284,7 @@ export class Menus {
       <tr><td><kbd>L</kbd></td><td>Phares</td></tr><tr><td><kbd>V</kbd></td><td>Copilote : voix on / off</td></tr>
       <tr><td><kbd>R</kbd></td><td>Redémarrer la spéciale (+60 s en championnat)</td></tr><tr><td><kbd>T</kbd></td><td>Remise sur la route (+45 s, les dégâts restent)</td></tr>
       <tr><td><kbd>Échap</kbd> <kbd>Tab</kbd></td><td>Pause</td></tr></table>
-      <p class="muted">Manette ou volant (API Gamepad) : stick ou volant = direction, RT / LT ou pédales = gaz / frein, A = frein à main, Y = vue, X = redémarrer, B = remise en piste, LB = phares, RB = voix, Start = pause, Back = carte. Le volant est détecté d'après son nom ; si les pédales ne répondent pas, utilise la manette.</p>
+      <p class="muted">Manette ou volant (API Gamepad) : stick ou volant = direction, RT / LT ou pédales = gaz / frein, A = frein à main, Y = vue, X = redémarrer (2 fois), croix bas = remise en piste, LB = phares, RB = voix, Start = pause, Back = carte. Le volant est détecté d'après son nom ; si les pédales ne répondent pas, utilise la manette.</p>
       <p class="muted">Notes du copilote : « gauche 3 serré, 50, droite 5 » = virage à gauche de gravité 3 (1 = épingle, 6 = presque plein gaz) qui se referme, puis 50 m, puis un virage à droite de gravité 5. Les pénalités sont données pour les coupures de virages et les remises en piste.</p>
       <div class="row"><button class="btn primary" data-act="back">Retour</button></div></div>`);
   }

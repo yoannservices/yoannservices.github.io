@@ -1115,6 +1115,8 @@ function slew(c,t,dt){const rate=(t===0||(c!==0&&Math.sign(t)!==Math.sign(c)))?9
 function readInputs(dt){
   const k=keys;
   let tp=((k.KeyW||k.ArrowDown)?1:0)-((k.KeyS||k.ArrowUp)?1:0),tr=((k.KeyD||k.ArrowRight)?1:0)-((k.KeyA||k.ArrowLeft)?1:0),ty=(k.KeyE?1:0)-(k.KeyQ?1:0);
+  const g=window.GP&&GP.on&&(GP.lx||GP.ly||GP.rx||GP.ry)?GP:null; // manette : tangage/roulis analogiques, stick droit = tonneau (roulis max) + palonnier
+  if(g){tp=g.ly;tr=clamp(g.lx+1.6*g.rx,-1,1);ty=g.ry}
   if(touchStick){inp.pitch=touchStick.pitch;inp.roll=touchStick.roll;inp.yaw=slew(inp.yaw,ty,dt)}
   else{inp.pitch=slew(inp.pitch,tp,dt);inp.roll=slew(inp.roll,tr,dt);inp.yaw=slew(inp.yaw,ty,dt)}
   const up=(k.ShiftLeft||k.ShiftRight||k.PageUp)?1:0,dn=(k.ControlLeft||k.ControlRight||k.PageDown)?1:0;
@@ -1620,6 +1622,7 @@ addEventListener('keydown',e=>{
   else if(c==='KeyR')spawn(curAp,startMode);else if(c==='KeyN')soundOn=!soundOn;
 });
 addEventListener('keyup',e=>{keys[e.code]=false});
+if(window.GP)GP.sub=()=>ACF.id;
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 addEventListener('wheel',e=>{if(running&&!menuOpen){{const was=S.thr>=.999;S.thr=clamp(S.thr-e.deltaY*.0006,0,1);if(e.deltaY<0&&was)S.ab=true;if(e.deltaY>0)S.ab=false}$('thr').value=Math.round(S.thr*100)}},{passive:true});
 let tp0=null;

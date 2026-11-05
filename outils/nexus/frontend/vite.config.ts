@@ -14,7 +14,7 @@ export default defineConfig({
     // (sinon l'élève risquerait d'ouvrir le site d'un camarade)
     strictPort: process.env.FRONTEND_PORT !== undefined,
     // En dev, les appels à /api/... sont redirigés vers le backend local.
-    // En prod, c'est nginx qui fait ce travail (voir nginx.conf.template).
+    // En production, FastAPI sert le site et répond aux appels /api.
     proxy: {
       "/api": `http://localhost:${process.env.BACKEND_PORT ?? 8000}`,
     },

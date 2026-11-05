@@ -115,6 +115,7 @@
     };
   })();
 
+  if (window.GP) GP.air = () => st.mode === 'air';
   /* ═══ Entrées ═══ */
   const keys = new Set(), pressed = new Set();
   const KEYMAP = {

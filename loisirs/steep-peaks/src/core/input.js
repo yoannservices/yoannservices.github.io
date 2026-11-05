@@ -1,5 +1,5 @@
 const keys = new Set(), hit = new Set();
-const PAD_KEYS = { 0: 'space', 1: 'e', 2: 'f', 3: 'g', 4: 'prevdisc', 5: 'nextdisc', 8: 'm', 9: 'escape', 10: 'c', 12: 't', 13: 'b' };
+const PAD_KEYS = { 0: 'space', 3: 'c', 2: 'r', 4: 'prevdisc', 5: 'nextdisc', 8: 'm', 9: 'escape', 15: 't', 13: 'b' };
 const norm = (e) => {
   if (e.code.startsWith('Digit')) return e.code.slice(5);
   if (/^Numpad\d$/.test(e.code)) return e.code.slice(6);
@@ -25,13 +25,15 @@ export const held = (k) => keys.has(k);
 export function poll() {
   let x = (any('d', 'arrowright') ? 1 : 0) - (any('q', 'a', 'arrowleft') ? 1 : 0);
   let y = (any('z', 'w', 'arrowup') ? 1 : 0) - (any('s', 'arrowdown') ? 1 : 0);
-  let padBrake = 0;
+  let padBrake = 0, padGrab = 0;
   const gp = (navigator.getGamepads && [...navigator.getGamepads()].find(Boolean)) || null;
   inp.pad = !!gp;
   if (gp) {
     const dz = (v) => (Math.abs(v) < 0.15 ? 0 : v);
-    x += dz(gp.axes[0]) + dz(gp.axes[2] || 0);
-    y += -dz(gp.axes[1]) - dz(gp.axes[3] || 0);
+    x += dz(gp.axes[0]);
+    y += -dz(gp.axes[1]);
+    const rx = dz(gp.axes[2] || 0), ry = dz(gp.axes[3] || 0); // stick droit = figures : haut grab 1, bas grab 2, côtés grab 3
+    padGrab = Math.abs(rx) > Math.abs(ry) ? (rx ? 3 : 0) : ry < 0 ? 1 : ry > 0 ? 2 : 0;
     padBrake = gp.buttons[6]?.value || 0;
     gp.buttons.forEach((b, i) => {
       const name = PAD_KEYS[i];
@@ -47,7 +49,7 @@ export function poll() {
   inp.jump = keys.has('space');
   inp.jumpUp = prevJump && !inp.jump;
   prevJump = inp.jump;
-  inp.grab = keys.has('e') ? 1 : keys.has('f') ? 2 : keys.has('g') ? 3 : 0;
+  inp.grab = keys.has('e') ? 1 : keys.has('f') ? 2 : keys.has('g') ? 3 : padGrab;
   inp.drift = keys.has('shift');
   inp.brake = inp.y < -0.35 || padBrake > 0.4;
   inp.tuck = inp.y > 0.35;

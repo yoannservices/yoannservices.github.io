@@ -15,3 +15,9 @@ Touches : Z gaz, S frein, Q/D pencher, Espace frein arrière, E/F rapports, X st
 ## Tests (Node, sans rendu)
 
 `node test/tracks-check.js` · `node test/steady.js` (virage stabilisé par vitesse et niveau) · `node test/solo.js [circuit] [tours] [niveau]` · `node test/race-check.js [circuit] [tours] [niveau]`. Les tests chargent Three depuis `../apex-gp/vendor/three.min.js`.
+
+## Freinage, virage et pilote
+
+- Freinage plus fort (`PH.brakeG` 1,4 : jusqu'à ~1,7 G à haute vitesse). Freiner réduit le braquage utilisable (`A.steerGrip`, cercle de friction) : plein frein + plein braquage à 280 km/h ne tourne que doucement, et plus la moto ralentit plus le braquage revient. Le pneu avant perd de l'adhérence latérale en freinant et le lacet est plus amorti : plus de toupie au freinage (`node test/brake-turn.js`).
+- IA : même règle de braquage, freinage de référence plus fort (`BOT.brake`), évitement des contacts (voir apex-gp), visée courte quand elle est sortie de la piste.
+- Pilote : buste redressé et bassin reculé au freinage, couché sur le réservoir à l'accélération, bassin vers l'intérieur (hang-off), épaules et tête suivent le guidon, poses lissées (`carModel.js`).

@@ -40,7 +40,7 @@ class Game {
     this.traffic = new Traffic(this.scene);
     this.peds = new Pedestrians(this.scene);
     this.crowd = new StopCrowd(this.scene);
-    this.rig = new CameraRig(this.camera);
+    this.rig = new CameraRig(this.camera); this.rig.bind(this.renderer.domElement);
     this.vehicle = null;
     this.busCircles = [];
     this.busInfo = { x: 0, z: 0, circles: [], nodes: [] };

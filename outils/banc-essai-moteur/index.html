@@ -1,0 +1,122 @@
+<!doctype html><html lang="fr" data-cat="loisirs" data-theme="dark"><head>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../assets/theme.css" />
+<link rel="stylesheet" href="../../assets/simulateur.css" />
+<script src="../../assets/site.js" defer></script>
+<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="stylesheet" href="style.css"></head><body>
+<title>Banc d'essai moteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+
+<div class="wrap">
+  <header>
+    <h1>Banc d'essai moteur</h1>
+    <p class="lede">Choisissez une voiture et un moteur avec un enregistrement sonore du même moteur, puis sa boîte de vitesses. Conduisez avec les trois pédales : le compte-tours, le son et les pistons suivent ce que vous faites.</p>
+  </header>
+
+  <section class="pick">
+    <div class="panel">
+      <h2><span class="step">1</span>Voiture</h2>
+      <div class="carsel">
+        <label for="selBrand">Marque<select id="selBrand"></select></label>
+        <label for="selModel">Modèle<select id="selModel"></select></label>
+        <label for="selYear">Année<select id="selYear"></select></label>
+        <label for="selEng" class="wide">Moteur<select id="selEng"></select></label>
+      </div>
+      <p class="gbh">Suralimentation (modifiable)</p>
+      <div class="seg" id="turboChips" role="radiogroup" aria-label="Turbocompresseurs"></div>
+      <p class="blurb" id="turboText"></p>
+      <div id="engInfo"></div>
+    </div>
+    <div class="panel">
+      <h2><span class="step">2</span>Boîte de vitesses</h2>
+      <div class="seg" id="boxChips" role="radiogroup" aria-label="Boîte de vitesses"></div>
+      <p class="blurb" id="boxText"></p>
+      <p class="gbh" id="gbHead">Vitesse maximale par rapport, au régime maxi</p>
+      <div class="gearbars" id="gearBars"></div>
+    </div>
+  </section>
+
+  <section class="panel cockpit">
+    <h2><span class="step">3</span>Conduite</h2>
+    <div class="cgrid">
+      <div>
+        <div class="dialwrap"><canvas id="dial" aria-label="Compte-tours"></canvas></div>
+        <div class="status" id="status">
+          <span class="pill mute" id="pOff" hidden>Moteur coupé</span>
+          <span class="pill warn" id="pLim" hidden>Rupteur</span>
+          <span class="pill amber" id="pTrac" hidden>Adhérence limite</span>
+          <span class="pill amber" id="pSlip" hidden>Embrayage qui patine</span>
+        </div>
+      </div>
+      <div style="min-width:0">
+        <div class="readouts">
+          <div class="ro"><span class="lab">Vitesse</span><span class="val" id="roSpeed">0</span><span class="unit">km/h</span></div>
+          <div class="ro"><span class="lab">Rapport</span><span class="val" id="roGear">N</span></div>
+          <div class="ro"><span class="lab">Couple</span><span class="val" id="roTq">0</span><span class="unit">Nm</span></div>
+          <div class="ro"><span class="lab">Puissance</span><span class="val" id="roPw">0</span><span class="unit">ch</span></div>
+        </div>
+        <div class="boost" id="boostBox">
+          <div class="bl"><span>Pression turbo</span><b id="boostVal">Sans turbo</b></div>
+          <div class="btrack"><i id="boostFill"></i><b id="boostMark" hidden></b></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="btnEngine" type="button">Couper le moteur</button>
+          <button class="btn" id="btnSound" type="button">Son : cliquez pour activer</button>
+          <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="60"></label>
+          <label class="chk" for="assist"><input type="checkbox" id="assist" checked>Anti-calage</label>
+        </div>
+        <div class="selector" id="selector"></div>
+        <div class="pedals" id="pedals">
+          <div class="pedal" id="pedClu" data-key="clu" role="button" aria-label="Pédale d'embrayage">
+            <div class="fill"></div><span class="pn">Embrayage</span><span class="pv" id="pvClu">0 %</span><span class="ph">Maj, Q ou ←</span>
+          </div>
+          <div class="pedal" id="pedBrk" data-key="brk" role="button" aria-label="Pédale de frein">
+            <div class="fill"></div><span class="pn">Frein</span><span class="pv" id="pvBrk">0 %</span><span class="ph">S, Espace ou ↓</span>
+          </div>
+          <div class="pedal" id="pedThr" data-key="thr" role="button" aria-label="Pédale d'accélérateur">
+            <div class="fill"></div><span class="pn">Accélérateur</span><span class="pv" id="pvThr">0 %</span><span class="ph">Z, W ou ↑</span>
+          </div>
+        </div>
+        <p class="toast" id="toast" aria-live="polite">Le moteur tourne au ralenti. Cliquez ou appuyez sur une touche pour activer le son.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <h2>Dans le moteur</h2>
+      <canvas class="cv" id="cyl" aria-label="Pistons animés"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--st-intake)"></i>Admission</span>
+        <span><i style="background:var(--st-comp)"></i>Compression</span>
+        <span><i style="background:var(--st-power)"></i>Combustion</span>
+        <span><i style="background:var(--st-exh)"></i>Échappement</span>
+      </div>
+      <p class="note" id="cylNote"></p>
+    </div>
+    <div class="panel">
+      <h2>Couple et puissance</h2>
+      <canvas class="cv" id="curve" aria-label="Courbes de couple et de puissance"></canvas>
+      <p class="note" id="curveNote">Courbes à pleine charge. Le trait vertical suit le régime actuel. Le cercle creux montre le couple réellement produit avec votre pied.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <details><summary id="credSum">Crédits sonores</summary><div class="credits" id="credits"></div></details>
+  </section>
+
+  <section class="panel">
+    <h2>Commandes</h2>
+    <dl class="help" id="help"></dl>
+  </section>
+</div>
+
+<script src="js/sons.js"></script>
+<script src="js/main.js"></script>
+
+</body></html>

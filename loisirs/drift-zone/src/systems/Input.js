@@ -27,7 +27,7 @@ class Input {
     let handbrake = d('Space');
     let restart = this.pressed.has('KeyR');
     const toggleDebug = this.pressed.has('KeyG');
-    const pause = this.pressed.has('Escape') || this.pressed.has('KeyP');
+    let pause = this.pressed.has('Escape') || this.pressed.has('KeyP');
     const toggleMute = this.pressed.has('KeyM');
     const anyKey = this.pressed.size > 0;
     this.pressed.clear();
@@ -40,9 +40,11 @@ class Input {
       throttle = Math.max(throttle, pad.buttons[7]?.value ?? 0);
       brake = Math.max(brake, pad.buttons[6]?.value ?? 0);
       handbrake = handbrake || !!(pad.buttons[0]?.pressed || pad.buttons[5]?.pressed);
-      const start = !!pad.buttons[9]?.pressed;
-      restart = restart || (start && !this.padRestartWas);
-      this.padRestartWas = start;
+      const start = !!pad.buttons[9]?.pressed, x = !!pad.buttons[2]?.pressed;
+      restart = restart || (x && !this.padRestartWas);
+      this.padRestartWas = x;
+      pause = pause || (start && !this.padPauseWas);
+      this.padPauseWas = start;
       padActive = Math.abs(ax) > DEADZONE || throttle > 0 || brake > 0 || handbrake || start;
     }
     return { throttle, brake, steer, handbrake, restart, toggleDebug, pause, toggleMute, any: anyKey || padActive };
