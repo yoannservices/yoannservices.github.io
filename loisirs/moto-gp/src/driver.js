@@ -149,9 +149,10 @@
       // ---- vitesse cible ----
       const look = Math.ceil((Math.abs(u) * 0.35) / ds);
       let vt = Math.min(L.vmax[i], L.vmax[(i + look) % N]);
-      const pace = lv.pace * (1 + this.n1 * lv.noise * 0.6) * (0.985 + (this.drv.skill - 0.97) * 0.5);
-      vt *= pace * this.gripScale(ctx.wet);
-      if (this.pass) vt *= 1 + 0.012 * lv.agg; // freinage un peu plus tardif pour conclure le dépassement
+      // jamais au-dessus de la limite de la voiture (même perf que le joueur) : seules les trajectoires font gagner du temps
+      const pace = Math.min(1, lv.pace * (1 + this.n1 * lv.noise * 0.6) * (0.985 + (this.drv.skill - 0.97) * 0.5)), vLim = vt * this.gripScale(ctx.wet);
+      vt = vLim * pace;
+      if (this.pass) vt = Math.min(vt * (1 + 0.012 * lv.agg), vLim); // freinage un peu plus tardif pour conclure le dépassement, sans dépasser la limite // freinage un peu plus tardif pour conclure le dépassement
       if (this.errT > 0) vt *= 0.96;
       // hors piste : on revient doucement
       const off = Math.abs(car.lat) - tr.hw;
@@ -183,7 +184,7 @@
       // distance de sécurité cinématique : on doit pouvoir s'arrêter derrière la voiture de devant, même si elle freine à fond
       let vsafe = 1e9, gapNeed = 0;
       if (front && Math.abs(front.lat - car.lat) < LANE + 0.5) {
-        const B = A.BOT, aS = 0.6 * (Math.min(0.9 * B.mu * (B.g + (B.cd * u * u) / B.mass), (B.brake / B.mass) * 0.92) + (B.drag * u * u) / B.mass);
+        const B = A.BOT, aS = 0.6 * (Math.min(0.9 * (B.bg || 1) * B.mu * (B.g + (B.cd * u * u) / B.mass), (B.brake / B.mass) * 0.92) + (B.drag * u * u) / B.mass);
         const vf = front.drv && front.drv.vtCmd != null && !(front.isPlayer && !front.auto_ap) ? Math.min(front.u, front.drv.vtCmd) : Math.max(0, front.u + Math.min(0, front.axL != null ? front.axL : front.ax || 0) * 0.6);
         gapNeed = Math.max(fgap - 1.0 - u * 0.12, 0.3);
         vsafe = Math.sqrt(Math.max(0, vf * vf + 2 * aS * gapNeed));
@@ -202,7 +203,7 @@
         if (vt <= 0.01) { inp.thr = 0; inp.brk = 1; }
       }
       if (vsafe < 1e8 && u > vsafe + 0.5) { // freinage proportionnel à la décélération nécessaire (pas seulement à l'écart de vitesse)
-        const B = A.BOT, aMax = Math.min(0.9 * B.mu * (B.g + (B.cd * u * u) / B.mass), (B.brake / B.mass) * 0.92) + (B.drag * u * u) / B.mass;
+        const B = A.BOT, aMax = Math.min(0.9 * (B.bg || 1) * B.mu * (B.g + (B.cd * u * u) / B.mass), (B.brake / B.mass) * 0.92) + (B.drag * u * u) / B.mass;
         inp.brk = Math.max(inp.brk, clamp(((u * u - vsafe * vsafe) / (2 * gapNeed)) / aMax, 0, 1)); inp.thr = 0;
       }
       this.vtCmd = vt;

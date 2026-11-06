@@ -43,7 +43,7 @@
         const isP = id === 0, drv = isP ? null : A.DRIVERS[id - 1];
         const tire = isP ? set.tire : wet0 > 0.25 ? 'W' : A.pick(['M', 'M', 'M', 'S', 'S', 'H', 'H']);
         const c = new A.Car(id, { name: isP ? set.name : drv.name, number: isP ? set.number : nums[(id - 1) % nums.length], team: isP ? set.team : drv.team, driver: drv, isPlayer: isP, setup: playerSetup, assists: isP ? set.assists : { abs: true, tc: true, auto: true, wheelie: true }, tire, riding: 'arcade' });
-        if (!isP) { c.perf = Object.assign({}, playerPerf); c.crashK = 2.2; }
+        if (!isP) { c.perf = Object.assign({}, playerPerf); }
         const pose = tr.gridPose(this.cfg.noGrid ? 0 : k);
         c.reset(pose, fuel); c.gridPos = k; c.pit.slot = k; c.pos = k + 1; c.s = pose.s; c.idx = -1;
         A.contact(c, tr);

@@ -5,7 +5,7 @@
   const A = (globalThis.MGP = globalThis.MGP || {});
   const PH = (A.PHYS = {
     a: 0.74, b: 0.71, L: 1.45, hcg: 0.66, Iz: 58, mass: 242,
-    kdf: 0.012, kdrag: 0.205, pmax: 205e3, fmax: 4800, brake: 9000, brakeG: 1.4, ride: 0.012,
+    kdf: 0.012, kdrag: 0.205, pmax: 205e3, fmax: 4800, brake: 9000, brakeG: 4.2, ride: 0.012,
     VRED: [26, 39, 51, 63, 79, 98], NG: 6,
   });
   A.WHEEL_X = [PH.a, -PH.b]; A.WHEEL_Y = [0, 0];
@@ -19,9 +19,11 @@
   A.bikeDmax = sp => Math.min(0.55, 52 / (sp * sp + 40));
 
   // Freinage max : décélération limitée par le basculement avant (stoppie), avec l'appui aéro et le poids pilote ; brakeG règle la puissance
+  const BRAKE_GRIP = 1.7;
   A.brakeAccel = () => (PH.brakeG * A.G * PH.a) / (PH.hcg * A.RIDING.arcade.hcg);
   // Part de l'adhérence réservée au freinage (0..1) : décélération demandée / décélération max
-  A.brakeLoad = brk => Math.min(1, Math.max(0, brk) * PH.brake / (PH.mass + 12) / A.brakeAccel());
+  // charge de freinage (réduit le braquage) : calée sur l'ancienne référence brakeG 1,4 pour que le braquage au freinage reste identique malgré les freins plus puissants
+  A.brakeLoad = brk => Math.min(1, Math.max(0, brk) * PH.brake / (PH.mass + 12) / (A.brakeAccel() * 1.4 / PH.brakeG));
   // Part de braquage utilisable : cercle de friction (le freinage prend de l'adhérence latérale), qui revient quand la moto ralentit
   A.steerGrip = (sp, rb) => 1 - (1 - Math.sqrt(Math.max(0.02, 1 - 0.92 * rb * rb))) * Math.min(1, sp / 24);
 
@@ -124,10 +126,11 @@
       // la force latérale passe en premier ; le longitudinal ne dispose que du reste de l'ellipse
       const Fy0 = -Fmax * (front ? Math.sin(1.3 * Math.atan(24 * al)) : Math.sin(1.2 * Math.atan(28 * al))), fr = Fy0 / Fmax;
       const cap = Fmax * Math.sqrt(Math.max(0.01, 1 - fr * fr));
+      const gB = 1 + (BRAKE_GRIP - 1) * (1 - fr * fr), capB = cap * gB; // les freins disposent de plus d'adhérence longitudinale, mais plus on demande de latéral, moins il en reste
       let bw = front ? bias * Fb : (1 - bias) * Fb + Fr;
       let dw_ = front ? 0 : Fdrive;
       let lock = false, spin = false;
-      if (bw > 0.97 * cap) { if (car.assists.abs || rd.forceAids) bw = 0.92 * cap; else lock = true; }
+      if (bw > 0.97 * capB) { if (car.assists.abs || rd.forceAids) bw = 0.92 * capB; else lock = true; }
       if (dw_ > 0.95 * cap) { if (car.assists.tc || rd.forceAids) dw_ = 0.9 * cap; else spin = true; }
       const vs = vlong >= 0 ? 1 : -1;
       let Fx = dw_ - bw * vs - CRR[car.surf[w]] * Fz * vs;
@@ -136,7 +139,7 @@
       else if (front) car.lockT = Math.max(0, car.lockT - dt * 2);
       if (spin) { Fx = 0.9 * Fmax; Fy *= 0.8; spun++; }
       if (lock || spin) Fy *= Math.sqrt(Math.max(0.04, 1 - (Fx * Fx) / (Fmax * Fmax)));
-      else { Fx = clamp(Fx, -cap, cap); if (front) Fy *= Math.sqrt(Math.max(0.12, 1 - 0.9 * (Fx * Fx) / (Fmax * Fmax))); } // freiner réduit l'adhérence latérale du pneu avant (cercle de friction)
+      else { Fx = clamp(Fx, -capB, cap); if (front) Fy *= Math.sqrt(Math.max(0.12, 1 - 0.9 * (Fx * Fx) / (Fmax * Fmax))); } // freiner réduit l'adhérence latérale du pneu avant (cercle de friction)
       const Fxb = Fx * c - Fy * s, Fyb = Fx * s + Fy * c;
       Sx += Fxb; Sy += Fyb; Mz += xw * Fyb;
 

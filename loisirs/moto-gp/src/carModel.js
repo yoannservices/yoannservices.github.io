@@ -34,8 +34,10 @@
   // Les motos proches de la caméra utilisent le .glb ; les autres gardent la moto procédurale (plus légère).
   let glbBike = null, glbBikeP = null;
   const waiting = new Set();
+  const WHEEL_MESH = new Set(['Object_5', 'Object_4', 'Object_17', 'Object_21']);
   const pick = (o, c) => { // c : centre du triangle, repère de la moto (+Z avant, +X gauche)
-    if (Math.abs(c.x) < 0.14) {
+    // roue = pneu + jante (Object_5 avant, Object_4 arrière) et disques (Object_17, Object_21) ; les étriers, la fourche et le garde-boue (autres maillages) restent fixes
+    if (Math.abs(c.x) < 0.14 && WHEEL_MESH.has(o.name)) {
       if (Math.hypot(c.z - 0.71, c.y - 0.32) < 0.34) return 'w0';
       if (Math.hypot(c.z + 0.75, c.y - 0.32) < 0.345) return 'w1';
     }

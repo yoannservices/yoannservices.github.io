@@ -8,7 +8,7 @@ const def = A.TRACK_DEFS.find(d => d.id === id), tr = new A.Track(def);
 const set = Object.assign({}, A.DEFAULT_SETTINGS, { diff: lv, adaptive: true });
 const race = new A.Race({ tr, settings: set, mode: 'race', laps, wet0 });
 race.env.wet = wet0;
-const p = race.player; p.crashK = 2.2;
+const p = race.player;
 for (const c of race.cars) {
   if (c.isPlayer) continue;
   if (Object.keys(p.perf).some(k => c.perf[k] !== p.perf[k]) || Object.keys(p.setup).some(k => c.setup[k] !== p.setup[k])) {

@@ -3,7 +3,7 @@
   const A = (globalThis.MGP = globalThis.MGP || {});
   const T = THREE;
 
-  const BOT = { mu: 1.3, g: 9.81, cd: 0.011, drag: 0.205, pmax: 205e3, mass: 242, brake: 4000 };
+  const BOT = { mu: 1.3, g: 9.81, cd: 0.011, drag: 0.205, pmax: 205e3, mass: 242, brake: 8000, bg: 1.9 }; // bg : adhérence de freinage (≈ BRAKE_GRIP de carPhysics, un peu moins)
   A.BOT = BOT;
 
   A.buildRacingLine = tr => {
@@ -50,7 +50,7 @@
       }
       v[i] = vv;
     }
-    const aBrake = vv => Math.min(1.0 * aLat(vv), P.brake / P.mass * 0.92) + (P.drag * vv * vv) / P.mass;
+    const aBrake = vv => Math.min((P.bg || 1) * aLat(vv), P.brake / P.mass * 0.92) + (P.drag * vv * vv) / P.mass;
     const aAcc = vv => Math.max(0.6, Math.min((P.pmax * 0.9) / (P.mass * Math.max(vv, 12)) - (P.drag * vv * vv) / P.mass, 0.55 * aLat(vv)));
     for (let pass = 0; pass < 2; pass++) {
       for (let i = N * 2; i > 0; i--) { // arrière : on doit pouvoir freiner jusqu'à la vitesse du point suivant
