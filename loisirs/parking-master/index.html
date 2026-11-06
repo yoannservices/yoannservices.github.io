@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="sim" lang="fr" data-cat="loisirs" data-hk-skip="map compass" data-lod="1">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Parking Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <link rel="stylesheet" href="../../assets/simulateur.css" />
+  <script src="../../assets/loader.js" data-name="Parking Master" data-driving="parking-master" data-description="Suis les flèches au sol et gare-toi dans la place, en ville, à la campagne, en forêt et en montagne. Un choc à 10 km/h ou plus fait perdre le niveau." data-controls="Z / ↑ : avancer|S / ↓ : freiner puis reculer|Q D / ← → : tourner|Espace : frein à main|C : changer de vue|R : recommencer|Échap : pause|Manette : RT avancer · LT freiner · stick gauche tourner · stick droit caméra · A frein à main · Y caméra · X recommencer · Start pause"></script>
+  <script src="../../assets/driving-base.js"></script>
+  <script src="../../assets/site.js"></script>
+<script src="../../assets/gamepad.js" data-profile="none"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">import { patch } from '../../assets/perf.js'; import * as T from 'three'; patch(T);</script>
+</head>
+<body>
+  <canvas id="gl" tabindex="0" aria-label="Jeu de stationnement en 3D"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-tl panel"><span class="lbl" id="h-lvl">Niveau</span><strong id="h-time">0:00.0</strong></div>
+    <div class="hud-tr panel"><div id="h-stars" class="stars"></div><small id="h-starhint"></small></div>
+    <div id="h-park" class="panel" hidden><span>Immobilise-toi dans la place</span><i><b id="h-parkbar"></b></i></div>
+    <div class="hud-br panel"><div class="spd"><b id="h-speed">0</b><small>km/h</small></div><small id="h-limit">choc ≥ 10 km/h : niveau perdu</small></div>
+    <div id="h-msg" aria-live="polite"></div>
+    <div id="h-hint"></div>
+    <div id="h-flash"></div>
+  </div>
+  <div id="screen" class="overlay" hidden></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
