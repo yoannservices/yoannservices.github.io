@@ -25,7 +25,7 @@ export class Menu {
     this.root.innerHTML = `<div class="card"><p class="eyebrow">Loisirs · Jeu de VTT</p><h1>Downhill<br><span>Riders</span></h1>
       <p class="lede">Des descentes générées à partir d'une graine : sauts, passerelles, rails, drops, tronçons techniques et lignes risquées. Enchaîne les figures, ne tombe pas.</p>
       <div class="stats"><span>Réputation <b>${Math.floor(save.rep)}</b></span><span>À dépenser <b>${Math.floor(save.cash)}</b></span><span>Descentes <b>${save.stats.runs}</b></span><span>Plus long saut <b>${save.stats.longestJump.toFixed(0)} m</b></span>${nu ? `<span>Prochain déblocage : <b>${nu.name}</b> à ${nu.rep}</span>` : ''}</div>
-      <div class="row"><button class="btn primary" data-a="setup">Descendre</button><button class="btn" data-a="shop">Garage</button><button class="btn ghost" data-a="help">Commandes</button><button class="btn ghost" data-a="settings">Réglages</button></div></div>`;
+      <div class="row"><button class="btn primary" data-a="setup">Descendre</button><button class="btn" data-a="shop">Garage</button><button class="btn ghost" data-a="settings">Audio &amp; effets</button></div></div>`;
     this._bind();
   }
 
@@ -53,7 +53,7 @@ export class Menu {
   }
 
   settings() {
-    this.root.innerHTML = `<div class="card small"><p class="eyebrow">Réglages</p><h2>Réglages</h2>
+    this.root.innerHTML = `<div class="card small"><p class="eyebrow">Réglages</p><h2>Audio &amp; effets</h2>
       <label class="row"><input type="checkbox" id="blur" ${save.settings.blur ? 'checked' : ''} /> Flou radial en vitesse</label>
       <label class="field">Volume <input type="range" id="vol" min="0" max="100" value="${Math.round(save.settings.volume * 100)}" style="text-transform:none" /></label>
       <div class="row"><button class="btn" data-a="reset">Effacer la sauvegarde</button><button class="btn primary" data-a="${this.back || 'main'}">Retour</button></div></div>`;
@@ -63,7 +63,7 @@ export class Menu {
   }
 
   pause() {
-    this.root.innerHTML = `<div class="card small"><p class="eyebrow">Pause</p><h2>En pause</h2><div class="row"><button class="btn primary" data-a="resume">Reprendre</button><button class="btn" data-a="restart">Recommencer la descente</button><button class="btn ghost" data-a="help2">Commandes</button><button class="btn ghost" data-a="settings2">Réglages</button><button class="btn ghost" data-a="quit">Abandonner</button></div></div>`;
+    this.root.innerHTML = `<div class="card small"><p class="eyebrow">Pause</p><h2>En pause</h2><div class="row"><button class="btn primary" data-a="resume">Reprendre</button><button class="btn" data-a="restart">Recommencer la descente</button><button class="btn ghost" data-a="settings2">Audio &amp; effets</button><button class="btn ghost" data-a="quit">Abandonner</button></div></div>`;
     this._bind({ resume: () => this.h.resume(), restart: () => this.h.restart(), quit: () => this.h.quit(), help2: () => { this.back = 'pause'; this.help(); }, settings2: () => { this.back = 'pause'; this.settings(); } });
   }
 
