@@ -1,3 +1,4 @@
+window.__dzEsc = () => { for (const t of ['keydown', 'keyup']) setTimeout(() => document.dispatchEvent(new KeyboardEvent(t, { code: 'Escape', key: 'Escape', bubbles: true })), t === 'keyup' ? 90 : 0); }; // bouton Reprendre du menu pause : même effet que la touche Échap
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.round(n).toLocaleString('fr-FR');
 const fmtTime = (s) => { const m = Math.floor(s / 60); return `${m}:${String(Math.floor(s - m * 60)).padStart(2, '0')}`; };
@@ -44,7 +45,7 @@ class Hud {
   }
 
   showPause() {
-    this.el.card.innerHTML = '<h1>PAUSE</h1><p class="cta">Échap pour reprendre</p><p style="font-size:12px">M : couper / remettre le son</p><button type="button" class="q-set" onclick="window.GameSettings&&GameSettings.open()">⚙ Réglages</button>';
+    this.el.card.innerHTML = '<h1>PAUSE</h1><p class="cta">Échap pour reprendre</p><p style="font-size:12px">M : couper / remettre le son</p><button type="button" onclick="__dzEsc()">Reprendre</button>';
     this.el.overlay.classList.remove('hidden');
   }
 
