@@ -61,6 +61,12 @@
       if (over > 0) brk = Math.max(brk, clamp(over * 0.25, 0, 0.6));
     }
     if (car.fuel <= 0) thr = 0;
+    // pilote humain : penché, l'adhérence est déjà prise par le virage. Gaz plafonnés (sans relever la moto) et freins plus doux, jusqu'à ce qu'on se redresse.
+    if (car.isPlayer) {
+      const lf = clamp(1 - (car.lean / 1.05) ** 2, 0, 1);
+      thr *= Math.sqrt(lf);
+      brk *= 0.3 + 0.7 * Math.sqrt(lf);
+    }
 
     // direction : angle limité en vitesse, avec vitesse de rotation bornée par le niveau de pilotage
     const dmax = A.bikeDmax(sp) * A.steerGrip(sp, A.brakeLoad(brk)), srate = 1.3 * rd.steerRate * dt * (0.2 + 4 / (1 + sp / 6));

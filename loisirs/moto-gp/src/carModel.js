@@ -147,7 +147,7 @@
     pz.a += (A.clamp(car.axL / 8, 0, 1) * (car.wheelie > 0.1 ? 1 : 0.7) - pz.a) * k; // accélération : couché sur le réservoir
     pz.hang += (A.clamp(lean * 0.8, -0.55, 0.55) - pz.hang) * Math.min(1, dt * 9);   // hang-off : bassin vers l'intérieur
     pz.turn += (A.clamp(car.delta * 3, -0.4, 0.4) - pz.turn) * k;                    // épaules et regard suivent le guidon
-    m.rider.position.set(pz.hang, -0.035 * Math.abs(pz.hang) / 0.55, -0.12 * pz.b + 0.05 * pz.a);
+    m.rider.position.set(0, 0, 0); // bassin toujours sur la selle : seuls le dos et les épaules bougent
     m.st.rotation.y = A.clamp(car.delta * 2.4, -0.6, 0.6);
     m.blob.visible = true;
     m.fwG.visible = d.wheel[0]; m.rwG.visible = d.wheel[1]; m.hl.visible = !d.fwOff; m.tail.visible = !d.rwOff;
@@ -166,7 +166,7 @@
     m.spinF.rotation.x = m.spin[0]; m.spinR.rotation.x = m.spin[1];
     if (m.gWF) m.gWF.rotation.x = m.spin[0]; if (m.gWR) m.gWR.rotation.x = m.spin[1];
     // buste : penché vers l'intérieur autour des hanches (hang-off), se redresse au freinage, se couche à l'accélération
-    const up = A.clamp(pz.b * 1.25 - pz.a * 0.55, -0.55, 1.25), extra = A.clamp(lean * 0.4 + pz.hang * 0.25, -0.7, 0.7);
+    const up = A.clamp(pz.b * 1.25 - pz.a * 0.55, -0.55, 1.25), extra = A.clamp(lean * 0.4 + pz.hang * 0.25, -0.45, 0.45);
     _q.setFromAxisAngle(_zf, -extra).multiply(_q2.setFromAxisAngle(_ax, -0.5 * up)).multiply(_q2.setFromAxisAngle(_yUp, pz.turn * 0.5));
     m.torso.quaternion.copy(_q).multiply(m.torsoQ0);
     m.headG.position.copy(m.headP0).sub(m.torso.position).applyQuaternion(_q).add(m.torso.position);
