@@ -44,7 +44,7 @@ class Hud {
   }
 
   showPause() {
-    this.el.card.innerHTML = '<h1>PAUSE</h1><p class="cta">Échap pour reprendre</p><p style="font-size:12px">M : couper / remettre le son</p>';
+    this.el.card.innerHTML = '<h1>PAUSE</h1><p class="cta">Échap pour reprendre</p><p style="font-size:12px">M : couper / remettre le son</p><button type="button" class="q-set" onclick="window.GameSettings&&GameSettings.open()">⚙ Réglages</button>';
     this.el.overlay.classList.remove('hidden');
   }
 
