@@ -2079,7 +2079,7 @@ function openMenu(tab){
 }
 function closeMenu(){$('#ovMenu').hidden=true;if(GAME.state==='menu2')GAME.state='play'}
 function renderMenu(){
-  const tabs=[['quetes','Quêtes'],['carte','Carte'],['aide','Aide'],['reglages','Réglages']];
+  const tabs=[['quetes','Quêtes'],['carte','Carte'],['reglages','Réglages']];
   $('#menuTabs').innerHTML=tabs.map(t=>`<button class="tab ${t[0]===menuTab?'on':''}" data-t="${t[0]}">${t[1]}</button>`).join('');
   const b=$('#menuBody');
   if(menuTab==='quetes'){
