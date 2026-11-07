@@ -56,7 +56,7 @@ body.first-person #speedBox{display:none}
 #deliv{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));width:240px}
 #deliv .t{font:600 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
 #deliv .d{display:flex;align-items:center;gap:10px}
-#navArrow{width:34px;height:34px;flex:none}
+#navArrow{display:none}
 #deliv .big{font:600 20px/1 var(--mono)}
 #deliv .s{color:var(--mute);font-size:13px}
 #navTarget{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:220px;width:240px}

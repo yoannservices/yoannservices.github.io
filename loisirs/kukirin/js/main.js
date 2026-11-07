@@ -1997,7 +1997,23 @@ function renderNavigationHud(){
 }
 
 /* ---------- HUD ---------- */
+/* ---------- guidage commun (assets/quality.js) : flèche en haut + chevrons au sol le long des rues (grille) jusqu'à la cible ---------- */
+let guideG=null;
+function updateGuide(){
+  const GS=window.GameSettings;if(!GS)return;
+  if(!guideG)guideG=GS.ground(THREE,scene);
+  if(!navTarget||GAME.state!=='play'){GS.arrow(null);guideG.update(null);return}
+  const pts=[{x:P.x,y:0,z:P.z}],n0=nearestNode(P.x,P.z),n1=nearestNode(navTarget.x,navTarget.z);
+  let i=n0[0],j=n0[1];pts.push({x:i*PITCH,y:0,z:j*PITCH});
+  while(i!==n1[0]){i+=Math.sign(n1[0]-i);pts.push({x:i*PITCH,y:0,z:j*PITCH})}
+  while(j!==n1[1]){j+=Math.sign(n1[1]-j);pts.push({x:i*PITCH,y:0,z:j*PITCH})}
+  pts.push({x:navTarget.x,y:0,z:navTarget.z});
+  guideG.update(pts,performance.now()/1000);
+  const d=Math.hypot(navTarget.x-P.x,navTarget.z-P.z);
+  GS.arrow(Math.atan2(navTarget.x-P.x,navTarget.z-P.z)-P.h,d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m');
+}
 function updateHud(dt){
+  updateGuide();
   const o=curOwned(),sc=SC_BY_ID[SV.cur];
   $('#money').textContent=fmtEur(SV.money);
   $('#scName').textContent=sc.name;
