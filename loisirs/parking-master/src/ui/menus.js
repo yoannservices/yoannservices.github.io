@@ -51,7 +51,7 @@ export class Menus {
     card.append(el('h2', null, 'Pause'));
     const vol = el('label', 'vol', 'Volume <input type="range" min="0" max="1" step="0.05">');
     const r = vol.querySelector('input'); r.value = save.volume; r.addEventListener('input', () => { save.volume = +r.value; this.g.audio.setVolume(save.volume); });
-    card.append(this.button('Reprendre', () => this.g.resume(), 'primary'), this.button('Recommencer', () => this.g.restart()), this.button('⚙ Réglages', () => window.GameSettings && window.GameSettings.open()), this.button('Menu', () => this.g.toMenu()), vol);
+    card.append(this.button('Reprendre', () => this.g.resume(), 'primary'), this.button('Recommencer', () => this.g.restart()), this.button('Menu', () => this.g.toMenu()), vol);
     this.open(card, 'dim');
   }
 
