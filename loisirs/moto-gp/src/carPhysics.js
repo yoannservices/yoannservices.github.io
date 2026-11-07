@@ -119,7 +119,7 @@
         Sx += -sgn * Math.min(900, 250 + sp * 20); continue;
       }
       const Fz = front ? axleF : axleR;
-      const mu = tire.mu(Fz, wet, car.surf[w], front ? pfF : pfR, car.perf.grip * rd.grip) * (0.5 + 0.5 * d.susp[w]);
+      const mu = tire.mu(Fz, wet, car.surf[w], front ? pfF : pfR, car.perf.grip * rd.grip * (car.isPlayer ? 1.8 : 1)) * (0.5 + 0.5 * d.susp[w]);
       const Fmax = mu * Fz * (front ? 1 : REAR_GRIP);
       const uy = v + r * xw;
       const dw = front ? car.delta : 0;
@@ -168,6 +168,8 @@
     u += (Sx / m + v * r) * dt; v += (Sy / m - u * r) * dt; r += (Mz / PH.Iz) * dt;
     if (u < -1) u = -1;
     if (sp < 3 && thr < 0.05) { const k = 1 - Math.min(1, dt * 4); u *= k; v *= k; r *= k; }
+    if (car.isPlayer && sp > 10) v *= Math.exp(-Math.min(14, 2 + sp * 0.12) * dt); // joueur : le dérapage latéral est résorbé très vite (pas de dérapage)
+    if (car.isPlayer && sp > 5) { const rM = 2.6 * G / sp; r = clamp(r, -rM, rM); } // joueur : lacet borné à ~2,6 G latéral, pas de tête-à-queue
     car.u = u; car.v = v; car.r = r;
     car.h += r * dt;
     const sh = Math.sin(car.h), ch = Math.cos(car.h);
