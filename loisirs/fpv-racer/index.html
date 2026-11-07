@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="sim" lang="fr" data-cat="loisirs" data-hk-skip="pause" data-lod="2">
+<html class="sim" lang="fr" data-cat="loisirs" data-lod="2">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Chakra+Petch:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/simulateur.css" />
-<script src="../../assets/loader.js" data-name="FPV Racer" data-preload="../../assets/models/ferrari.glb"></script>
+<script src="../../assets/loader.js" data-name="FPV Racer" data-preload="../../assets/models/ferrari.glb" data-controls="# Touches de base|Z S : gaz · Q D : lacet · flèches : tangage et roulis|C : caméra|R : reset|Échap : menu|# Touches du jeu|Espace : armer / désarmer|T : cible|H : OSD"></script>
 <script src="../../assets/site.js"></script>
 <script src="../../assets/gamepad.js" data-profile="none" data-cam="0"></script>
 <link rel="stylesheet" href="style.css">
@@ -91,16 +91,7 @@
         <button class="go" id="goBtn">Décoller</button>
         <span class="hint" id="goHint"></span>
       </div>
-      <div class="m-actions"><button class="btn" type="button" onclick="window.GameSettings&&GameSettings.open()">⚙ Réglages graphiques</button></div>
-      <div class="keys">
-        <div><kbd>Z</kbd><kbd>S</kbd> gaz <small>(W/S en QWERTY)</small></div>
-        <div><kbd>Q</kbd><kbd>D</kbd> lacet</div>
-        <div><kbd>↑</kbd><kbd>↓</kbd> tangage · <kbd>←</kbd><kbd>→</kbd> roulis</div>
-        <div><kbd>Espace</kbd> armer / désarmer</div>
-        <div><kbd>R</kbd> reset · <kbd>C</kbd> caméra · <kbd>T</kbd> cible</div>
-        <div><kbd>H</kbd> OSD · <kbd>Échap</kbd> menu</div>
-        <div><kbd>Manette</kbd> stick gauche lacet/tangage · stick droit roulis · RT/LT gaz · A armer · B Angle/Acro · Y caméra · X reset · Start menu</div>
-      </div>
+      <div data-foot></div> <!-- Réglages + commandes : assets/quality.js (GameSettings.foot) -->
     </section>
 
     <!-- CONTRÔLES -->
