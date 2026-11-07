@@ -124,6 +124,12 @@ class Game {
     run.update(dt, inp);
     this.car.update(ph, dt);
     this.guide.update(ph.x, ph.z, this.t);
+    const GS = window.GameSettings;
+    if (GS) { // guidage : chevrons au sol et/ou flèche en haut
+      this.guide.mesh.visible = GS.guide !== 'haut';
+      const g = this.guide, p = g.pts[Math.min(g.n - 1, g.idx + 6)];
+      GS.arrow(run.state === 'driving' ? Math.atan2(-(p.x - ph.x), -(p.z - ph.z)) - ph.yaw : null);
+    }
     this.marks.set(run.inside, run.progress);
     this.hud.update(dt, { time: run.time, kmh: Math.abs(ph.v) * 3.6, stars: run.stars, inside: run.inside, progress: run.progress, state: run.state });
     this.place.update?.(dt, { x: ph.x, z: ph.z, v: ph.v, yaw: ph.yaw });

@@ -37,7 +37,12 @@ export class Menus {
       if (open) row.append(this.button(b ? 'Rejouer' : 'Jouer', () => this.g.start(L.id)));
       list.append(row);
     });
-    card.append(list);
+    card.append(list, this.button('⚙ Réglages', () => window.GameSettings && window.GameSettings.open()));
+    const keys = el('div', 'keys-foot'); keys.append(el('h3', null, 'Commandes'));
+    for (const line of (document.querySelector('script[data-controls]')?.dataset.controls || '').split('|').filter(Boolean)) {
+      const i = line.indexOf(':'), r = el('div', 'kf-row'); r.append(el('kbd', null, i < 0 ? '' : line.slice(0, i).trim()), el('span', null, i < 0 ? line : line.slice(i + 1).trim())); keys.append(r);
+    }
+    card.append(keys);
     this.open(card);
   }
 
@@ -46,7 +51,7 @@ export class Menus {
     card.append(el('h2', null, 'Pause'));
     const vol = el('label', 'vol', 'Volume <input type="range" min="0" max="1" step="0.05">');
     const r = vol.querySelector('input'); r.value = save.volume; r.addEventListener('input', () => { save.volume = +r.value; this.g.audio.setVolume(save.volume); });
-    card.append(this.button('Reprendre', () => this.g.resume(), 'primary'), this.button('Recommencer', () => this.g.restart()), this.button('Menu', () => this.g.toMenu()), vol);
+    card.append(this.button('Reprendre', () => this.g.resume(), 'primary'), this.button('Recommencer', () => this.g.restart()), this.button('⚙ Réglages', () => window.GameSettings && window.GameSettings.open()), this.button('Menu', () => this.g.toMenu()), vol);
     this.open(card, 'dim');
   }
 
