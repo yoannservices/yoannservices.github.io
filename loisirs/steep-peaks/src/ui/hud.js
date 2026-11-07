@@ -100,20 +100,21 @@ export class HUD {
   toggle() { this.open ? this.hide() : this.show(); }
 
   render() {
-    const tabs = [['equip', 'Équipement'], ['chal', 'Défis'], ['stats', 'Stats'], ['help', 'Commandes']];
+    const tabs = [['equip', 'Équipement'], ['chal', 'Défis'], ['stats', 'Stats']];
     let body = '';
     if (this.tab === 'equip') body = this.equipHtml();
     else if (this.tab === 'chal') body = this.chalHtml();
     else if (this.tab === 'stats') body = this.statsHtml();
-    else body = this.helpHtml();
+    else body = this.statsHtml();
     this.el.menu.innerHTML = `<div class="panel"><header><h2>Steep Peaks</h2><span>Niveau ${prog.level}</span>
       <nav>${tabs.map(([k, n]) => `<button data-tab="${k}" class="${k === this.tab ? 'on' : ''}">${n}</button>`).join('')}</nav>
-      <button data-act="close">Reprendre</button></header><section>${body}</section></div>`;
+      <button data-act="close">Reprendre</button><button data-act="settings">⚙ Réglages</button></header><section>${body}</section><section><h3>Commandes</h3>${this.helpHtml()}</section></div>`;
     this.el.menu.onclick = (ev) => {
       const t = ev.target.closest('[data-tab],[data-act],[data-eq]');
       if (!t) return;
       if (t.dataset.tab) { this.tab = t.dataset.tab; this.render(); }
       else if (t.dataset.act === 'close') this.hide();
+      else if (t.dataset.act === 'settings') window.GameSettings?.open();
       else if (t.dataset.act === 'goto') this.hooks.goto?.(t.dataset.id);
       else if (t.dataset.eq) { const [k, id] = t.dataset.eq.split(':'); if (prog.equip(k, id)) { this.hooks.equip?.(); this.render(); } }
     };
