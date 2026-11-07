@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fr" data-hk-skip="map" data-lod="2.5">
+<html lang="fr" data-hk-skip="map" data-guide="1" data-lod="2.5">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bus City Simulator</title>
 <link rel="stylesheet" href="../../assets/theme.css" />
-<script src="../../assets/loader.js" data-name="Bus City Simulator" data-driving="bus-city-simulator" data-menu="#menu .panel" data-menu-hide=".head h1" data-description="Conduis un bus urbain : lignes, arrêts, voyageurs et développement de ton réseau." data-controls="Z / ↑ : accélérer|S / ↓ : freiner ou reculer|Q D / ← → : braquer|Espace : frein à main|H : klaxon · L : phares|A / E : clignotants|O : portes · R : rampe PMR|V : changer de vue|M : carte|Tab : menu · I : aide|Manette : RT accélérer · LT freiner · stick gauche volant · stick droit caméra · A frein à main · Y vue · croix gauche/droite clignotants · croix haut phares · croix bas klaxon · RB portes · Start pause" data-preload="../../assets/models/town-bus.glb|../../assets/models/npc/car-compact.glb|../../assets/models/npc/car-coupe.glb|../../assets/models/npc/car-hatchback.glb|../../assets/models/npc/car-minivan.glb|../../assets/models/npc/car-offroad.glb|../../assets/models/npc/car-pickup.glb|../../assets/models/npc/car-sedan.glb|../../assets/models/npc/car-sport.glb|../../assets/models/npc/car-suv.glb|../../assets/models/npc/car-wagon.glb|../../assets/models/npc/veh-taxi.glb|../../assets/models/npc/veh-police_sedan.glb|../../assets/models/npc/veh-postvan.glb"></script>
+<script src="../../assets/loader.js" data-name="Bus City Simulator" data-driving="bus-city-simulator" data-menu="#menu .panel" data-menu-hide=".head h1" data-description="Conduis un bus urbain : lignes, arrêts, voyageurs et développement de ton réseau." data-controls="# Touches de base|Z S Q D / flèches : accélérer, freiner, braquer|C : caméra (V aussi)|M : carte|Échap : pause|# Touches du jeu|Espace : frein à main|H : klaxon · L : phares|A / E : clignotants|O : portes · R : rampe PMR|Tab : menu · I : aide|Manette : RT accélérer · LT freiner · stick gauche volant · stick droit caméra · A frein à main · Y vue · croix gauche/droite clignotants · croix haut phares · croix bas klaxon · RB portes · Start pause" data-preload="../../assets/models/town-bus.glb|../../assets/models/npc/car-compact.glb|../../assets/models/npc/car-coupe.glb|../../assets/models/npc/car-hatchback.glb|../../assets/models/npc/car-minivan.glb|../../assets/models/npc/car-offroad.glb|../../assets/models/npc/car-pickup.glb|../../assets/models/npc/car-sedan.glb|../../assets/models/npc/car-sport.glb|../../assets/models/npc/car-suv.glb|../../assets/models/npc/car-wagon.glb|../../assets/models/npc/veh-taxi.glb|../../assets/models/npc/veh-police_sedan.glb|../../assets/models/npc/veh-postvan.glb"></script>
 <script src="../../assets/driving-base.js"></script>
 <script src="../../assets/site.js"></script>
 <script src="../../assets/gamepad.js" data-profile="none"></script>
@@ -22,7 +22,7 @@
   #topbar b { font-size: 20px; } #money.neg { color: var(--bad); }
   .bar { width: 70px; height: 6px; background: #ffffff22; border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--acc); }
   #nextstop { top: 110px; left: 50%; transform: translateX(-50%); display: none; gap: 14px; align-items: center; background: #0f1218b8; border: 1px solid var(--line); border-radius: 12px; padding: 8px 16px; }
-  #arrow { font-size: 26px; color: var(--acc); } #nsName { font-weight: 700; } #nsDelta.ok { color: var(--ok); } #nsDelta.warn { color: var(--warn); } #nsDelta.bad { color: var(--bad); }
+  #arrow { display: none; } #nsName { font-weight: 700; } #nsDelta.ok { color: var(--ok); } #nsDelta.warn { color: var(--warn); } #nsDelta.bad { color: var(--bad); }
   #prompt { bottom: 26%; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: 600; background: #0f1218c8; border: 1px solid var(--acc); border-radius: 10px; padding: 8px 18px; transition: opacity .2s; opacity: 0; }
   #event { top: 170px; left: 50%; transform: translateX(-50%); display: none; background: #7a2620cc; border-radius: 8px; padding: 5px 14px; font-weight: 700; }
   #toasts { position: fixed; top: 190px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(640px, 92vw); }
@@ -81,6 +81,6 @@
 </div>
 <div id="maparea"><canvas id="mapfull" width="760" height="760"></canvas></div>
 <div id="menu"></div>
-<script src="./game.js?v=7"></script>
+<script src="./game.js?v=10"></script>
 </body>
 </html>

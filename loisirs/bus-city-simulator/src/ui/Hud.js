@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { drawMinimap, drawFullMap } from './Minimap.js';
 import { WEATHER_LABEL } from '../world/Environment.js';
 import { LEVEL_XP } from '../economy/Economy.js';
@@ -6,6 +7,7 @@ const $ = (id) => document.getElementById(id);
 const el = Object.fromEntries(['clock', 'weather', 'money', 'level', 'xpbar', 'nsName', 'nsDist', 'nsDelta', 'arrow', 'nextstop', 'prompt', 'pax', 'sat', 'satbar', 'enbar', 'enlabel', 'limit',
   'kmh', 'gear', 'hb', 'lights', 'indL', 'indR', 'view', 'help', 'dial', 'toasts', 'event', 'minimap', 'mapfull', 'maparea', 'door', 'ramp'].map((i) => [i, $(i)]));
 const dg = el.dial.getContext('2d');
+const stopEdge = (s) => s.stop.edgeIndex;
 
 function drawDial(kmh) {
   const MAX = 100, a0 = Math.PI * 0.8, a1 = Math.PI * 2.2, cx = 120, cy = 130, r = 100;
@@ -72,6 +74,7 @@ export class Hud {
     el.event.style.display = g.events.label ? 'block' : 'none';
     const stop = s.stop;
     el.nextstop.style.display = s.active ? 'flex' : 'none';
+    if (!s.active) { window.GameSettings?.arrow(null); this.gg?.update(null); }
     if (s.active) {
       const r = p.refPoint(), dx = stop.x - r.x, dz = stop.z - r.z;
       el.nsName.textContent = `${s.stopIdx + 1}/${s.line.stops.length} · ${stop.name}`;
@@ -80,7 +83,21 @@ export class Hud {
       el.nsDelta.textContent = late > 20 ? `+${late} s de retard` : late < -20 ? `${-late} s d'avance` : 'à l\'heure';
       el.nsDelta.className = late > 60 ? 'bad' : late > 20 ? 'warn' : 'ok';
       let rel = Math.atan2(dx, dz) - p.heading; rel = Math.atan2(Math.sin(rel), Math.cos(rel));
-      el.arrow.style.transform = `rotate(${-rel}rad)`;
+      const GS = window.GameSettings; // guidage commun (assets/quality.js) : flèche en haut + chevrons au sol sur le trajet de la ligne jusqu'au prochain arrêt
+      if (GS) {
+        GS.arrow(Math.hypot(dx, dz) < 30 ? null : rel, `${Math.round(Math.hypot(dx, dz))} m`);
+        if (!this.gg) this.gg = GS.ground(THREE, g.scene);
+        const path = s.line.path, E = path.length, pts = [{ x: r.x, y: 0, z: r.z }];
+        let bi = 0, bd = Infinity;
+        for (let k = 0; k < E; k++) { const d = (path[k].x - r.x) ** 2 + (path[k].z - r.z) ** 2; if (d < bd) { bd = d; bi = k; } }
+        const ahead = (q) => (q.x - r.x) * Math.sin(p.heading) + (q.z - r.z) * Math.cos(p.heading) > 0; // jamais de chevron vers l'arrière
+        if (!ahead(path[bi])) bi = (bi + 1) % E;
+        const n = (((stopEdge(s) - bi) % E) + E) % E;
+        for (let k = 0; k <= Math.min(n, 14); k++) pts.push({ x: path[(bi + k) % E].x, y: 0, z: path[(bi + k) % E].z });
+        if (ahead(stop)) pts.push({ x: stop.x, y: 0, z: stop.z });
+        if (Math.hypot(dx, dz) < 30) pts.length = 0; // arrivé à l'arrêt : plus de tracé
+        this.gg.update(pts.length > 1 ? pts : null, performance.now() / 1000);
+      }
     }
     el.prompt.textContent = ctl.prompt || s.promptText;
     el.prompt.style.opacity = el.prompt.textContent ? 1 : 0;

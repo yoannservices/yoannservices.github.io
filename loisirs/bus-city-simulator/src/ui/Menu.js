@@ -64,7 +64,7 @@ export class Menu {
         <button class="danger" data-act="reset">Effacer la sauvegarde</button>`;
     }
     this.root.innerHTML = `<div class="panel"><div class="head"><h1>Bus City Simulator</h1><span>${eur(d.money)} · Niveau ${e.level}</span>
-      <button onclick="window.GameSettings&&GameSettings.open()">⚙ Réglages</button><button data-act="close">✕</button></div><div class="tabs">${tabs.map(([k, n]) => `<button class="${this.tab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
+      <button data-act="close">Reprendre</button></div><div class="tabs">${tabs.map(([k, n]) => `<button class="${this.tab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
       <div class="body">${body}</div><div class="foot">Tab / Échap : menu · C vue · O portes · R rampe PMR · N sauter l'arrêt · M carte · I aide</div></div>`;
   }
 }
