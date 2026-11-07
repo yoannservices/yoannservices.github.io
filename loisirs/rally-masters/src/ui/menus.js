@@ -101,7 +101,7 @@ export class Menus {
         ${this.confirmNew ? '<button class="btn danger" data-act="abandonchamp">Abandonner le championnat en cours</button><button class="btn ghost" data-act="title">Annuler</button>' : ''}
         <button class="btn" data-act="free">🎯 Spéciale libre (graine au choix)</button>
         <button class="btn" data-act="garage">🔧 Garage, boutique et réglages voiture</button>
-        <div class="row"><button class="btn" data-act="settings">⚙ Réglages</button><button class="btn" data-act="help">❓ Aide et touches</button></div>
+        <button class="btn" data-act="settings">Son &amp; copilote</button>
       </div></div>`, 'side');
   }
 
@@ -254,8 +254,7 @@ export class Menus {
     this.show(`<div class="card small"><p class="eyebrow">Pause</p><h2>Rally Masters</h2><div class="menu">
       <button class="btn primary" data-act="resume">Reprendre</button>
       <button class="btn" data-act="restart">Redémarrer la spéciale ${free ? '' : '(+60 s)'}</button>
-      <button class="btn" data-act="settings" data-back="pauseBack">Réglages</button>
-      <button class="btn" data-act="help" data-back="pauseBack">Touches</button>
+      <button class="btn" data-act="settings" data-back="pauseBack">Son &amp; copilote</button>
       <button class="btn danger" data-act="abort">${free ? 'Quitter la spéciale' : 'Abandonner la spéciale'}</button></div></div>`);
     this.pauseBack = () => this.pause(free);
   }
