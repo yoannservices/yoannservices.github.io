@@ -99,6 +99,7 @@ const menu = new Menu(document.getElementById('screen'), {
 
 function clearWorld() {
   if (G.chunks) { G.chunks.dispose(); G.chunks = null; } if (G.structs) { scene.remove(G.structs); G.structs = null; } if (G.obstacles) { scene.remove(G.obstacles); G.obstacles = null; }
+  if (G.gg) { G.gg.dispose(); G.gg = null; } G.gi = -1;
   G.track = null; G.bike = null; G.ragdoll = null; G.ragdollOn = false;
 }
 const garageGround = (() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 0.2, 40), new THREE.MeshStandardMaterial({ color: 0x20252d, roughness: 0.8 })); m.position.y = -0.1; m.receiveShadow = true; scene.add(m); return m; })();
@@ -190,11 +191,28 @@ function respawn(manual) {
 }
 
 /* ───────── mise à jour d'une image de jeu ───────── */
+/* Guidage commun (assets/quality.js) : chevrons au sol sur la ligne principale et flèche en haut vers le point 35 m devant */
+function guideDH(b, track) {
+  const GS = window.GameSettings; if (!GS || !track) return;
+  if (!G.gg) G.gg = GS.ground(THREE, scene);
+  const L = track.lines[0], n = L.n; let gi = G.gi ?? -1, bd = Infinity, bi = 0;
+  const lo = gi < 0 ? 0 : Math.max(0, gi - 15), hi = gi < 0 ? n : Math.min(n, gi + 60);
+  for (let i = lo; i < hi; i++) { const d = (L.X[i] - b.pos.x) ** 2 + (L.Z[i] - b.pos.z) ** 2; if (d < bd) { bd = d; bi = i; } }
+  if (bd > 900 && gi >= 0) { G.gi = -1; return; } // trop loin de la ligne : recherche complète à l'image suivante
+  G.gi = bi;
+  const pts = [{ x: b.pos.x, y: b.pos.y - b.R + 0.05, z: b.pos.z }]; let tgt = null;
+  for (let i = bi + 1; i < n && L.S[i] - L.S[bi] < 140; i++) { pts.push({ x: L.X[i], y: L.Y[i], z: L.Z[i] }); if (!tgt && L.S[i] - L.S[bi] > 35) tgt = pts[pts.length - 1]; }
+  G.gg.update(pts, performance.now() / 1000);
+  if (tgt) GS.arrow(-(Math.atan2(tgt.x - b.pos.x, -(tgt.z - b.pos.z)) - b.yaw)); // cap : avant = (sin yaw, -cos yaw), +x à droite
+}
+
+
 function updatePlay(dt) {
   const b = G.bike, run = G.run, track = G.track;
   if (Input.pressed('pause')) { setPause(!G.paused); }
   if (Input.pressed('help') || Input.pressed('book')) { setPause(true); menu.back = 'pause'; menu.help(); }
   if (G.paused) return;
+  guideDH(b, track);
   if (Input.pressed('camera')) { G.camName = rig.cycle(); hud.toast(G.camName); }
   if (Input.pressed('map')) hud.toggleMap();
   if (Input.pressed('reset') && G.ready <= 0 && !b.crashed) respawn(true);
