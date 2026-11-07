@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html data-start="1" lang="fr" class="sim ui-mini" data-cat="loisirs" data-hk-skip="map compass" data-lod="3">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#18211f" />
+  <title>Chantier &amp; Carrière</title>
+  <link rel="stylesheet" href="../../assets/theme.css" />
+  <link rel="stylesheet" href="../../assets/simulateur.css" />
+  <script src="../../assets/loader.js" data-name="Chantier &amp; Carrière" data-driving="Chargeuse compacte" data-description="Ramasse le gravier, livre-le à la trémie et développe le chantier." data-controls="# Touches de base|Z S Q D / flèches : avancer, reculer, tourner|C : caméra|R : replacer|Échap : pause|# Touches du jeu|A E : régler le godet|Espace : charger / décharger"></script>
+  <script src="../../assets/driving-base.js"></script>
+  <script src="../../assets/site.js"></script>
+  <link rel="stylesheet" href="style.css?v=2" />
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="Chantier en 3D"></canvas>
+  <main id="hud">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">CC</span><div><strong>CHANTIER <i>&amp;</i> CARRIÈRE</strong><small>SIMULATEUR DE CHANTIER · PROTOTYPE</small></div></div>
+      <div class="wallet"><span>TRÉSORERIE</span><strong id="money">0 €</strong></div>
+      <button id="view-button" class="icon-button" type="button" title="Changer de caméra (C)" aria-label="Changer de caméra">◉</button>
+    </header>
+    <section class="mission-panel" aria-live="polite">
+      <div class="eyebrow">CONTRAT EN COURS <span id="contract-number">01</span></div>
+      <h1>Alimenter la trémie</h1>
+      <p>Ramasse le gravier avec le godet et livre-le sur la zone jaune.</p>
+      <div class="waypoint"><span aria-hidden="true">⌖</span><strong id="waypoint">TRÉMIE · 0 m</strong></div>
+      <div class="progress-line"><span id="deliveries">0 / 3 livraisons</span><div class="progress-track"><i id="progress"></i></div></div>
+      <div id="automation-status" class="automation-status">CONVOYEUR · verrouillé à 3 livraisons</div>
+    </section>
+    <div class="loadout"><span class="load-label">GODET</span><strong id="load-state">VIDE</strong><span id="arm-state">Position basse</span></div>
+    <div id="prompt" class="prompt">Approche d'un tas de gravier</div>
+    <div id="toast" class="toast" role="status"></div>
+    <footer class="bottom-bar">
+      <div class="controls"><kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd><span>Conduire</span><kbd>A</kbd><kbd>E</kbd><span>Godet</span><kbd>Espace</kbd><span>Action</span><kbd>C</kbd><span>Caméra</span><kbd>R</kbd><span>Replacer</span></div>
+      <div class="speed"><strong id="speed">0</strong><span>km/h</span></div>
+    </footer>
+    <div id="touch-controls" aria-label="Commandes tactiles">
+      <div class="touch-steer"><button data-code="KeyW">▲</button><div><button data-code="KeyA">◀</button><button data-code="KeyS">▼</button><button data-code="KeyD">▶</button></div></div>
+      <div class="touch-tools"><button data-code="KeyQ">↓ GODET</button><button data-code="KeyE">↑ GODET</button><button data-action="action">CHARGER / VIDER</button></div>
+    </div>
+  </main>
+  <section id="pause-menu" class="pause-menu" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+    <div class="pause-panel">
+      <span class="pause-kicker">CHANTIER · EN PAUSE</span>
+      <h2 id="pause-title">On reprend quand tu veux.</h2>
+      <p>La chargeuse et le convoyeur sont arrêtés.</p>
+      <button id="resume-button" type="button">Reprendre le chantier</button>
+      <small>Échap pour reprendre</small>
+    </div>
+  </section>
+  <script type="module" src="src/main.js?v=2"></script>
+</body>
+</html>
