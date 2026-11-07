@@ -176,7 +176,24 @@ st.fov+=(60+Math.min(spd,55)*.5+(drifting?4:0)-st.fov)*(1-Math.exp(-dt*3));camer
 
 // boucle
 let last=performance.now(),smokeT=0,lsx=0,lsz=0;
-function frame(now){requestAnimationFrame(frame);const dt=Math.min(.033,(now-last)/1000);last=now;clock+=dt;
+let gg=null;/* guidage commun (assets/quality.js) : chevrons sur la route ; les virages à venir sont dans les notes du HUD (comme Rally Masters) */
+function guideDK(){const GS=window.GameSettings;if(!GS)return;if(!gg)gg=GS.ground(T,scene);const pts=[{x:st.x,y:st.y,z:st.z}];for(let k=2;k<64;k++){const p=P[(st.idx+k)%n];pts.push({x:p.x,y:p.y+.05,z:p.z})}gg.update(pts,clock)}
+/* notes de virages : on repère les virages de la boucle (rayon < 160 m), gravité 1 (épingle) à 6 (large), puis les 4 prochains devant la voiture */
+const notes=(()=>{const ds=[],th=[];for(let i=0;i<n;i++){const a=P[i],b=P[(i+1)%n];ds.push(Math.hypot(b.x-a.x,b.z-a.z));th.push(Math.atan2(b.x-a.x,b.z-a.z))}
+const wr=a=>Math.atan2(Math.sin(a),Math.cos(a)),k=th.map((t,i)=>wr(th[(i+1)%n]-t)/ds[i]),ks=k.map((_,i)=>{let s=0;for(let j=-4;j<=4;j++)s+=k[(i+j+n)%n];return s/9});
+const cum=[0];for(let i=0;i<n;i++)cum.push(cum[i]+ds[i]);const out=[];let i0=ks.findIndex(v=>Math.abs(v)<1/400);if(i0<0)i0=0;let cur=null;
+for(let q=0;q<n;q++){const i=(i0+q)%n,v=ks[i],on=Math.abs(v)>1/160;if(on&&(!cur||Math.sign(v)!==cur.sg)){if(cur)out.push(cur);cur={i,sg:Math.sign(v),rmin:1/Math.abs(v),len:0}}else if(on){cur.rmin=Math.min(cur.rmin,1/Math.abs(v))}else if(cur){out.push(cur);cur=null}if(cur)cur.len++}
+if(cur)out.push(cur);return out.filter(c=>c.len>=6).map(c=>({i:c.i,dir:c.sg>0?'L':'R',sev:c.rmin<16?1:c.rmin<28?2:c.rmin<48?3:c.rmin<78?4:c.rmin<125?5:6,s:cum[c.i]}))})();
+const LOOPLEN=P.reduce((a,p,i)=>a+Math.hypot(P[(i+1)%n].x-p.x,P[(i+1)%n].z-p.z),0);
+function noteIcon(c){const turn=[0,3.0,2.0,1.4,0.9,0.55,0.3][c.sev]*(c.dir==='L'?1:-1),pts=[];let x=20,y=36,h=0;pts.push([x,y]);y-=10;pts.push([x,y]);const rad=c.sev===1?7:6+c.sev*2,tot=Math.abs(turn);for(let i=0;i<10;i++){h+=turn/10;x+=Math.sin(h)*rad*tot/10*1.4;y-=Math.cos(h)*rad*tot/10*1.4;pts.push([x,y])}
+const col=c.sev<=2?'#ff6b6b':c.sev<=4?'#ffb347':'#7be37b',d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');return '<svg viewBox="0 0 40 40"><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+const pn=document.createElement('div');pn.id='pn';document.body.append(pn);let pnSig='';
+function notesDK(){if(!running||paused||!notes.length){pn.style.display='none';return}const cs=ni0(),L=LOOPLEN;const nx=notes.map(c=>({c,d:((c.s-cs)%L+L)%L})).filter(x=>x.d>5).sort((a,b)=>a.d-b.d).slice(0,4);const sig=nx.map(x=>x.c.s+':'+Math.round(x.d/10)).join('|');pn.style.display='flex';if(sig===pnSig)return;pnSig=sig;pn.innerHTML=nx.map((x,i)=>'<div class="np'+(i===0?' first':'')+'">'+noteIcon(x.c)+'<b>'+(Math.round(x.d/10)*10)+'</b></div>').join('')}
+function ni0(){let s=0;for(let i=0;i<st.idx;i++)s+=Math.hypot(P[i+1>=n?0:i+1].x-P[i].x,P[i+1>=n?0:i+1].z-P[i].z);return s}
+let paused=false;/* pause native : Échap ou bouton ❚❚ ouvre le menu pause commun (Reprendre, Recommencer, Réglages, commandes) */
+function setPause(v){if(v&&!running)return;paused=v;$('pause').style.display=v?'grid':'none';for(const k in K)K[k]=0}
+addEventListener('keydown',e=>{if(e.code==='Escape'&&running)setPause(!paused)});
+function frame(now){requestAnimationFrame(frame);if(paused){last=now;return}const dt=Math.min(.033,(now-last)/1000);last=now;clock+=dt;
 if(running){step(dt/2);step(dt/2)}
 const sn=Math.sin(st.th),cs_=Math.cos(st.th),f1=st.vx*sn+st.vz*cs_,l1=st.vx*cs_-st.vz*sn,spd=Math.hypot(st.vx,st.vz),beta=Math.atan2(Math.abs(l1),Math.abs(f1)),hb=running&&K.Space,thr=running&&(K.KeyW||K.ArrowUp)?1:0;
 const drifting=spd>7&&f1>0&&beta>.22;
@@ -201,7 +218,7 @@ sky.position.copy(camera.position);sun.position.copy(camera.position).addScaledV
 dl.position.set(st.x,st.y,st.z).addScaledVector(sunDir,150);dl.target.position.set(st.x,st.y,st.z);
 if(AC&&eng){const g=Math.min(4,Math.floor(spd/7)),r=clamp((spd-g*7)/7,0,1),tt=AC.currentTime;
 eng.frequency.setTargetAtTime(55+r*70+g*14+thr*12,tt,.05);engG.gain.setTargetAtTime(.025+.04*thr,tt,.08);sqG.gain.setTargetAtTime(slipping?Math.min(.08,.02+Math.abs(l1)*.006):0,tt,.06)}
-hud(spd,f1);renderer.render(scene,camera)}
+guideDK();notesDK();hud(spd,f1);renderer.render(scene,camera)}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();reset(0);requestAnimationFrame(frame);
 window.__driftMap=()=>({x:st.x,z:st.z,heading:st.th});
