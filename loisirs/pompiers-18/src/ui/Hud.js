@@ -41,13 +41,13 @@ export class Hud {
     const [t1, t2] = m.title(); $('mTitle').textContent = t1; $('mText').textContent = t2;
     $('mission').className = `hud ${m.state === 'alerte' ? 'alert' : ''}`;
     // GPS : flèche vers le point du trajet 25 m devant (suit les routes), prochain virage, distance restante
-    const tgt = m.target, fx = g.focus, look = tgt && g.route.mesh.visible ? g.route.lookPoint(fx) : tgt;
-    $('gps').style.display = tgt ? 'flex' : 'none';
+    const tgt = m.target, fx = g.focus, look = tgt && g.route.active ? g.route.lookPoint(fx) : tgt, gm = window.GameSettings?.guide;
+    $('gps').style.display = tgt && gm !== 'none' ? 'flex' : 'none';
     if (tgt) {
       const d = Math.hypot(tgt.x - fx.x, tgt.z - fx.z), ang = Math.atan2(look.x - fx.x, look.z - fx.z) - info.yaw;
-      $('arrow').style.transform = `rotate(${-ang}rad)`;
-      const t = g.route.mesh.visible ? g.route.turn() : null;
-      $('turn').textContent = d < 15 ? 'Vous êtes arrivé' : t?.turn && t.dist < 250 ? `${t.turn === 'droite' ? '↱ À droite' : '↰ À gauche'} dans ${Math.max(10, Math.round(t.dist / 10) * 10)} m` : 'Suivez le tracé au sol';
+      window.GameSettings?.arrow(d >= 15 ? ang : null, d >= 15 ? (d > 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m') : ''); // flèche commune en haut de l'écran
+      const t = g.route.active ? g.route.turn() : null;
+      $('turn').textContent = d < 15 ? 'Vous êtes arrivé' : t?.turn && t.dist < 250 ? `${t.turn === 'droite' ? '↱ À droite' : '↰ À gauche'} dans ${Math.max(10, Math.round(t.dist / 10) * 10)} m` : (gm === 'haut' ? 'Suivez la flèche' : 'Suivez le tracé au sol');
       $('dist').textContent = d >= 15 ? `Destination à ${d > 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m'}` : '';
     }
 

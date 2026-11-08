@@ -334,8 +334,6 @@ class Game {
     this.mission.update(dt);
     this.crew.update(dt, this.time);
     this.route.update(dt, this.focus, this.mission.target, this.mission.state === 'retour' || this.mission.state === 'transport' ? '#4fb3ff' : '#ff8a1a');
-    this.route.mesh.visible = this.route.mesh.visible && window.GameSettings?.guide !== 'haut'; // guidage : tracé au sol / flèche GPS en haut
-    document.getElementById('gps').style.display = window.GameSettings?.guide === 'sol' ? 'none' : '';
     for (const b of this.buildings) if (b.sim) b.update(dt, this.time);
     this.fx.update(dt, this.mission.building, this.camera.position);
 

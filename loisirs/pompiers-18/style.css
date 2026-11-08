@@ -60,3 +60,5 @@ button.go { background: #a3141b; } button.danger { background: #7a2620; }
   #minimap { width: 120px; height: 120px; }
   #side { width: 180px; } #crew { display: none; } .stats { grid-template-columns: repeat(2, 1fr); } #help { display: none; }
 }
+
+#gps #arrow { display: none; } /* la flèche est celle, commune, de assets/quality.js (haut de l'écran) */

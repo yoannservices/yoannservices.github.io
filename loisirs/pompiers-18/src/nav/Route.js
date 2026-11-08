@@ -25,7 +25,7 @@ export class Route {
   // origine (engin ou joueur), cible (ou null), couleur
   update(dt, from, target, color = '#ff8a1a') {
     this.tex.offset.y -= dt * 1.2;
-    if (!target) { this.mesh.visible = false; this.pts = []; return; }
+    if (!target) { this.active = false; this.mesh.visible = false; this.pts = []; return; }
     this.t -= dt;
     const key = `${Math.round(target.x)},${Math.round(target.z)}`;
     if (this.t <= 0 || key !== this.key) {
@@ -33,7 +33,9 @@ export class Route {
       this.pts = [{ x: from.x, z: from.z }, ...routePoints(from, target)];
       this.build(); this.mat.color.set(color);
     }
-    this.mesh.visible = Math.hypot(from.x - target.x, from.z - target.z) > 15;
+    this.active = Math.hypot(from.x - target.x, from.z - target.z) > 15; // trajet calculé (indépendant du mode de guidage)
+    const gs = window.GameSettings?.guide;
+    this.mesh.visible = this.active && gs !== 'haut' && gs !== 'none'; // tracé au sol : modes « sol » et « les deux »
   }
 
   // ruban de 1,4 m décalé sur la voie de droite (sauf premier et dernier segments, hors route)

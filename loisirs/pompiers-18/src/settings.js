@@ -1,8 +1,8 @@
 // Réglages graphiques du jeu. Le niveau commun (Auto / Haut / Moyen / Bas, ombres, 30 FPS) vient de assets/quality.js
 // (distance d'affichage, brouillard, taille des ombres) ; ce module ajoute ce qui est propre au jeu et l'applique.
-import { Q, LEVELS, level } from '../../../assets/quality.js';
+import { Q, LEVELS, level, save as saveShared } from '../../../assets/quality.js';
 
-const KEY = 'pompiers18.gfx.v1', QKEY = 'site.quality.v1';
+const KEY = 'pompiers18.gfx.v1';
 // valeurs par niveau ; « auto » suit le niveau choisi par quality.js selon les FPS
 export const PRESETS = {
   haut: { effects: 2, lights: true, env: true, pixel: 2, traffic: 60, textures: 2 },
@@ -28,5 +28,5 @@ export function setOption(opt, v) { GFX.custom[opt] = v; save(); }
 export function setLevel(mode) { Q.mode = mode; if (mode === 'bas') Q.shadows = false; else if (mode === 'haut') Q.shadows = true; GFX.custom = {}; saveQ(); save(); }   // Bas coupe les ombres (≈ 175 appels de dessin et 0,9 M triangles de moins)
 export function setShared(k, v) { Q[k] = v; saveQ(); }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(GFX.custom)); } catch { /* ignore */ } };
-const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify({ mode: Q.mode, shadows: Q.shadows, fps30: Q.fps30 })); } catch { /* ignore */ } };
+const saveQ = saveShared; // même sauvegarde que le panneau Réglages commun (assets/quality.js)
 export { Q, LEVELS, level };
