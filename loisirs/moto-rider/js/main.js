@@ -1249,6 +1249,8 @@ function drawMini(st){
 }
 let last=performance.now(),acc=0,lastRoadUpd=0,fps=60,tAll=0;
 const _qUp=new THREE.Quaternion(),_ax=new THREE.Vector3(1,0,0),_yUp=new THREE.Vector3(0,1,0),_v1=new THREE.Vector3(),_v2=new THREE.Vector3();
+let gg=null;/* guidage commun (assets/quality.js) : chevrons sur la route et flèche en haut vers le point ~35 m devant */
+function guideMR(st){const GS=window.GameSettings;if(!GS)return;if(!gg)gg=GS.ground(THREE,scene);const pts=[{x:st.x,y:st.y,z:st.z}],i0=Math.max(0,Math.min(NS-80,st.idx|0));for(let k=1;k<=70;k++)pts.push({x:RX[i0+k],y:RY[i0+k]+.05,z:RZ[i0+k]});gg.update(pts,tAll);GS.arrow(Math.atan2(RX[i0+17]-st.x,RZ[i0+17]-st.z)-st.psi)}
 function frame(now){
   requestAnimationFrame(frame);
   let dt=Math.min(.05,(now-last)/1000);last=now;if(dt<=0)return;
@@ -1259,7 +1261,7 @@ function frame(now){
     while(acc>=1/120){const r=stepPhysics(bikeState,bk,inp,aids,1/120);if(r&&!ev)ev=r;acc-=1/120}
     if(ev==='crash'){msg('Chute ! Remise en piste…',1800);setTimeout(()=>{if(playing)resetOnRoad()},1900)}
     else if(ev==='rail'&&!msg.rail){msg('Glissière !',700);msg.rail=1;setTimeout(()=>msg.rail=0,900)}
-    const st=bikeState;
+    const st=bikeState;guideMR(st);
     // objets
     const b=bikeObj;
     b.root.position.set(st.x,st.y,st.z);b.root.rotation.y=st.psi;
