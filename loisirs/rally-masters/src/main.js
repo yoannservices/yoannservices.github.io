@@ -131,7 +131,7 @@ class Game {
   /* ---------- construction du monde ---------- */
   disposeWorld() {
     const w = this.w; if (!w) return;
-    w.cod.stop(); this.audio.silence(); w.track.dispose(); w.atmo.dispose(); w.model.dispose(); w.ghost?.dispose(); w.particles.dispose();
+    w.cod.stop(); this.audio.silence(); w.gg?.dispose(); w.track.dispose(); w.atmo.dispose(); w.model.dispose(); w.ghost?.dispose(); w.particles.dispose();
     w.scene.clear(); this.w = null; this.endT = 0;
   }
   startWorld(p) {
@@ -213,8 +213,8 @@ class Game {
   frame(dt) {
     if (this.mode === 'menu') { this.showcase.update(dt, innerWidth / innerHeight); renderer.render(this.showcase.scene, this.showcase.cam); return; }
     const w = this.w; if (!w) return;
-    if (this.paused && Input.pressed('pause')) this.menuResume();
-    if (!this.paused && !w.finished) this.updateStage(dt, w);
+    if (this.paused) { if (Input.pressed('pause')) this.menuResume(); } // reprise : on ne relance pas updateStage dans la même image (il remettrait aussitôt en pause)
+    else if (!w.finished) this.updateStage(dt, w);
     renderer.render(w.scene, this.camera);
   }
 
@@ -238,6 +238,11 @@ class Game {
     ph.locked = run.state === 'countdown';
     ph.update(dt, ctl, track);
     track.update(ph.idx); track.animate(dt);
+    { const GS = window.GameSettings; if (GS) { // guidage commun (assets/quality.js) : chevrons sur la spéciale (les virages à venir sont dans les notes de pace du HUD)
+      if (!w.gg) w.gg = GS.ground(THREE, w.scene);
+      const X = stage.x, Z = stage.z, Y = stage.y, n = X.length, i0 = Math.min(n - 2, ph.idx), pts = [{ x: ph.x, y: ph.y, z: ph.z }];
+      for (let k = 1; k <= 35 && i0 + k < n; k++) pts.push({ x: X[i0 + k], y: Y[i0 + k] + 0.05, z: Z[i0 + k] });
+      w.gg.update(pts, performance.now() / 1000); } }
     run.update(dt, ph, track);
     for (const e of run.events) this.runEvent(e, w);
     const dist = (ph.idx + (ph.g[4].t || 0)) * DS;

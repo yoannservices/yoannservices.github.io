@@ -178,7 +178,7 @@ export class Track {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     geo.setIndex(idx); geo.computeVertexNormals(); geo.computeBoundingSphere(); owned.push(geo);
-    const terrain = new THREE.Mesh(geo, this.mat); terrain.receiveShadow = true; group.add(terrain);
+    const terrain = new THREE.Mesh(geo, this.mat); terrain.receiveShadow = true; terrain.userData.noLod = true; group.add(terrain); // jamais masqué par la distance d'affichage commune (trous dans le sol)
 
     // --- décor ---
     const env = this.env, treesBy = {}, rocks = [], specs = [], signs = { '-1': [], 1: [] }, batch = new StaticBatch(), d2r = Math.PI / 180;

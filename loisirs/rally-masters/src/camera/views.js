@@ -15,10 +15,11 @@ export class CameraRig {
     if (m === 0) {
       // poursuite basse : suit le cap de la voiture avec un léger retard, recule et s'élargit avec la vitesse
       const vh = ph.speed > 4 ? Math.atan2(ph.u * Math.sin(ph.yaw) + ph.v * Math.cos(ph.yaw), ph.u * Math.cos(ph.yaw) - ph.v * Math.sin(ph.yaw)) : ph.yaw;
-      let tgt = ph.yaw * 0.6 + (ph.u >= 0 ? vh : ph.yaw) * 0.4;
+      const dv = ph.u >= 0 ? Math.atan2(Math.sin(vh - ph.yaw), Math.cos(vh - ph.yaw)) : 0; // écart cap voiture / direction de déplacement ramené à ±π (yaw s'accumule au-delà de π : sans cela la caméra se retournait)
+      const tgt = ph.yaw + dv * 0.4;
       let dh = tgt - this.heading; dh = Math.atan2(Math.sin(dh), Math.cos(dh));
       this.heading = this.init ? this.heading + dh * Math.min(1, dt * 4.5) : tgt;
-      const dist = 5.6 + ph.speed * 0.04, h = 1.7 + ph.speed * 0.006;
+      const dist = 4.6 + ph.speed * 0.035, h = 2.7 + ph.speed * 0.008; // plus haute et moins reculée (avant : 5,6 m derrière, 1,7 m de haut)
       _p.set(ph.x - Math.sin(this.heading) * dist, ph.y + h, ph.z - Math.cos(this.heading) * dist);
       if (!this.init) { this.pos.copy(_p); this.init = true; } else this.pos.lerp(_p, 1 - Math.exp(-dt * 12));
       cam.position.copy(this.pos);
