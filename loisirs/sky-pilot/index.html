@@ -4,7 +4,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../../assets/theme.css" />
 <link rel="stylesheet" href="../../assets/simulateur.css" />
-<script src="../../assets/loader.js" data-name="Sky Pilot" data-preload="../../assets/models/f35.glb|../../assets/models/v22-osprey-tilt.glb"></script>
+<script src="../../assets/loader.js" data-name="Sky Pilot" data-preload="../../assets/models/f35.glb|../../assets/models/v22-osprey-tilt.glb" data-controls="# Touches de base|Z S Q D / flèches : tangage et roulis|C : vues|R : recommencer à la piste|M : carte et destination|Échap : menu et pause|# Touches du jeu|A / E : palonnier|Maj / Ctrl : poussée (à 100 %, relâche puis Maj : boost)|Espace : freinage d’urgence|G : train · F : volets|T / Y / B / O : tuyères, aile, freins VTOL, portes|J : parachute|Tab : destination suivante|H : pilotage assisté|N : son"></script>
 <script src="../../assets/site.js"></script>
 <script src="../../assets/gamepad.js" data-profile="plane"></script>
 <meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="stylesheet" href="style.css"></head><body>
@@ -66,33 +66,7 @@
     <button class="go" id="goBtn">DÉCOLLER</button>
     <label class="chk"><input type="checkbox" id="assistChk" checked> Pilotage assisté (l'avion se remet à plat si tu lâches le manche)</label>
   </div>
-  <h2>Réglages</h2>
-  <div class="row"><button type="button" class="go" style="background:transparent;color:inherit;border:1px solid currentColor" onclick="window.GameSettings&&GameSettings.open()">⚙ Réglages graphiques</button></div>
-  <h2>Commandes</h2>
-  <div class="keys">
-    <div><kbd>Z</kbd><kbd>↓</kbd><span>Cabrer (nez en haut)</span></div>
-    <div><kbd>S</kbd><kbd>↑</kbd><span>Piquer (nez en bas)</span></div>
-    <div><kbd>Q</kbd><kbd>←</kbd><span>Rouler à gauche</span></div>
-    <div><kbd>D</kbd><kbd>→</kbd><span>Rouler à droite</span></div>
-    <div><kbd>A</kbd><kbd>E</kbd><span>Palonnier gauche / droite</span></div>
-    <div><kbd>Maj</kbd><kbd>Ctrl</kbd><span>Poussée. À 100 %, relâche puis rappuie sur Maj pour le BOOST (post-combustion)</span></div>
-    <div><kbd>Espace</kbd><span>Freinage d'urgence : gaz coupés, parachute, freins</span></div>
-    <div><kbd>Manette</kbd><span>Stick gauche : tangage (haut = piquer) et roulis · stick droit : tonneau (gauche/droite) et palonnier (haut/bas) · RT / LT : poussée · A train · X frein d'urgence (2e fois : parachute) · Y caméra · croix : haut volets, bas freins VTOL (PV-40), gauche portes (PV-40), droite pilotage assisté · RB / LB : ailes PV-40 ou tuyères F-35 · Start pause</span></div>
-    <div><kbd>J</kbd><span>Larguer le parachute</span></div>
-    <div><kbd>T</kbd><span>F-35 : tuyères verticales / horizontales · PV-40 : basculer l'aile vers 30°, 60°, 90°</span></div>
-    <div><kbd>Y</kbd><span>PV-40 : rabaisser l'aile (90° → 60° → 30° → 0°)</span></div>
-    <div><kbd>B</kbd><span>PV-40 : freins VTOL (amortissent le vol vertical)</span></div>
-    <div><kbd>O</kbd><span>PV-40 : portes parachutistes et rampe arrière</span></div>
-    <div><kbd>G</kbd><span>Train d'atterrissage</span></div>
-    <div><kbd>F</kbd><span>Volets (0 / 1 / 2)</span></div>
-    <div><kbd>C</kbd><span>Vues : extérieure, cockpit, poursuite (+ cabine et soute du PV-40) · clic + glisser : tourner autour</span></div>
-    <div><kbd>M</kbd><span>Carte et destination</span></div>
-    <div><kbd>Tab</kbd><span>Destination suivante</span></div>
-    <div><kbd>H</kbd><span>Pilotage assisté oui / non</span></div>
-    <div><kbd>R</kbd><span>Recommencer à la piste</span></div>
-    <div><kbd>N</kbd><span>Son oui / non</span></div>
-    <div><kbd>Échap</kbd><span>Menu et pause</span></div>
-  </div>
+  <div data-foot></div> <!-- Réglages + commandes : assets/quality.js (GameSettings.foot) -->
   <div class="tip"><b>Décoller :</b> poussée à fond (Maj), tire doucement sur le manche vers 190 km/h, rentre le train (G). <b>Atterrir :</b> train sorti, volets 2, environ 200 km/h, moins de 3 m/s de descente au toucher, puis freins.<br><b>Vrille :</b> monte, laisse la vitesse tomber sous 130 km/h en tirant, puis donne un coup de palonnier (A ou E). <b>Pour sortir :</b> manche en avant et palonnier opposé.<br><b>PV-40 :</b> aile à 90° (T trois fois), puissance 75–80 % : il monte à la verticale. Pour passer en vol normal, prends au moins 300 m de hauteur et rabaisse l'aile progressivement (Y) en accélérant, sinon il décroche. L'aile à 30° permet des décollages très courts.<br><b>Mur du son :</b> un nuage de condensation peut se former près de Mach 1 si l'air est humide (humidité approximée selon l'altitude) ; le cône de choc se forme en vol supersonique. Le bang simulé en double onde de pression s'entend depuis la vue extérieure, pas dans le cockpit.</div>
  </div>
 </div>
