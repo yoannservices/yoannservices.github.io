@@ -76,3 +76,5 @@ kbd{display:inline-block;min-width:1.5em;padding:1px 6px;margin:0 2px;border:1px
 #combo .hint{font:600 11px var(--f-body);color:var(--mute);letter-spacing:.08em}
 @media (max-width:700px){#scorebox{transform:translateX(-50%) scale(.8);transform-origin:center top}#combo{bottom:210px}}
 #c.drag{cursor:grabbing}
+
+#qbtn{display:none} /* qualité : réglage commun (⚙ Réglages) */
