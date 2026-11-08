@@ -108,7 +108,7 @@ export class HUD {
     else body = this.statsHtml();
     this.el.menu.innerHTML = `<div class="panel"><header><h2>Steep Peaks</h2><span>Niveau ${prog.level}</span>
       <nav>${tabs.map(([k, n]) => `<button data-tab="${k}" class="${k === this.tab ? 'on' : ''}">${n}</button>`).join('')}</nav>
-      <button data-act="close">Reprendre</button><button data-act="settings">⚙ Réglages</button></header><section>${body}</section><section><h3>Commandes</h3>${this.helpHtml()}</section></div>`;
+      <button data-act="close">Reprendre</button></header><section>${body}</section></div>`;
     this.el.menu.onclick = (ev) => {
       const t = ev.target.closest('[data-tab],[data-act],[data-eq]');
       if (!t) return;
