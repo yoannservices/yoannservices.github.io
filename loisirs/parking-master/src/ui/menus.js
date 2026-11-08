@@ -37,12 +37,8 @@ export class Menus {
       if (open) row.append(this.button(b ? 'Rejouer' : 'Jouer', () => this.g.start(L.id)));
       list.append(row);
     });
-    card.append(list, this.button('⚙ Réglages', () => window.GameSettings && window.GameSettings.open()));
-    const keys = el('div', 'keys-foot'); keys.append(el('h3', null, 'Commandes'));
-    for (const line of (document.querySelector('script[data-controls]')?.dataset.controls || '').split('|').filter(Boolean)) {
-      const i = line.indexOf(':'), r = el('div', 'kf-row'); r.append(el('kbd', null, i < 0 ? '' : line.slice(0, i).trim()), el('span', null, i < 0 ? line : line.slice(i + 1).trim())); keys.append(r);
-    }
-    card.append(keys);
+    card.append(list);
+    const ft = window.GameSettings?.foot(); if (ft) card.append(ft); // Réglages + commandes : même pied que les autres jeux
     this.open(card);
   }
 
