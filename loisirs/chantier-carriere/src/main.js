@@ -1,425 +1,250 @@
+// Chantier & Carrière : boucle de jeu. Terrain déformable, 5 engins (chargeuse, pelle, tombereau, bouteur, camion benne),
+// concasseur, camions clients, commandes, carburant, usure, tirs de mine, météo et jour/nuit, boutique et carrière.
 import * as THREE from 'three';
 import { patch } from '../../../assets/perf.js';
-import { advanceAutomation, AUTOMATION_INTERVAL, AUTOMATION_UNLOCK_DELIVERIES, recordDelivery } from './progression.js';
-import { boxCollider, circleCollider, deepestContact, vehicleBox } from './collision.js';
-
 patch(THREE);
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Terrain, tonnes } from './core/terrain.js';
+import { TerrainMesh } from './world/TerrainMesh.js';
+import { Site, ZONES, BLAST_SITES } from './world/Site.js';
+import { Plant, PLANT } from './world/Plant.js';
+import { Environment } from './world/Environment.js';
+import { Customers } from './world/Customers.js';
+import { Machine, SPECS } from './machines/Machine.js';
+import { buildMachine, poseMods } from './machines/models.js';
+import { work } from './machines/ops.js';
+import { Economy, PRICES } from './economy/Economy.js';
+import { Orders } from './economy/Orders.js';
+import { GameAudio } from './audio/audio.js';
+import { CameraRig } from './camera.js';
+import { readInput, press } from './input.js';
+import { Hud } from './ui/Hud.js';
+import { Menu } from './ui/Menu.js';
+import { Tutorial } from './ui/Tutorial.js';
+import { get } from './settings.js';
 
-const canvas = document.querySelector('#scene');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
-renderer.setSize(window.innerWidth, window.innerHeight, false);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+const STEP = 1 / 60;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+const SPAWN = { loader: [-48, -24, -Math.PI / 2], excavator: [8, -10, Math.PI / 2], dumper: [-6, -20, Math.PI / 2], dozer: [10, -28, Math.PI / 2], truck: [-52, 30, Math.PI] };
+const IDLE = { drive: 0, steer: 0, brake: 1, hand: true, t1: 0, t2: 0, t3: 0, t4: 0 };
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#a9c5c6');
-scene.fog = new THREE.Fog('#a9c5c6', 45, 115);
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 180);
-const groundMaterial = new THREE.MeshLambertMaterial({ color: '#b5a77e' });
-const rockMaterial = new THREE.MeshLambertMaterial({ color: '#777a70', flatShading: true });
-const keys = new Set();
-const rocks = [];
-const colliders = [];
-const loader = { x: -3, z: 14, heading: -2.18, speed: 0, lift: 0, loaded: false, view: 0 };
-const saveKey = 'chantier-carriere.prototype.v1';
-let actionQueued = false;
-let toastTimer = 0;
-let beltTimer = 0;
-let beltProgress = 0;
-let beltRock;
-let paused = false;
-let delivered = 0;
-let money = 0;
-let automationUnlocked = false;
-
-try {
-  const save = JSON.parse(localStorage.getItem(saveKey) || '{}');
-  delivered = Math.max(0, Number(save.delivered) || 0);
-  money = Math.max(0, Number(save.money) || 0);
-  automationUnlocked = delivered >= AUTOMATION_UNLOCK_DELIVERIES;
-} catch { /* Une sauvegarde absente ou invalide repart de zéro. */ }
-
-scene.add(new THREE.HemisphereLight('#e4f0e5', '#625a43', 2.15));
-const sun = new THREE.DirectionalLight('#fff0d4', 2.1);
-sun.position.set(-25, 45, 20);
-scene.add(sun);
-
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(150, 110), groundMaterial);
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.16;
-scene.add(ground);
-
-const grid = new THREE.GridHelper(120, 60, '#8e8b6d', '#a69d79');
-grid.position.y = -0.145;
-grid.material.transparent = true;
-grid.material.opacity = 0.18;
-scene.add(grid);
-
-function box(parent, size, color, position, materialOptions = {}) {
-  const material = new THREE.MeshLambertMaterial({ color, ...materialOptions });
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
-  mesh.position.set(...position);
-  parent.add(mesh);
-  return mesh;
-}
-
-function makeLoader() {
-  const root = new THREE.Group();
-  scene.add(root);
-  box(root, [2.4, 0.5, 3.15], '#d89527', [0, 0.82, -0.1]);
-  box(root, [2.15, 0.64, 1.45], '#e5a52f', [0, 1.12, -0.82]);
-  box(root, [1.32, 1.12, 1.18], '#38484a', [0, 1.76, -0.86]);
-  box(root, [1.18, 0.9, 0.08], '#9ec3c5', [0, 1.78, -0.25], { transparent: true, opacity: 0.72 });
-  box(root, [0.08, 0.92, 0.9], '#263638', [-0.66, 1.77, -0.86]);
-  box(root, [0.08, 0.92, 0.9], '#263638', [0.66, 1.77, -0.86]);
-  box(root, [1.38, 0.12, 1.32], '#d89527', [0, 2.36, -0.86]);
-  box(root, [1.55, 0.16, 0.24], '#262b29', [0, 1.16, 1.45]);
-  const wheels = [];
-  for (const x of [-1.12, 1.12]) {
-    for (const z of [-1.02, 1.02]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 0.34, 10), new THREE.MeshLambertMaterial({ color: '#282b29', flatShading: true }));
-      wheel.rotation.z = Math.PI / 2;
-      wheel.position.set(x, 0.49, z);
-      root.add(wheel);
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.36, 8), new THREE.MeshLambertMaterial({ color: '#d3a542' }));
-      hub.rotation.z = Math.PI / 2;
-      hub.position.set(x, 0.49, z);
-      root.add(hub);
-      wheels.push(wheel);
+// poussière : particules réutilisées (creusage, chute de roche, tir de mine)
+class Dust {
+  constructor(scene) {
+    const n = 260; this.n = n; this.p = new Float32Array(n * 3); this.v = new Float32Array(n * 3); this.life = new Float32Array(n); this.i = 0;
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(this.p, 3));
+    this.pts = new THREE.Points(g, new THREE.PointsMaterial({ color: '#b9a888', size: 1.3, transparent: true, opacity: 0.45, depthWrite: false, sizeAttenuation: true }));
+    this.pts.frustumCulled = false; this.pts.userData.noLod = true; scene.add(this.pts);
+    for (let k = 0; k < n; k++) this.p[k * 3 + 1] = -999;
+  }
+  emit(x, y, z, count, spread = 1.5, up = 1.2) {
+    for (let c = 0; c < count; c++) {
+      const k = this.i++ % this.n; this.life[k] = 1 + Math.random();
+      this.p.set([x + (Math.random() - 0.5) * spread, y, z + (Math.random() - 0.5) * spread], k * 3);
+      this.v.set([(Math.random() - 0.5) * spread, up * (0.4 + Math.random()), (Math.random() - 0.5) * spread], k * 3);
     }
   }
-  const armPivot = new THREE.Group();
-  armPivot.position.set(0, 1.35, 0.5);
-  root.add(armPivot);
-  for (const x of [-0.82, 0.82]) {
-    const arm = box(armPivot, [0.2, 0.22, 2.15], '#c98222', [x, 0.06, 1.05]);
-    arm.rotation.x = -0.08;
-    box(armPivot, [0.24, 0.25, 0.3], '#4c4c40', [x, 0.02, 2.03]);
+  update(dt) {
+    for (let k = 0; k < this.n; k++) {
+      if (this.life[k] <= 0) continue;
+      this.life[k] -= dt; if (this.life[k] <= 0) { this.p[k * 3 + 1] = -999; continue; }
+      this.p[k * 3] += this.v[k * 3] * dt; this.p[k * 3 + 1] += this.v[k * 3 + 1] * dt; this.p[k * 3 + 2] += this.v[k * 3 + 2] * dt; this.v[k * 3 + 1] *= 0.97;
+    }
+    this.pts.geometry.attributes.position.needsUpdate = true;
   }
-  const bucket = new THREE.Group();
-  bucket.position.set(0, -0.08, 2.12);
-  armPivot.add(bucket);
-  box(bucket, [1.68, 0.2, 0.88], '#555951', [0, -0.22, 0.15]);
-  box(bucket, [1.68, 0.66, 0.16], '#656961', [0, 0.02, 0.55]);
-  box(bucket, [0.16, 0.54, 0.72], '#656961', [-0.76, 0.06, 0.2]);
-  box(bucket, [0.16, 0.54, 0.72], '#656961', [0.76, 0.06, 0.2]);
-  const cargo = new THREE.Mesh(new THREE.DodecahedronGeometry(0.39, 0), new THREE.MeshLambertMaterial({ color: '#777a70', flatShading: true }));
-  cargo.position.set(0, 0.22, 0.18);
-  cargo.visible = false;
-  bucket.add(cargo);
-  return { root, wheels, armPivot, bucket, cargo };
 }
 
-const machine = makeLoader();
-
-function makeRock(x, z, scale = 1) {
-  const group = new THREE.Group();
-  group.position.set(x, 0.1, z);
-  const count = 3 + Math.floor(Math.random() * 3);
-  for (let i = 0; i < count; i++) {
-    const mesh = new THREE.Mesh(new THREE.DodecahedronGeometry((0.42 + Math.random() * 0.24) * scale, 0), rockMaterial);
-    mesh.position.set((Math.random() - 0.5) * 1.1 * scale, Math.random() * 0.32, (Math.random() - 0.5) * 1.1 * scale);
-    mesh.rotation.set(Math.random(), Math.random(), Math.random());
-    group.add(mesh);
+class Game {
+  constructor() {
+    const canvas = document.getElementById('scene');
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.05;
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(62, 1, 0.1, 1500); this.scene.add(this.camera);
+    const pm = new THREE.PMREMGenerator(this.renderer); this.envTex = pm.fromScene(new RoomEnvironment(), 0.04).texture; pm.dispose();
+    this.time = 0; this.acc = 0; this.saveT = 0; this.started = false; this.timeSpeed = 1; this.meshT = 0; this.sound = {};
+    this.economy = new Economy(); this.audio = new GameAudio();
+    this.env = new Environment(this.scene, this.economy.d.hours ?? 7);
+    this.terrain = new Terrain(); this.plant = new Plant();
+    this.loadTerrain();
+    this.tmesh = new TerrainMesh(this.scene, this.terrain);
+    this.site = new Site(this.scene, this.terrain);
+    this.dust = new Dust(this.scene);
+    this.world = { terrain: this.terrain, plant: this.plant, machines: [], obstacles: (self) => [...this.site.colliders, ...this.world.machines.filter((o) => o !== self).map((o) => o.collider())] };
+    this.models = new Map(); this.group = new THREE.Group(); this.scene.add(this.group);
+    for (const spec of Object.values(SPECS)) {
+      const [x, z, h] = SPAWN[spec.id], m = new Machine(spec, x, z, h); m.y = this.terrain.height(x, z); m.fuel = spec.fuel; this.world.machines.push(m);
+    }
+    const saved = this.economy.d.machines; if (saved) for (const m of this.world.machines) m.restore(saved[m.id]);
+    for (const m of this.world.machines) m.y = this.terrain.height(m.x, m.z);
+    this.active = this.world.machines[0];
+    this.orders = new Orders(this.economy.d.orderList);
+    this.customers = new Customers(this.world, this.orders, (t, tn, r) => this.onSale(t, tn, r));
+    this.rig = new CameraRig(this.camera); this.rig.bind(canvas);
+    this.hud = new Hud(this); this.menu = new Menu(this); this.tuto = new Tutorial(this);
+    this.economy.onGrade = (g) => { this.toast(`Promotion : ${g} !`, 'ok'); this.audio.chime(); };
+    this.applyUpgrades(); this.applyGfx(); this.syncModels(0);
+    addEventListener('resize', () => this.resize()); addEventListener('pointerdown', () => this.audio.unlock()); addEventListener('keydown', () => this.audio.unlock());
+    addEventListener('beforeunload', () => this.save());
+    window.__pauseGame = () => this.menu.toggle(true);
+    for (const b of document.querySelectorAll('#touch button')) {
+      const k = b.dataset.k; b.addEventListener('pointerdown', (e) => { e.preventDefault(); press(k, true); }); for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(ev, () => press(k, false));
+    }
+    this.resize(); this.menu.toggle(true);
+    this.last = performance.now();
+    this.renderer.setAnimationLoop((now) => { const dt = Math.min((now - this.last) / 1000, 0.1); this.last = now; this.step(dt); });
   }
-  group.userData.taken = false;
-  group.userData.collider = circleCollider(x, z, 1.15 * scale);
-  colliders.push(group.userData.collider);
-  scene.add(group);
-  rocks.push(group);
-}
-
-[[-13, 7], [-14, 0], [-11, -7], [-20, 2], [-19, -8], [-7, -13]].forEach(([x, z], index) => makeRock(x, z, index % 2 ? 0.9 : 1.1));
-
-function makeSite() {
-  box(scene, [10, 0.3, 10], '#66765a', [14, -0.02, -8]);
-  const pad = box(scene, [7, 0.08, 7], '#d4bd58', [14, 0.18, -8]);
-  pad.material.color.set('#d4bd58');
-  for (let i = -3; i <= 3; i += 2) {
-    box(scene, [0.1, 0.04, 7], '#eee0a1', [14 + i, 0.25, -8]);
-    box(scene, [7, 0.04, 0.1], '#eee0a1', [14, 0.25, -8 + i]);
+  resize() { this.renderer.setSize(innerWidth, innerHeight, false); this.camera.aspect = innerWidth / innerHeight; this.camera.updateProjectionMatrix(); }
+  toast(msg, kind) { this.hud?.toast(msg, kind); }
+  get mods() { const e = this.economy; return { speed: e.mult('engine', 0.1), bucket: e.mult('bucket', 0.2), tank: e.mult('tank', 0.25), tires: e.d.up.tires ? 0.7 : 1 }; }
+  applyUpgrades() { const m = this.mods; poseMods.bucket = m.bucket; poseMods.tank = m.tank; this.plant.mul = this.economy.mult('crusher', 0.3); }
+  applyGfx() {
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, get('pixel')));
+    this.scene.environment = get('env') ? this.envTex : null; this.scene.environmentIntensity = 0.4; this.audio.setVolume(get('volume'));
+    for (const m of this.world.machines) m.lightsOk = get('lights');
   }
-  box(scene, [4.5, 1.2, 0.6], '#56594f', [14, 0.82, -11.3]);
-  box(scene, [4.7, 0.14, 0.85], '#e3b834', [14, 1.48, -11.2]);
-  box(scene, [2.2, 3, 0.35], '#716e5b', [14, 1.5, -12.1]);
-  colliders.push(boxCollider(14, -11.3, 2.25, 0.3), boxCollider(14, -12.1, 1.1, 0.18));
-  box(scene, [0.2, 1.4, 0.45], '#d7ed78', [11.4, 0.9, -5.4]);
-  box(scene, [0.2, 1.4, 0.45], '#d7ed78', [16.6, 0.9, -5.4]);
-  box(scene, [8, 0.15, 0.5], '#4e594d', [5.8, 0.62, -6.8]);
-  box(scene, [8, 0.15, 0.5], '#4e594d', [5.8, 1.75, -6.8]);
-  colliders.push(boxCollider(5.8, -6.8, 4, 0.32));
-  for (let i = 0; i < 4; i++) {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.1, 6), new THREE.MeshLambertMaterial({ color: '#60665a' }));
-    post.position.set(2.4 + i * 2.2, 1.1, -6.8);
-    scene.add(post);
+  // --- terrain initial / sauvegarde -----------------------------------------------------------------
+  initPiles() {
+    const t = this.terrain; t.add(17, -10, 7, 420, 0); t.add(PLANT.stock.x, PLANT.stock.z, 4, 70, 1);
+    for (let i = 0; i < 400; i++) if (!t.relax(20000)) break;
   }
-  beltRock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3, 0), rockMaterial);
-  beltRock.position.set(2.1, 0.9, -6.8);
-  beltRock.visible = false;
-  scene.add(beltRock);
-  const warehouse = new THREE.Group();
-  box(warehouse, [12, 6, 0.7], '#747665', [-31, 2.8, -15]);
-  box(warehouse, [12.4, 0.45, 1], '#4d574b', [-31, 5.95, -15]);
-  box(warehouse, [3, 3.8, 0.08], '#34403b', [-31, 2, -14.62]);
-  scene.add(warehouse);
-  box(scene, [45, 0.25, 1.2], '#8f7955', [-9, 0.02, 20]);
-  box(scene, [45, 0.25, 1.2], '#8f7955', [-9, 0.02, -20]);
-  box(scene, [1.2, 0.25, 41], '#8f7955', [-31, 0.02, 0]);
-  box(scene, [1.2, 0.25, 41], '#8f7955', [23, 0.02, 0]);
-  colliders.push(
-    boxCollider(-9, 20, 22.5, 0.6), boxCollider(-9, -20, 22.5, 0.6),
-    boxCollider(-31, 0, 0.6, 20.5), boxCollider(23, 0, 0.6, 20.5),
-  );
-}
-makeSite();
-
-const ui = {
-  money: document.querySelector('#money'),
-  deliveries: document.querySelector('#deliveries'),
-  progress: document.querySelector('#progress'),
-  automation: document.querySelector('#automation-status'),
-  load: document.querySelector('#load-state'),
-  arm: document.querySelector('#arm-state'),
-  prompt: document.querySelector('#prompt'),
-  waypoint: document.querySelector('#waypoint'),
-  toast: document.querySelector('#toast'),
-  speed: document.querySelector('#speed'),
-  viewButton: document.querySelector('#view-button'),
-};
-const pauseMenu = document.querySelector('#pause-menu');
-
-function setPaused(value) {
-  paused = value;
-  pauseMenu.hidden = !paused;
-  keys.clear();
-}
-window.__pauseGame = () => setPaused(!paused);
-document.querySelector('#resume-button').addEventListener('click', () => setPaused(false));
-
-function saveProgress() {
-  localStorage.setItem(saveKey, JSON.stringify({ delivered, money }));
-}
-
-function showToast(message) {
-  ui.toast.textContent = message;
-  ui.toast.classList.add('visible');
-  toastTimer = 2.6;
-}
-
-function bucketWorldPosition() {
-  return new THREE.Vector3(0, 0.65, 3.35).applyAxisAngle(new THREE.Vector3(0, 1, 0), loader.heading).add(new THREE.Vector3(loader.x, 0, loader.z));
-}
-
-function nearestRock() {
-  const bucketPosition = bucketWorldPosition();
-  let nearest = null;
-  let nearestDistance = Infinity;
-  for (const rock of rocks) {
-    if (rock.userData.taken) continue;
-    const distance = bucketPosition.distanceTo(rock.position);
-    if (distance < nearestDistance) { nearest = rock; nearestDistance = distance; }
+  loadTerrain() {
+    let ok = false;
+    try { const s = localStorage.getItem('chantier-carriere.save.v2.terrain'); if (s) ok = this.terrain.decode(s); } catch { /* ignore */ }
+    if (!ok) this.initPiles();
   }
-  return { rock: nearest, distance: nearestDistance };
-}
-
-function doAction() {
-  if (loader.loaded) {
-    if (Math.hypot(loader.x - 14, loader.z + 8) < 6.2) {
-      loader.loaded = false;
-      machine.cargo.visible = false;
-      const progress = recordDelivery(delivered, money);
-      delivered = progress.deliveries;
-      money = progress.money;
-      if (progress.unlocked) {
-        automationUnlocked = true;
-        beltRock.visible = true;
-        showToast('Convoyeur débloqué : la trémie produit automatiquement !');
-      } else {
-        showToast('Gravier livré · +40 €');
-      }
-      saveProgress();
-      updateUI();
+  save() {
+    const e = this.economy; e.d.machines = Object.fromEntries(this.world.machines.filter((m) => !m.ai).map((m) => [m.id, m.snapshot()]));
+    e.d.orderList = this.orders.list; e.d.hours = this.env.hours; e.save();
+    try { localStorage.setItem('chantier-carriere.save.v2.terrain', this.terrain.encode()); } catch { /* quota */ }
+  }
+  newCareer() {
+    this.economy.reset(); const t = this.terrain, f = new Terrain(); t.H.set(f.H); t.L.fill(0); t.G.fill(0); t.active.clear(); this.initPiles(); t.version++;
+    for (const m of this.world.machines.filter((o) => !o.ai)) { const [x, z, h] = SPAWN[m.id]; Object.assign(m, { x, z, h, speed: 0, fuel: m.s.fuel, damage: 0, cargo: { vol: 0, g: 0 } }); m.y = t.height(x, z); }
+    this.plant.hopper = 0; this.orders.list = []; this.orders.next = 5; this.applyUpgrades(); this.toast('Nouvelle carrière', 'ok'); this.switchTo('loader'); this.tuto.start();
+  }
+  // --- modèles ----------------------------------------------------------------------------------------
+  syncModels() {
+    const live = new Set(this.world.machines);
+    for (const m of this.world.machines) if (!this.models.has(m)) { const mdl = buildMachine(m.id, this.group); this.models.set(m, mdl); }
+    for (const [m, mdl] of this.models) if (!live.has(m)) { this.group.remove(mdl.root); this.models.delete(m); }
+  }
+  switchTo(id) {
+    const m = this.world.machines.find((x) => x.id === id && !x.ai); if (!m || m === this.active) return;
+    this.active = m; this.rig.orb.yaw = 0; this.rig.orb.pitch = 0; this.rig.follow = m.h; this.audio.click(); this.toast(`${m.s.name}`, '');
+  }
+  fleet() { return this.world.machines.filter((m) => !m.ai); }
+  // --- économie ---------------------------------------------------------------------------------------
+  onSale(t, tn, r) {
+    const e = this.economy, total = r.pay + r.bonus;
+    if (tn < 0.5) { this.toast('Camion parti à vide : trop long à charger', 'warn'); return; }
+    e.addMoney(total); e.d.sold += tn; e.d.soldMoney += total; e.d.trucks++; e.addXp(Math.round(tn * 0.7 + (r.finished ? 40 : 0)));
+    if (r.finished) { e.d.orders++; this.toast(`Commande terminée : prime ${r.bonus >= 0 ? '+' : ''}${r.bonus} €`, r.bonus >= 0 ? 'ok' : 'warn'); }
+    this.toast(`Pesée : ${tn.toFixed(1)} t · +${r.pay} €${t.order ? ' · ' + t.order.client : ''}`, 'ok'); this.audio.cash();
+  }
+  // --- interactions (F) -------------------------------------------------------------------------------
+  interactions(inp) {
+    const a = this.active, e = this.economy, mods = this.mods, here = { x: a.x, z: a.z };
+    let prompt = '', act = null;
+    const z = ZONES, still = Math.abs(a.speed) < 1.2;
+    const atFuel = dist(here, z.fuel) < z.fuel.r, atWork = dist(here, z.workshop) < z.workshop.r, w = z.weigh;
+    const onScale = Math.abs(a.x - w.x) < w.hx && Math.abs(a.z - w.z) < w.hz;
+    if (onScale && a.s.bed && a.cargo.vol > 0.2) {
+      const tn = tonnes(a.cargo.vol, a.cargo.g), p = Math.round(tn * (a.cargo.g > 0.5 ? PRICES.gravel : PRICES.rock));
+      prompt = `F : peser et vendre ${tn.toFixed(1)} t de ${a.cargo.g > 0.5 ? 'gravier' : 'tout-venant'} (+${p} €)`;
+      act = () => { a.unload(99); a.tool.bed = 0; e.addMoney(p); e.d.sold += tn; e.d.soldMoney += p; e.addXp(Math.round(tn * 0.4)); this.toast(`Vente au pont-bascule : ${tn.toFixed(1)} t · +${p} €`, 'ok'); this.audio.cash(); };
+    } else if (atFuel && a.fuel < a.fuelMax(mods) * 0.98) {
+      const cost = Math.ceil((a.fuelMax(mods) - a.fuel) * PRICES.fuel);
+      prompt = still ? `F : faire le plein (${cost} €)` : 'Arrête-toi pour faire le plein';
+      if (still) act = () => { if (e.spend(cost)) { a.fuel = a.fuelMax(mods); this.toast(`Plein fait : −${cost} €`, 'ok'); this.audio.cash(); } else this.toast('Fonds insuffisants', 'warn'); };
+    } else if (atWork && (a.damage > 0.01 || a.dead)) {
+      const cost = Math.ceil(a.damage * PRICES.repairPerPoint);
+      prompt = still ? `F : réparer l'engin (${cost} €)` : "Arrête-toi pour réparer";
+      if (still) act = () => { if (e.spend(cost)) { a.damage = 0; a.dead = ''; this.toast(`Réparation faite : −${cost} €`, 'ok'); this.audio.chime(); } else this.toast('Fonds insuffisants', 'warn'); };
+    } else if (dist(here, z.kiosk) < z.kiosk.r) {
+      prompt = `F : tir de mine (${PRICES.blast} €) · engins à plus de 35 m du front`;
+      act = () => this.blast();
     } else {
-      showToast('Approche la trémie jaune pour décharger.');
+      const near = this.fleet().filter((m) => m !== a).sort((p, q) => dist(p, a) - dist(q, a))[0];
+      if (near && dist(near, a) < 16) { prompt = `F : passer dans ${near.s.short}`; act = () => this.switchTo(near.id); }
     }
-    return;
+    if (inp.interact && act) act();
+    return prompt;
   }
-  const { rock, distance } = nearestRock();
-  if (rock && distance < 2.8 && loader.lift < 0.34) {
-    rock.userData.taken = true;
-    rock.userData.collider.active = false;
-    rock.visible = false;
-    loader.loaded = true;
-    machine.cargo.visible = true;
-    updateUI();
-    showToast('Godet chargé. Relève-le et va à la trémie.');
-  } else if (loader.lift >= 0.34) {
-    showToast('Abaisse le godet avant de ramasser.');
-  } else {
-    showToast('Place le godet au ras d’un tas de gravier.');
-  }
-}
-
-function updateUI() {
-  ui.money.textContent = `${money.toLocaleString('fr-FR')} €`;
-  ui.deliveries.textContent = automationUnlocked ? `${delivered} livraisons · convoyeur actif` : `${delivered} / 3 livraisons`;
-  ui.progress.style.width = `${Math.min(delivered / 3, 1) * 100}%`;
-  ui.automation.textContent = automationUnlocked ? 'CONVOYEUR · ACTIF · +20 € / 10 s' : `CONVOYEUR · verrouillé à ${Math.max(3 - delivered, 0)} livraison${3 - delivered > 1 ? 's' : ''}`;
-  ui.automation.classList.toggle('on', automationUnlocked);
-  ui.load.textContent = loader.loaded ? 'CHARGÉ' : 'VIDE';
-  ui.load.classList.toggle('full', loader.loaded);
-  ui.arm.textContent = loader.lift > 0.42 ? 'Position haute' : loader.lift > 0.12 ? 'Mi-hauteur' : 'Position basse';
-  document.querySelector('#contract-number').textContent = String(Math.floor(delivered / 3) + 1).padStart(2, '0');
-}
-updateUI();
-
-function updateWaypoint() {
-  const dx = 14 - loader.x;
-  const dz = -8 - loader.z;
-  const targetHeading = Math.atan2(dx, dz);
-  const difference = Math.atan2(Math.sin(targetHeading - loader.heading), Math.cos(targetHeading - loader.heading));
-  const direction = Math.abs(difference) < 0.3 ? 'DEVANT' : difference > 0 ? 'À DROITE' : 'À GAUCHE';
-  ui.waypoint.textContent = `TRÉMIE · ${Math.round(Math.hypot(dx, dz))} m · ${direction}`;
-}
-updateWaypoint();
-
-function onKeyDown(event) {
-  if (event.code === 'Escape') {
-    event.preventDefault();
-    if (!event.repeat) setPaused(!paused);
-    return;
-  }
-  if (paused) return;
-  const handled = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'Space', 'KeyC', 'KeyR', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'];
-  if (handled.includes(event.code)) event.preventDefault();
-  if (event.code === 'Space' && !event.repeat) actionQueued = true;
-  if (event.code === 'KeyC' && !event.repeat) loader.view = (loader.view + 1) % 2;
-  if (event.code === 'KeyR' && !event.repeat) {
-    loader.x = -3; loader.z = 14; loader.heading = -2.18; loader.speed = 0;
-    showToast('Chargeuse replacée au départ.');
-  }
-  keys.add(event.code);
-}
-function onKeyUp(event) { keys.delete(event.code); }
-addEventListener('keydown', onKeyDown);
-addEventListener('keyup', onKeyUp);
-addEventListener('blur', () => keys.clear());
-ui.viewButton.addEventListener('click', () => { loader.view = (loader.view + 1) % 2; });
-
-for (const button of document.querySelectorAll('#touch-controls button')) {
-  const code = button.dataset.code;
-  button.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    if (button.dataset.action) actionQueued = true;
-    else if (code) keys.add(code);
-  });
-  const release = () => { if (code) keys.delete(code); };
-  button.addEventListener('pointerup', release);
-  button.addEventListener('pointercancel', release);
-  button.addEventListener('pointerleave', release);
-}
-
-function updatePrompt() {
-  if (loader.loaded) {
-    const close = Math.hypot(loader.x - 14, loader.z + 8) < 6.2;
-    ui.prompt.textContent = close ? 'ESPACE · Déverser le gravier' : 'Godet chargé · Rejoins la trémie jaune';
-    ui.prompt.classList.toggle('visible', close);
-    return;
-  }
-  const { rock, distance } = nearestRock();
-  const near = rock && distance < 3.1;
-  ui.prompt.textContent = near ? (loader.lift < 0.34 ? 'ESPACE · Ramasser le gravier' : 'A · Abaisser le godet') : 'Approche d’un tas de gravier';
-  ui.prompt.classList.toggle('visible', Boolean(near));
-}
-
-function update(dt) {
-  if (paused) return;
-  const forward = keys.has('KeyW') || keys.has('ArrowUp');
-  const reverse = keys.has('KeyS') || keys.has('ArrowDown');
-  const left = keys.has('KeyA') || keys.has('ArrowLeft');
-  const right = keys.has('KeyD') || keys.has('ArrowRight');
-  const lower = keys.has('KeyQ');
-  const raise = keys.has('KeyE');
-  if (forward) loader.speed += 7 * dt;
-  if (reverse) loader.speed -= 6 * dt;
-  loader.speed *= Math.exp(-1.6 * dt);
-  loader.speed = THREE.MathUtils.clamp(loader.speed, -4.5, 7.5);
-  if (Math.abs(loader.speed) > 0.08) loader.heading += (right ? 1 : 0) * dt * Math.sign(loader.speed) * 1.45 - (left ? 1 : 0) * dt * Math.sign(loader.speed) * 1.45;
-  loader.x += Math.sin(loader.heading) * loader.speed * dt;
-  loader.z += Math.cos(loader.heading) * loader.speed * dt;
-  loader.x = THREE.MathUtils.clamp(loader.x, -29, 21);
-  loader.z = THREE.MathUtils.clamp(loader.z, -19, 19);
-  for (let iteration = 0; iteration < 4; iteration++) {
-    const body = vehicleBox(loader.x, loader.z, loader.heading, 1.65, 1.2);
-    const contact = deepestContact(body, colliders);
-    if (!contact) break;
-    loader.x += contact.nx * (contact.depth + 0.005);
-    loader.z += contact.nz * (contact.depth + 0.005);
-    const forwardDot = Math.sin(loader.heading) * contact.nx + Math.cos(loader.heading) * contact.nz;
-    if (loader.speed * forwardDot < 0) loader.speed *= 1 - forwardDot * forwardDot;
-  }
-  loader.lift = THREE.MathUtils.clamp(loader.lift + (raise ? 0.75 : 0) * dt - (lower ? 0.75 : 0) * dt, 0, 0.8);
-  machine.root.position.set(loader.x, 0, loader.z);
-  machine.root.rotation.y = loader.heading;
-  machine.armPivot.rotation.x = -loader.lift;
-  machine.bucket.rotation.x = loader.lift * 0.52;
-  for (const wheel of machine.wheels) wheel.rotation.x -= loader.speed * dt * 1.4;
-  if (actionQueued) { doAction(); actionQueued = false; }
-  if (automationUnlocked) {
-    const payout = advanceAutomation(beltTimer, dt);
-    beltTimer = payout.elapsed;
-    beltProgress = beltTimer / AUTOMATION_INTERVAL;
-    beltRock.position.x = 2.1 + beltProgress * 7.4;
-    beltRock.position.y = 0.9 + Math.sin(beltProgress * Math.PI) * 0.15;
-    beltRock.visible = true;
-    if (payout.reward > 0) {
-      money += payout.reward;
-      saveProgress();
-      updateUI();
+  blast() {
+    const t = this.terrain, e = this.economy;
+    let best = null, bv = 0;
+    for (const s of BLAST_SITES) { const v = t.solidAbove(s.x0, s.x0 + s.depth, s.cz - s.halfW, s.cz + s.halfW, s.floor + 0.4); if (v > bv) { bv = v; best = s; } }
+    if (!best || bv < 250) { this.toast('Plus de roche à abattre sur les fronts balisés', 'warn'); return; }
+    for (const m of this.fleet()) {
+      const dx = Math.max(best.x0 - 12 - m.x, 0, m.x - (best.x0 + best.depth)), dz = Math.max(Math.abs(m.z - best.cz) - best.halfW, 0);
+      if (Math.hypot(dx, dz) < 35) { this.toast(`Zone non dégagée : ${m.s.short} à moins de 35 m du front`, 'bad'); this.audio.warn(); return; }
     }
+    if (!e.spend(PRICES.blast)) { this.toast('Fonds insuffisants', 'warn'); return; }
+    this.audio.siren(2); this.pendingBlast = { site: best, t: 2.6 }; this.toast('Tir dans 3 secondes… ', 'warn');
   }
-  if (toastTimer > 0) {
-    toastTimer -= dt;
-    if (toastTimer <= 0) ui.toast.classList.remove('visible');
+  doBlast(site) {
+    const vol = this.terrain.blast(site); this.economy.d.blasts++; this.economy.addXp(25);
+    this.audio.blast(); this.rig.shake = 0.7; this.dust.emit(site.x0 - 2, this.terrain.height(site.x0 - 3, site.cz) + 2, site.cz, 80, site.halfW * 1.2, 5);
+    this.toast(`Tir de mine : ${Math.round(vol * 1.25)} m³ de roche abattue au pied du front`, 'ok');
   }
-  const armLabel = loader.lift > 0.42 ? 'Position haute' : loader.lift > 0.12 ? 'Mi-hauteur' : 'Position basse';
-  if (ui.arm.textContent !== armLabel) ui.arm.textContent = armLabel;
-  ui.speed.textContent = String(Math.round(Math.abs(loader.speed) * 3.6));
-  updatePrompt();
-  updateWaypoint();
+  // --- boucle -----------------------------------------------------------------------------------------
+  step(dt) {
+    const inp = readInput(this.active.id);
+    if (inp.menu) { this.menu.toggle(); if (!this.menu.open) this.started = true; }
+    if (inp.map) this.hud.toggleMap(); if (inp.help) this.hud.toggleHelp();
+    if (this.menu.open) { this.audio.update({ paused: true }); this.renderer.render(this.scene, this.camera); return; }
+    this.started = true; this.time += dt;
+    const a = this.active, mods = this.mods;
+    if (inp.switch) { const f = this.fleet(); if (Math.abs(inp.switch) === 99) this.switchTo(f[(f.indexOf(a) + (inp.switch > 0 ? 1 : f.length - 1)) % f.length].id); else { const id = Object.values(SPECS).find((s) => s.key === inp.switch)?.id; if (id) this.switchTo(id); } }
+    const A = this.active;
+    if (inp.view) this.rig.toggle();
+    if (inp.lights) A.lights = !A.lights; if (inp.beacon) A.beacon = !A.beacon;
+    if (inp.reset) { const [x, z, h] = SPAWN[A.id]; Object.assign(A, { x, z, h, speed: 0 }); this.toast('Engin replacé à son poste', ''); }
+    this.env.update(dt, A, this.camera.position, this.timeSpeed);
+    const night = this.env.night; this.site.setNight(night);
+    for (const m of this.world.machines) if (m.ai) m.lights = night > 0.3; else if (m !== A && night > 0.5 && m.lightsAuto === undefined) m.lightsAuto = true;
+    // physique, outils
+    const events = { dig: 0, pour: 0, push: 0 };
+    for (this.acc += dt; this.acc >= STEP; this.acc -= STEP) {
+      for (const m of this.world.machines) {
+        if (m.ai) continue;
+        m.fuelMaxCached = m.fuelMax(mods);
+        const ctl = m === A ? { ...inp, drive: inp.drive, brake: inp.drive * m.speed < -0.05 ? 1 : 0 } : IDLE;
+        m.update(STEP, ctl, this.world, mods);
+        if (m === A && m.impact > 2.5) { this.audio.thud(m.impact * 0.4); this.rig.shake = Math.min(0.4, 0.05 * m.impact); if (m.damage >= 1 && !m.dead) { m.dead = 'Hors service : atelier'; this.toast(`${m.s.short} hors service : va à l'atelier`, 'bad'); } }
+        const mdl = this.models.get(m); if (!mdl) continue;
+        const tip = new THREE.Vector3(), pour = new THREE.Vector3(); mdl.tip.getWorldPosition(tip); mdl.pour.getWorldPosition(pour);   // ancres de l'image précédente
+        const ev = work(this.world, m, tip, pour, STEP, mods);
+        events.dig += ev.dig; events.pour += ev.pour; events.push += ev.push;
+        if (m === A) { if (ev.dig > 0) this.dust.emit(tip.x, tip.y + 0.2, tip.z, 1, 1.2); if (ev.pour > 0) this.dust.emit(pour.x, pour.y - 0.5, pour.z, 2, 1.4, 0.6); if (ev.push > 0) this.dust.emit(tip.x, tip.y + 0.3, tip.z, 1, 2.4); }
+        if (m.fuel <= 0 && !m.dead && m === A) { m.dead = ''; this.toast('Panne sèche ! Station-service : F', 'bad'); this.audio.warn(); }
+      }
+    }
+    // concasseur, terrain, clients, commandes
+    const q = this.plant.update(dt, this.terrain, this.plant.mul ?? 1); this.economy.d.crushed += q;
+    this.terrain.relax(2500); this.meshT -= dt; if (this.meshT <= 0) { this.meshT = 0.12; this.tmesh.update(); }
+    this.site.update(dt, this.plant.running);
+    this.customers.update(dt, mods);
+    for (const o of this.orders.update(dt, this.economy.gradeIndex)) { this.toast(`${o.client} : commande en retard, prime réduite`, 'warn'); this.audio.warn(); }
+    this.syncModels();
+    for (const m of this.world.machines) {   // modèles : une mise à jour par image
+      const mdl = this.models.get(m); if (!mdl) continue;
+      mdl.update(m, dt, this.time, night, m === A && this.rig.cabin); mdl.root.updateMatrixWorld(true);
+    }
+    if (this.pendingBlast) { this.pendingBlast.t -= dt; if (this.pendingBlast.t <= 0) { this.doBlast(this.pendingBlast.site); this.pendingBlast = null; } }
+    this.dust.update(dt);
+    // caméra, interface, son
+    this.rig.follow3(dt, A, this.models.get(A), inp.camX);
+    const prompt = this.interactions(inp);
+    this.hud.update({ prompt, dt, hand: inp.hand }); this.tuto.update(inp);
+    const hop = { x: (PLANT.hopper.x0 + PLANT.hopper.x1) / 2, z: 0 };
+    this.audio.update({ speed: A.speed, thr: A.thr, horn: inp.horn, tool: Math.min(1, A.toolSpeed), dig: events.dig, pour: events.pour + events.push * 0.3, rain: this.env.rain, reversing: A.speed < -0.3, running: A.running, kind: A.s.type, crusher: this.plant.running ? Math.max(0, 1 - dist(A, hop) / 95) : 0 });
+    this.saveT += dt; if (this.saveT > 25) { this.saveT = 0; this.save(); }
+    this.renderer.render(this.scene, this.camera);
+  }
 }
 
-const target = new THREE.Vector3();
-const desiredCamera = new THREE.Vector3();
-function render() {
-  const forwardX = Math.sin(loader.heading);
-  const forwardZ = Math.cos(loader.heading);
-  if (loader.view === 0) {
-    desiredCamera.set(loader.x - forwardX * 11, 7, loader.z - forwardZ * 11);
-    target.set(loader.x + forwardX * 1.5, 1.2, loader.z + forwardZ * 1.5);
-  } else {
-    desiredCamera.set(loader.x + forwardX * 0.25, 2.2, loader.z + forwardZ * 0.25);
-    target.set(loader.x + forwardX * 12, 1.6, loader.z + forwardZ * 12);
-  }
-  camera.position.lerp(desiredCamera, 0.1);
-  camera.lookAt(target);
-  renderer.render(scene, camera);
-}
-
-function resize() {
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-}
-addEventListener('resize', resize);
-let lastFrame = performance.now();
-renderer.setAnimationLoop(() => {
-  const now = performance.now();
-  const dt = Math.min((now - lastFrame) / 1000, 0.05);
-  lastFrame = now;
-  update(dt);
-  render();
-});
+window.game = new Game();
 window.GameLoader?.ready();
