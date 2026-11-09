@@ -2,6 +2,7 @@
 // ou un équipier, mises en sécurité près de l'ambulance. Modèle : proportional_low_poly_man (Robin Butler, CC-BY).
 import * as THREE from 'three';
 import { loadGLB } from '../../../../assets/glb.js';
+import { groundY } from '../city/grid.js';
 
 let kit = null;
 function loadKit() {
@@ -37,7 +38,8 @@ export class Victim {
     loadKit().then((s) => { const m = s.clone(); m.userData.y0 = m.position.y; if (!this.standing) m.position.y -= 0.86; this.body.add(m); this.model = m; });   // centré sur le bassin
     this.sync();
   }
-  sync() { this.root.position.set(this.x, this.y + (this.standing ? 0 : 0.15), this.z); this.root.visible = this.state !== 'carried' && this.state !== 'saved'; }
+  sync() { this.root.position.set(this.x, this.y + (this.y < 0.1 ? groundY(this.x, this.z) : 0) + (this.standing ? 0 : 0.15), this.z);   // rez-de-chaussée et dehors : posée sur le trottoir ou le parquet
+    this.root.visible = this.state !== 'carried' && this.state !== 'saved'; }
 
   // fumée 0..1 et température au sol de la pièce
   hurt(dt, smoke, T) {

@@ -44,6 +44,12 @@ export const nodeAt = (i, j) => nodes[nid(i, j)];
 
 // Caserne (îlot 1,4) : le FPT attend devant la remise, nez vers la rue au sud.
 export const CASERNE = { x: (1 - 4) * P, z: 0 };
+// hauteur du sol : chaussée 0,02 m, trottoir des îlots 0,15 m, cour de la caserne 0,18 m (voir City.build)
+export function groundY(x, z) {
+  const off = (v) => { const d = (((v - P / 2) % P) + P) % P; return Math.min(d, P - d); };
+  if (off(x) < HALF || off(z) < HALF) return 0.02;
+  return Math.abs(x - CASERNE.x) < 40 && Math.abs(z - CASERNE.z) < 40 ? 0.18 : 0.15;
+}
 export const TRUCK_START = { x: CASERNE.x, z: CASERNE.z + 24, heading: 0 };
 export const PLAYER_START = { x: CASERNE.x - 6, z: CASERNE.z + 24 };
 

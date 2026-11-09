@@ -199,9 +199,12 @@ export class City {
     road.userData.dry = 0.95; this.wetMats.push(road);
     this.asphalt = road;
     const len = span + ROAD + 40;
+    // rues nord-sud : même hauteur que les rues est-ouest mais tirées devant aux carrefours (plus de scintillement entre les deux couches)
+    const roadNS = road.clone(); roadNS.polygonOffset = true; roadNS.polygonOffsetFactor = -1; roadNS.polygonOffsetUnits = -1;
+    roadNS.userData.dry = 0.95; this.wetMats.push(roadNS);
     for (let k = 0; k < G; k++) {
       const m1 = new THREE.Mesh(new THREE.BoxGeometry(len, 0.04, ROAD), road); m1.position.set(0, 0.0, coord(k));
-      const m2 = new THREE.Mesh(new THREE.BoxGeometry(ROAD, 0.04, len), road); m2.position.set(coord(k), 0.002, 0);
+      const m2 = new THREE.Mesh(new THREE.BoxGeometry(ROAD, 0.04, len), roadNS); m2.position.set(coord(k), 0.0, 0);
       m1.receiveShadow = m2.receiveShadow = true; scene.add(m1, m2);
     }
     // trottoirs : un pavé par îlot
@@ -220,7 +223,7 @@ export class City {
   }
 
   markings() {
-    const white = new THREE.MeshBasicMaterial({ color: '#e8e8e8' });
+    const white = new THREE.MeshBasicMaterial({ color: '#e8e8e8', polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });   // marquages devant la chaussée
     const flat = (w, l) => new THREE.PlaneGeometry(w, l).rotateX(-Math.PI / 2);
     const dashes = [], stripes = [], lines = [], signs = [], poles = [];
     const Y = 0.035;
@@ -281,20 +284,23 @@ export class City {
           add(id, cx + ox, cz + oz);
         }
       } else if (bi === HOSPITAL.bi && bj === HOSPITAL.bj) {
-        parkLots.push(this.M(cx, 0.16, cz, 0, 80, 1, 80));
+        parkLots.push(this.M(cx, 0.18, cz, 0, 80, 1, 80));
       } else if (zone === 'peripherie') {
-        if (rand() < 0.15) {
-          grassLots.push(this.M(cx, 0.16, cz, 0, 80, 1, 80));
+        const mission = [...MISSION_LOTS, ...IMMEUBLE_LOTS].some((l) => l.bi === bi && l.bj === bj);
+        if (rand() < 0.15 && !mission) {   // pas de pelouse sur l'îlot d'une maison visitable : elle recouvrait son rez-de-chaussée
+          grassLots.push(this.M(cx, 0.18, cz, 0, 80, 1, 80));
           for (let t = 0; t < 14; t++) parkTrees.push([cx + (rand() - 0.5) * 70, cz + (rand() - 0.5) * 70]);
-        } else for (const ox of [-26, 0, 26]) for (const oz of [-26, 0, 26]) if (rand() < 0.85 && !(ox === 0 && oz === 26 && [...MISSION_LOTS, ...IMMEUBLE_LOTS].some((l) => l.bi === bi && l.bj === bj))) add(rand() < 0.5 ? 'house' : 'house2', cx + ox + (rand() - 0.5) * 4, cz + oz + (rand() - 0.5) * 4);
+        } else for (const ox of [-26, 0, 26]) for (const oz of [-26, 0, 26]) if (rand() < 0.85 && !(ox === 0 && oz === 26 && mission)) add(rand() < 0.5 ? 'house' : 'house2', cx + ox + (rand() - 0.5) * 4, cz + oz + (rand() - 0.5) * 4);
       } else if (zone === 'commerce') {
-        parkLots.push(this.M(cx, 0.16, cz, 0, 80, 1, 80));
+        parkLots.push(this.M(cx, 0.18, cz, 0, 80, 1, 80));
         if (rand() < 0.5) add('mall', cx, cz - 14);
         else { add('shop', cx - 20, cz - 22); add('shop', cx + 20, cz - 22); }
       }
     }
-    this.instanced(flat1(), new THREE.MeshStandardMaterial({ color: '#4a8a3d', roughness: 1 }), grassLots);
-    this.instanced(flat1(), new THREE.MeshStandardMaterial({ color: '#35383d', roughness: 0.95 }), parkLots);
+    // pelouses et parkings 3 cm au-dessus du trottoir (0,15 m), tirés devant : ils scintillaient à 1 cm
+    const lotMat = (color) => new THREE.MeshStandardMaterial({ color, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    this.instanced(flat1(), lotMat('#4a8a3d'), grassLots);
+    this.instanced(flat1(), lotMat('#35383d'), parkLots);
 
     for (const [id, mats] of Object.entries(place)) {
       const a = ARCH[id], wh = a.wh ?? a.h, fd = facade(a.d, wh, a, rand), fw = a.w === a.d ? fd : facade(a.w, wh, a, rand);
@@ -406,7 +412,7 @@ export class City {
     const hc = canvas(128, 64), hg = hc.getContext('2d'); hg.fillStyle = 'rgba(0,0,0,0)'; hg.clearRect(0, 0, 128, 64);
     hg.fillStyle = '#f2c400'; for (let k = -64; k < 192; k += 22) { hg.beginPath(); hg.moveTo(k, 64); hg.lineTo(k + 12, 64); hg.lineTo(k + 44, 0); hg.lineTo(k + 32, 0); hg.fill(); }
     const ht = new THREE.CanvasTexture(hc); ht.colorSpace = THREE.SRGBColorSpace;
-    for (const o of [-12, 0, 12]) { const hp = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.2).rotateX(-Math.PI / 2), std({ map: ht, transparent: true, roughness: 0.9 })); hp.position.set(x + o, 0.175, z + 4.4); hp.receiveShadow = true; this.scene.add(hp); }
+    for (const o of [-12, 0, 12]) { const hp = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.2).rotateX(-Math.PI / 2), std({ map: ht, transparent: true, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 })); hp.position.set(x + o, 0.2, z + 4.4); hp.receiveShadow = true; this.scene.add(hp); }
     // bâtiment de vie : façade crépie à 3 niveaux, auvent d'entrée, perron, toit-terrasse
     const fl = wallMat(facade(22, 11, A, rand)), fs = wallMat(facade(14, 11, A, rand, noDoor));
     box(22, 11, 14, [fs, fs, roofM, roofM, fl, fl], x - 6, 5.5, z - 30); this.col.addBox(x - 17, x + 5, z - 37, z - 23, 'building');
@@ -440,7 +446,7 @@ export class City {
     s.position.set(x, 10.6, z + 2.6); this.scene.add(s);
     // sol de la remise et de la cour
     const lot = new THREE.Mesh(new THREE.PlaneGeometry(80, 80).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#3a3d42', roughness: 0.95 }));
-    lot.position.set(x, 0.16, z); lot.receiveShadow = true; this.scene.add(lot);
+    lot.position.set(x, 0.18, z); lot.receiveShadow = true; this.scene.add(lot);
   }
 
   // Hôpital : bloc blanc à façade vitrée sur 5 niveaux, entrée sous auvent, enseigne URGENCES, héliport et équipements sur le toit.

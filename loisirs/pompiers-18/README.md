@@ -10,7 +10,7 @@ Three.js r186 par import map, modules ES, sans build ni npm. Rendu : tonalité A
 ## Ce qu'on y fait
 
 - **Choisir son engin.** À pied, une grande flèche verte rebondit au-dessus de l'engin que tu regardes (à moins de 4,5 m), avec son nom : F pour y monter. Pendant une alerte, une flèche orange signale l'engin conseillé : FPT pour un feu de maison, VSAV pour un secours à personne, EPA pour un feu d'immeuble.
-- **Collisions des engins.** Chaque engin a une boîte calée sur son vrai modèle au chargement. Le joueur s'arrête contre la carrosserie, sans y entrer.
+- **Collisions des engins.** Chaque engin a une boîte calée sur son vrai modèle au chargement (tous les sommets). Le joueur s'arrête contre la carrosserie, sans y entrer. Contre une voiture ou un autre engin, c'est cette boîte qui compte ; chaque voiture a son emprise réelle (2 cercles avant / arrière à la largeur et à la longueur de son modèle, décalage vers le trottoir compris : `Traffic.footprint`).
 
 - **GPS.** Un tracé orange à chevrons au sol suit les routes sur la voie de droite (plus court chemin sur la grille, recalculé toutes les 0,5 s). Une vraie flèche en haut à gauche pointe vers le trajet 25 m devant et annonce le prochain virage (« ↱ À droite dans 120 m ») et la distance. Le tracé passe au bleu pour le transport aux urgences et le retour caserne.
 - **Feu d'immeuble** (R+4, tous les étages visitables par un escalier en lacets : volées A et B côte à côte dans la cage ; le binôme y monte aussi).
@@ -38,7 +38,11 @@ Three.js r186 par import map, modules ES, sans build ni npm. Rendu : tonalité A
   - Messages radio dans les notifications.
 
 - **Caserne et alerte.** On attend près du FPT. L'alerte donne une adresse et un motif. Le feu démarre dès l'alerte, mais à mi-vitesse jusqu'à l'arrivée.
-- **Conduite prioritaire.** G allume la sirène et les gyrophares. Les voitures à moins de 50 m se rangent à droite et s'arrêtent. Avec la sirène, on peut passer un feu rouge ou dépasser la limite sans amende. Il faut quand même ralentir aux carrefours, et les chocs comptent toujours.
+- **Conduite prioritaire.** G allume la sirène et les gyrophares. Avec la sirène, on peut passer un feu rouge ou dépasser la limite sans amende. Il faut quand même ralentir aux carrefours, et les chocs comptent toujours.
+  - Les voitures à moins de 50 m devant l'engin (dans les deux sens) se collent au trottoir de droite et s'arrêtent (`src/traffic/yield.js`). Sirène allumée, le tracé GPS passe à 1,5 m de la ligne médiane (au lieu de 2,4 m) : en le suivant, l'engin passe à côté des voitures rangées (testé avec le FPT et l'EPA, écart minimal 0,7 à 1 m, sans choc ni blocage). Engin arrêté, la circulation reprend.
+  - Une voiture déjà dans un carrefour le dégage ; les autres attendent avant le carrefour tant que l'engin est à moins de 45 m.
+  - Les voitures d'une file gardent un vrai écart entre pare-chocs (longueur de chaque modèle).
+  - **Piétons** : sirène à moins de 70 m devant, ceux qui attendent restent sur le trottoir ; ceux déjà engagés font demi-tour avant le milieu du passage, ou pressent le pas après.
 - **Maison visitable.** C'est une maison R+1 avec 6 pièces par niveau, des portes qui s'ouvrent et se ferment, et un escalier. Le départ de feu est tiré au hasard, et certaines portes sont fermées au départ.
 - **Feu réaliste simplifié** (`src/fire/FireSim.js`) :
   - Chaque pièce a sa température, son combustible, ses flammes et sa fumée.
@@ -69,6 +73,13 @@ Menu (Échap) → onglet **Graphismes** :
 - **flammes, fumée, eau**, **lumières dynamiques**, **reflets**, **résolution max**, **circulation**, **textures des maisons**.
 - Les textures s'appliquent au rechargement (bouton dans le menu). Le reste s'applique tout de suite.
 - Sauvegarde : `pompiers18.gfx.v1` pour le jeu, `site.quality.v1` pour le réglage commun.
+
+## Sol et scintillement (z-fighting)
+
+- Hauteurs : chaussée 0,02 m, trottoir des îlots 0,15 m, pelouses et parkings 0,18 m, cour de la caserne 0,18 m. `groundY(x, z)` (`src/city/grid.js`) donne la hauteur du sol : engins (montée de trottoir adoucie), piétons, équipiers et victimes dehors ou au rez-de-chaussée s'y posent au lieu de s'enfoncer.
+- Rez-de-chaussée des maisons et immeubles : parquet à 0,17 m et meubles posés dessus (le trottoir et parfois une pelouse recouvraient le sol). Plus de pelouse sur l'îlot d'une maison visitable.
+- Carrefours : les rues nord-sud sont à la même hauteur que les rues est-ouest et tirées devant (`polygonOffset`) ; marquages, chevrons de la caserne, pelouses et parkings aussi.
+- Fenêtres des maisons : cadre, vitre et croisillons espacés de 1 cm. Caméra : plan proche à 0,1 m (au lieu de 0,05) pour la précision de profondeur au loin.
 
 ## Lancer
 
@@ -107,7 +118,8 @@ src/firefighter  Player (vue subjective, ARI, tuyau), Crew (binôme IA), water (
 src/mission      alertes feu et secours à personne, Victims, pay (bilan chiffré)
 src/economy      carrière et matériel, code de la route (fines.js = logique pure)
 src/ui  src/audio  src/world  src/camera.js  src/input.js  src/main.js
-test/logic.mjs   feu, eau, tuyau, sirène, bilan, itinéraire
+test/logic.mjs   feu, eau, tuyau, sirène, bilan, itinéraire, voitures et piétons devant la sirène, hauteur du sol
+test/scene-sirene.js  scène de test de la sirène dans le navigateur
 test/syntax.mjs  syntaxe de tous les modules
 ```
 
@@ -120,12 +132,17 @@ node --experimental-vm-modules test/syntax.mjs
 
 `node --check` ne voit pas les erreurs de syntaxe des modules ES avec Node 24 : utiliser `test/syntax.mjs`. Debug dans la console : `window.game`.
 
+Scène de test de la sirène (navigateur, non chargée par le jeu) : `test/scene-sirene.js`. Mode d'emploi en tête du fichier ; `sireneTest(30, 'epa')` fait rouler l'engin vers une file de voitures et renvoie l'écart minimal engin / voitures (doit rester ≥ 0) et engin / piétons engagés.
+
 ## Modèles 3D (tous CC-BY, crédités dans assets/models/CREDITS.md)
 
-- **FPT** et **EPA** : `npc/veh-fire_truck.glb` (l'échelle de l'EPA est construite en primitives) ; le pack marque la carrosserie « transparente » : `fixMaterials` (`src/truck/Truck.js`) la rend opaque, et double face pour la vue cabine ; **VSAV et ambulance du SAMU** : `npc/veh-ambulance.glb` (pack de Comrade1280). Les gyrophares sont calés au chargement sur l'avant et le toit réels de la cabine.
+- **FPT** et **EPA** : `npc/veh-fire_truck.glb` (l'échelle de l'EPA est construite en primitives) ; le pack marque la carrosserie « transparente » : `fixMaterials` (`src/truck/Truck.js`) la rend opaque, et double face pour la vue cabine ; **VSAV et ambulance du SAMU** : `npc/veh-ambulance.glb` (pack de Comrade1280). Les gyrophares sont posés au chargement par lancer de rayons : rampe sur le toit de cabine (à `barZ` m de l'avant, réglé par engin), feux encastrés dans la calandre.
 - **Équipiers** et **victimes** : `proportional_low_poly_man` (Robin Butler). Les équipiers sont habillés en pompiers au chargement : tenue bleu nuit, bandes jaunes, casque chromé, bouteille d'ARI. Ils n'ont pas d'animation : la marche est simulée par un balancement.
 
 ## Fait en dernier
+
+- Sirène : voitures collées au trottoir et arrêtées, carrefours dégagés, piétons qui s'écartent ; hitbox réelles des voitures et des engins (plus d'interpénétration ni de blocage).
+- Bugs visuels : gyrophares qui flottaient devant le capot, sol du rez-de-chaussée caché par le trottoir, scintillement des carrefours, pelouses et fenêtres, engins et piétons enfoncés dans le trottoir.
 
 - Piétons aux passages des feux (copiés de bus-city : ils traversent au rouge, les voitures les laissent passer).
 - Équipiers dans tous les étages d'immeuble, par l'escalier en lacets.

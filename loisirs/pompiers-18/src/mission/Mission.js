@@ -90,7 +90,7 @@ export class Mission {
   callAmbulance() {
     if (this.ambPos || !this.victims.length || !this.fire) return;
     this.ambPos = { x: this.lot.park.x - 14, z: this.lot.park.z };
-    this.amb.position.set(this.ambPos.x, 0, this.ambPos.z); this.amb.rotation.y = -Math.PI / 2; this.amb.visible = true;
+    this.amb.position.set(this.ambPos.x, 0.02, this.ambPos.z); this.amb.rotation.y = -Math.PI / 2; this.amb.visible = true;
     this.g.toast('🚑 Le SAMU est sur place : amène les victimes près de l\'ambulance.', 'ok');
   }
   // victime posée : sauvée si près de l'ambulance (feu) ; renvoie vrai si sauvée

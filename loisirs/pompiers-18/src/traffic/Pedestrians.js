@@ -1,8 +1,10 @@
 // Piétons : attendent au bord d'un passage puis traversent quand le feu de l'axe correspondant est rouge assez longtemps.
+// Sirène à moins de 70 m devant : ils restent sur le trottoir ; ceux déjà engagés font demi-tour (avant le milieu) ou pressent le pas.
 import * as THREE from 'three';
-import { nodes, DIRS, rightOf, inGrid, axisOfDir } from '../city/grid.js';
+import { nodes, DIRS, rightOf, inGrid, axisOfDir, groundY } from '../city/grid.js';
 import { lightState, timeToGreen } from '../city/TrafficLights.js';
 import { PERSON_FILE, PERSON_SCALE, loadKit, instanceKit } from './Kits.js';
+import { sirenAhead, pedFlee } from './yield.js';
 
 const MAX = 120, HALF_W = 7.4, SPEED = 1.4;
 
@@ -32,7 +34,8 @@ export class Pedestrians {
     }).catch((e) => console.warn('Piéton non chargé', e));
   }
 
-  update(dt, t, bus) {
+  // siren : { x, z, h } de l'engin conduit sirène allumée, ou null
+  update(dt, t, bus, siren = null) {
     if (t - this.lastScan > 1) {
       this.lastScan = t;
       this.active = this.cws.filter((c) => Math.hypot(c.cx - bus.x, c.cz - bus.z) < 170);
@@ -45,12 +48,14 @@ export class Pedestrians {
     for (let i = this.list.length - 1; i >= 0; i--) {
       const p = this.list[i], cw = p.cw;
       if (Math.hypot(cw.cx - bus.x, cw.cz - bus.z) > 260) { this.list.splice(i, 1); continue; }
+      const danger = sirenAhead(siren, cw.cx, cw.cz, 70, 12);
       if (p.state === 'wait') {
         p.wait -= dt;
-        if (p.wait <= 0 && lightState(cw.n, cw.axis, t) === 'R' && timeToGreen(cw.n, cw.axis, t) >= 12.5) { p.state = 'cross'; p.t = 0; }
+        if (p.wait <= 0 && !danger && lightState(cw.n, cw.axis, t) === 'R' && timeToGreen(cw.n, cw.axis, t) >= 12.5) { p.state = 'cross'; p.t = 0; }
       } else {
-        p.t += (SPEED * dt) / (2 * HALF_W);
-        if (p.t >= 1) { p.state = 'wait'; p.t = 0; p.side ^= 1; p.wait = 4 + Math.random() * 14; }
+        const k = danger || p.back ? pedFlee(p) : 1;
+        p.t += (SPEED * k * dt) / (2 * HALF_W);
+        if (p.t >= 1) { p.state = 'wait'; p.t = 0; p.side ^= 1; p.back = false; p.wait = 4 + Math.random() * 14; }
       }
       const f = p.side === 0 ? p.t : 1 - p.t;
       // t parcourt 0..1 depuis le côté courant : on place A->B si side 0, sinon B->A
@@ -63,7 +68,7 @@ export class Pedestrians {
       this.list.forEach((p, i) => {
         const bob = p.state === 'cross' ? Math.abs(Math.sin(t * 7 + p.ph)) * 0.05 : 0, cw = p.cw, dir = p.side === 0 ? 1 : -1;
         d.rotation.set(0, Math.atan2((cw.bx - cw.ax) * dir, (cw.bz - cw.az) * dir), 0); d.scale.set(1, 1, 1);
-        d.position.set(p.x, bob, p.z); d.updateMatrix(); this.real.set(i, d.matrix);
+        d.position.set(p.x, groundY(p.x, p.z) + bob, p.z); d.updateMatrix(); this.real.set(i, d.matrix);   // pieds sur le trottoir, pas dedans
       });
       this.real.commit(this.list.length);
       return;

@@ -122,7 +122,7 @@ export class Building {
       this.wall(f, 'x', 0, XC[0] + T / 2, XC[1] - T / 2); this.wall(f, 'x', 0, XC[1] + T / 2, XC[2] - T / 2, [gm]); this.wall(f, 'x', 0, XC[2] + T / 2, XC[3] - T / 2);
       // murs extérieurs (porte d'entrée au rez-de-chaussée)
       const ext = f === 0 ? [this.door(0, 'x', D / 2, 0, link(roomIndex(0, 1, 1), -1, 'exit'), true)] : [];
-      if (f === 0) { this.box(2.2, 0.16, 1.2, mat.slab, 0, 0.08, D / 2 + 0.7); this.box(1.5, 0.1, 0.12, mat.frame ??= new THREE.MeshStandardMaterial({ color: '#f2f2ee', roughness: 0.6 }), 0, 2.16, D / 2 + T / 2 + 0.06); for (const sx of [-0.6, 0.6]) this.box(0.1, 2.2, 0.12, mat.frame, sx, 1.1, D / 2 + T / 2 + 0.06); }
+      if (f === 0) { this.box(2.2, 0.24, 1.2, mat.slab, 0, 0.12, D / 2 + 0.7); this.box(1.5, 0.1, 0.12, mat.frame ??= new THREE.MeshStandardMaterial({ color: '#f2f2ee', roughness: 0.6 }), 0, 2.16, D / 2 + T / 2 + 0.06); for (const sx of [-0.6, 0.6]) this.box(0.1, 2.2, 0.12, mat.frame, sx, 1.1, D / 2 + T / 2 + 0.06); }
       this.wall(f, 'x', D / 2, -W / 2, W / 2, ext, mat.out, f === 0 ? cityCol : null);
       this.wall(f, 'x', -D / 2, -W / 2, W / 2, [], mat.out, f === 0 ? cityCol : null);
       this.wall(f, 'z', -W / 2, -D / 2, D / 2, [], mat.out, f === 0 ? cityCol : null);
@@ -135,7 +135,7 @@ export class Building {
         const w = rm.x1 - rm.x0, d = rm.z1 - rm.z0, g = new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), uv = g.attributes.uv;
         for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * w / 2, uv.getY(i) * d / 2);
         const fl = new THREE.Mesh(g, TILE.includes(rm.name) ? mat.tiles : mat.floor);
-        fl.position.set(rm.cx, f * H + 0.02, rm.cz); fl.receiveShadow = true; this.root.add(fl);
+        fl.position.set(rm.cx, f ? f * H + 0.02 : 0.17, rm.cz); fl.receiveShadow = true; this.root.add(fl);   // rez-de-chaussée au-dessus du trottoir (0,15 m), sinon le trottoir recouvre le parquet
         if (f === 1 && rm.col === 1 && rm.row === 0) fl.visible = false;    // palier : la trémie de l'escalier reste ouverte (dalle découpée dessous)
         const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.08, 16), mat.lamp); lamp.position.set(rm.cx, f * H + H - 0.3, rm.cz); this.root.add(lamp);
       }
@@ -194,7 +194,7 @@ export class Building {
       if (!f) continue;
       const [w, h, d, col] = f, m = new THREE.MeshStandardMaterial({ color: col, roughness: 0.8 });
       const fx = rm.cx + (rm.col === 0 ? -0.6 : rm.col === 2 ? 0.6 : 0.8), fz = rm.row === 0 ? rm.z0 + d / 2 + 0.4 : rm.z1 - d / 2 - 0.5;
-      this.box(w, h, d, m, fx, rm.floor * H + h / 2, fz);
+      this.box(w, h, d, m, fx, (rm.floor ? rm.floor * H : 0.17) + h / 2, fz);   // posé sur le parquet du rez-de-chaussée (0,17 m)
       this.solid(rm.floor, fx - w / 2, fx + w / 2, fz - d / 2, fz + d / 2);
       this.furniture.push({ room: rm.id, mat: m, base: new THREE.Color(col) });
     }
@@ -253,10 +253,10 @@ export class Building {
     if (ry === 0 && z < 0) m.rotation.y = Math.PI; else if (ry !== 0 && x > 0) m.rotation.y = Math.PI / 2; else if (ry !== 0) m.rotation.y = -Math.PI / 2;
     this.root.add(m);
     const frame = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 1.35), new THREE.MeshStandardMaterial({ color: '#f2f2ee' }));
-    frame.position.copy(m.position); frame.rotation.y = m.rotation.y; frame.translateZ(-0.005); this.root.add(frame);
+    frame.position.copy(m.position); frame.rotation.y = m.rotation.y; frame.translateZ(-0.01); this.root.add(frame);   // cadre, vitre et croisillons espacés de 1 cm : plus de scintillement de loin
     // croisillons, appui et volets ouverts
     const bar = this.mat.frame ??= new THREE.MeshStandardMaterial({ color: '#f2f2ee', roughness: 0.6 });
-    for (const [w, h] of [[0.06, 1.2], [1.3, 0.06]]) { const c = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bar); c.position.copy(m.position); c.rotation.y = m.rotation.y; c.translateZ(0.004); this.root.add(c); }   // le bâti reste quand la vitre éclate
+    for (const [w, h] of [[0.06, 1.2], [1.3, 0.06]]) { const c = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bar); c.position.copy(m.position); c.rotation.y = m.rotation.y; c.translateZ(0.02); this.root.add(c); }   // le bâti reste quand la vitre éclate
     const sill = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.06, 0.18), bar); sill.position.copy(m.position); sill.rotation.y = m.rotation.y; sill.translateY(-0.66); sill.translateZ(0.06); this.root.add(sill);
     if (get('textures')) {
       const sh = this.mat.shutter ??= new THREE.MeshStandardMaterial({ color: ['#3f6b4a', '#6b8fa8', '#8a4b3a', '#d8c690'][this.lot.k % 4], roughness: 0.7 });

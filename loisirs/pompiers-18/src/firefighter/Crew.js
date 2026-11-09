@@ -3,6 +3,7 @@
 // de la maison (Building.path), en ligne droite dehors. Modèle statique : la marche est simulée par un balancement.
 import * as THREE from 'three';
 import { loadGLB } from '../../../../assets/glb.js';
+import { groundY } from '../city/grid.js';
 
 const SPEED = 2.3, HOSE_LPM = 400;
 const NAMES = ['Équipier 1', 'Équipier 2'];
@@ -170,7 +171,7 @@ export class Crew {
       }
       // pose et balancement de marche
       m.phase += dt * (m.moving ? 9 : 0);
-      m.root.position.set(m.x, m.y + (m.moving ? Math.abs(Math.sin(m.phase)) * 0.05 : 0), m.z);
+      m.root.position.set(m.x, m.y + (m.y < 0.1 ? groundY(m.x, m.z) : 0) + (m.moving ? Math.abs(Math.sin(m.phase)) * 0.05 : 0), m.z);
       m.root.rotation.y = m.yaw; m.body.rotation.z = m.moving ? Math.sin(m.phase) * 0.05 : 0;
       if (m.carry) { m.carry.x = m.x; m.carry.z = m.z; m.carry.y = m.y; m.carry.floor = m.floor; }
       if (m.spraying) {

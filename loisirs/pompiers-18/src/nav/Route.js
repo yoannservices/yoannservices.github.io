@@ -23,13 +23,14 @@ export class Route {
   }
 
   // origine (engin ou joueur), cible (ou null), couleur
-  update(dt, from, target, color = '#ff8a1a') {
+  // siren : tracé plus près de la ligne médiane, là où les voitures rangées au trottoir laissent la place
+  update(dt, from, target, color = '#ff8a1a', siren = false) {
     this.tex.offset.y -= dt * 1.2;
     if (!target) { this.active = false; this.mesh.visible = false; this.pts = []; return; }
     this.t -= dt;
     const key = `${Math.round(target.x)},${Math.round(target.z)}`;
-    if (this.t <= 0 || key !== this.key) {
-      this.t = 0.5; this.key = key;
+    if (this.t <= 0 || key !== this.key || siren !== this.siren) {
+      this.t = 0.5; this.key = key; this.siren = siren;
       this.pts = [{ x: from.x, z: from.z }, ...routePoints(from, target)];
       this.build(); this.mat.color.set(color);
     }
@@ -40,7 +41,7 @@ export class Route {
 
   // ruban de 1,4 m décalé sur la voie de droite (sauf premier et dernier segments, hors route)
   build() {
-    const pts = this.pts, n = pts.length, pos = [], uv = [], idx = [], W = 0.7, OFF = 2.4;
+    const pts = this.pts, n = pts.length, pos = [], uv = [], idx = [], W = 0.7, OFF = this.siren ? 1.5 : 2.4;
     let u = 0;
     for (let i = 0; i < n; i++) {
       const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];

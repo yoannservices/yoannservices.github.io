@@ -52,7 +52,7 @@ class Game {
     this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.1;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(65, 1, 0.05, 1500);
+    this.camera = new THREE.PerspectiveCamera(65, 1, 0.1, 1500);   // near 0,1 : précision de profondeur (z-fighting au loin avec 0,05)
     this.scene.add(this.camera);
     const pm = new THREE.PMREMGenerator(this.renderer); this.envTex = pm.fromScene(new RoomEnvironment(), 0.04).texture; pm.dispose();
     this.sky = skyDome(); this.scene.add(this.sky);
@@ -125,11 +125,20 @@ class Game {
     let sx = 0, sz = 0, impact = 0;
     const push = (nx, nz, depth) => { sx += nx * depth; sz += nz * depth; const vn = p.vx * nx + p.vz * nz; if (vn < 0) { impact = Math.max(impact, -vn); p.vx -= vn * nx * 1.3; p.vz -= vn * nz * 1.3; } };
     for (const c of pts) { const r = col.resolve(c.x + sx, c.z + sz, c.r); if (r.hit) { const m = Math.hypot(r.px, r.pz) || 1; push(r.px / m, r.pz / m, m); } }
-    const others = [...this.traffic.cars.filter((c) => c.active && Math.abs(c.x - p.x) < 30 && Math.abs(c.z - p.z) < 30).map((c) => ({ x: c.x, z: c.z, r: 1.7, car: c })),
+    // voitures (emprise réelle, décalage vers le trottoir compris) et autres engins contre la boîte calée sur le modèle de cet engin
+    const others = [...this.traffic.cars.filter((c) => c.active && Math.abs(c.x - p.x) < 30 && Math.abs(c.z - p.z) < 30).flatMap((c) => this.traffic.footprint(c).map((q) => ({ ...q, car: c }))),
       ...this.vehicles.filter((v) => v !== veh).flatMap((v) => v.phys.collisionPoints())];
-    for (const o of others) for (const c of pts) {
-      const dx = c.x + sx - o.x, dz = c.z + sz - o.z, d = Math.hypot(dx, dz), rr = c.r + o.r;
-      if (d < rr) { push(dx / (d || 1), dz / (d || 1), rr - d); if (o.car) o.car.v = 0; }
+    const hitBox = (o) => {   // cercle o contre la boîte de veh (déjà déplacée de sx, sz) : pousse l'engin à l'opposé
+      const ox = o.x - sx, oz = o.z - sz, r = veh.pushOut(ox, oz, o.r);
+      if (!r.hit) return false;
+      const dx = ox - r.x, dz = oz - r.z, d = Math.hypot(dx, dz);
+      if (d > 1e-4) push(dx / d, dz / d, d);
+      return true;
+    };
+    for (const o of others) if (hitBox(o) && o.car) o.car.v = 0;
+    for (const v of this.vehicles) if (v !== veh) for (const c of pts) {   // coins de cet engin contre la boîte de l'autre
+      const r = v.pushOut(c.x + sx, c.z + sz, c.r);
+      if (r.hit) { const dx = r.x - c.x - sx, dz = r.z - c.z - sz, d = Math.hypot(dx, dz); if (d > 1e-4) push(dx / d, dz / d, d); }
     }
     if (sx || sz) { p.x += sx; p.z += sz; p.speed = p.vx * Math.sin(p.heading) + p.vz * Math.cos(p.heading); if (impact > 0) this.rules.collision(impact); }
   }
@@ -332,12 +341,12 @@ class Game {
       f.color.setRGB(0.09, 0.085, 0.08); f.near = 0.1; f.far = 45 - 42 * Math.min(1, s * 1.15);
     }
     this.lightsTL.update(this.time);
-    this.peds.update(dt, this.time, this.focus);
-    const dp = (this.driving ?? tr).phys;
-    this.traffic.update(dt, { t: this.time, bus: { x: this.focus.x, z: this.focus.z, h: dp.heading, circles: this.circles, nodes: this.vehNodes() }, peds: this.peds.crossing, siren: !!this.driving?.siren });
+    const dp = (this.driving ?? tr).phys, sirenOn = !!this.driving?.siren && Math.abs(dp.speed) > 0.5;   // engin arrêté : la circulation reprend
+    this.peds.update(dt, this.time, this.focus, sirenOn ? { x: dp.x, z: dp.z, h: dp.heading } : null);
+    this.traffic.update(dt, { t: this.time, bus: { x: this.focus.x, z: this.focus.z, h: dp.heading, circles: this.circles, nodes: this.vehNodes() }, peds: this.peds.crossing, siren: sirenOn });
     this.mission.update(dt);
     this.crew.update(dt, this.time);
-    this.route.update(dt, this.focus, this.mission.target, this.mission.state === 'retour' || this.mission.state === 'transport' ? '#4fb3ff' : '#ff8a1a');
+    this.route.update(dt, this.focus, this.mission.target, this.mission.state === 'retour' || this.mission.state === 'transport' ? '#4fb3ff' : '#ff8a1a', !!this.driving?.siren);
     for (const b of this.buildings) if (b.sim) b.update(dt, this.time);
     this.fx.update(dt, this.mission.building, this.camera.position);
 

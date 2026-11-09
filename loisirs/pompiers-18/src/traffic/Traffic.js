@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { G, P, HALF, LANE, DIRS, rightOf, axisOfDir, nodeAt, inGrid, ekey, coord } from '../city/grid.js';
 import { lightState } from '../city/TrafficLights.js';
 import { CAR_FILES, loadKit, instanceKit } from './Kits.js';
+import { curbLat, sirenAhead } from './yield.js';
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -66,7 +67,7 @@ export class Traffic {
     this.dummy = new THREE.Object3D(); this.tmp = {};
     const pal = ['#c0392b', '#2980b9', '#ecf0f1', '#2c3e50', '#f39c12', '#27ae60', '#7f8c8d', '#8e44ad', '#bdc3c7'];
     for (let i = 0; i < count; i++) {
-      this.cars.push({ leg: null, s: 0, v: 0, desired: 10, nextK: 0, stopT: 0, stuck: 0, x: 0, z: 0, h: 0, lat: 0, active: false });
+      this.cars.push({ leg: null, s: 0, v: 0, desired: 10, nextK: 0, stopT: 0, stuck: 0, x: 0, z: 0, h: 0, lat: 0, len: 4.2, wid: 1.8, active: false });
       body.setColorAt(i, new THREE.Color(pal[i % pal.length]));
     }
     // lampes avant (blanches) et arrière (rouges)
@@ -79,7 +80,7 @@ export class Traffic {
     Promise.all(CAR_FILES.map((f) => loadKit(f))).then((kits) => {
       this.real = kits.map((kit, k) => {
         const ids = this.cars.map((_, i) => i).filter((i) => i % kits.length === k);
-        ids.forEach((i, slot) => { this.cars[i].slot = slot; this.cars[i].kit = k; });
+        ids.forEach((i, slot) => { const c = this.cars[i]; c.slot = slot; c.kit = k; c.len = kit.size.z; c.wid = kit.size.x; });
         return { inst: instanceKit(this.scene, kit, ids.length), n: ids.length };
       });
       for (const m of [this.body, this.cab, this.lamps]) this.scene.remove(m);
@@ -117,6 +118,13 @@ export class Traffic {
   }
   leaveNode(c) { if (c.inNode != null) { const a = this.occ.get(c.inNode); if (a) a.splice(a.indexOf(c), 1); c.inNode = null; } }
 
+  // emprise réelle de la voiture (décalage latéral compris) : 2 cercles avant / arrière de la largeur du modèle
+  footprint(c) {
+    const r = c.wid / 2, a = Math.max(0, c.len / 2 - r), sn = Math.sin(c.h), cs = Math.cos(c.h);
+    const x = c.x - cs * c.lat, z = c.z + sn * c.lat;
+    return [{ x: x + sn * a, z: z + cs * a, r }, { x: x - sn * a, z: z - cs * a, r }];
+  }
+
   init(bus) { for (const c of this.cars) this.respawn(c, bus, 30, 450); }
 
   // retire les voitures d'une arête fermée
@@ -134,6 +142,7 @@ export class Traffic {
 
   canEnter(c, t, gapStop, bus) {
     const b = c.leg.b, kin = c.leg.k;
+    if (this.siren && Math.hypot(this.siren.x - b.x, this.siren.z - b.z) < 45) return false;   // engin prioritaire proche : on attend avant le carrefour
     if (b.type === 'signal') {
       const s = lightState(b, axisOfDir(kin), t);
       if (s === 'R') return false;
@@ -154,6 +163,7 @@ export class Traffic {
   // ctx : { t, bus:{x,z,circles,nodes,}, peds:[{x,z}] }
   update(dt, ctx) {
     const { t, bus, peds } = ctx;
+    this.siren = ctx.siren ? bus : null;
     let respawned = 0;
     this.cars.forEach((c, idx) => {
       if (idx >= (this.limit ?? this.n)) { if (c.active) { this.leaveNode(c); c.active = false; } return; }   // réglage « Circulation »
@@ -172,9 +182,9 @@ export class Traffic {
       const look = (ox, oz, r, wid) => {
         const dx = ox - c.x, dz = oz - c.z, f = dx * hx + dz * hz;
         if (f < 0.5 || f > 30 || Math.abs(dx * hz - dz * hx) > wid) return;
-        gap = Math.min(gap, f - r - 2.2);
+        gap = Math.min(gap, f - r - c.len / 2);
       };
-      for (let i = 0; i < this.cars.length; i++) { const o = this.cars[i]; if (i !== idx && o.active) look(o.x, o.z, 2.1, 1.9); }
+      for (let i = 0; i < this.cars.length; i++) { const o = this.cars[i]; if (i !== idx && o.active) look(o.x, o.z, o.len / 2, 1.9); }
       for (const b of bus.circles) look(b.x, b.z, b.r, b.r + 1.0);
       for (const p of peds) look(p.x, p.z, 0.3, 1.6);
 
@@ -183,11 +193,10 @@ export class Traffic {
       let vt = c.desired * scale;
       if (leg.type === 'turn') vt = Math.min(vt, 6);
       if (gap < Infinity) vt = Math.min(vt, Math.sqrt(2 * 3.5 * Math.max(gap - 1.2, 0)));
-      // sirène à moins de 50 m et voiture devant le camion : se ranger à droite et s'arrêter
-      const sx = c.x - bus.x, sz = c.z - bus.z;
-      const yieldNow = ctx.siren && sx * sx + sz * sz < 2500 && sx * Math.sin(bus.h) + sz * Math.cos(bus.h) > -4;
-      if (yieldNow) vt = Math.min(vt, 0.5);
-      c.lat += clamp((yieldNow && leg.type === 'edge' ? 1.7 : 0) - c.lat, -1.2 * dt, 1.2 * dt);
+      // sirène à moins de 50 m devant : sur un tronçon, se coller au trottoir de droite et s'arrêter ; dans un carrefour, le dégager
+      const yieldNow = leg.type === 'edge' && sirenAhead(this.siren, c.x, c.z, 50, 10);
+      if (yieldNow) vt = Math.min(vt, c.lat > curbLat(c.wid) - 0.4 ? 0 : 2.5);
+      c.lat += clamp((yieldNow ? curbLat(c.wid) : 0) - c.lat, -1.8 * dt, 1.8 * dt);
       c.v += clamp(vt - c.v, -6 * dt, 2.2 * dt);
       c.stuck = c.v < 0.2 ? c.stuck + dt : 0;
       c.s += c.v * dt;
@@ -221,7 +230,7 @@ export class Traffic {
     if (this.real) {
       this.cars.forEach((c) => {
         const s = c.active ? 1 : 0;
-        d.rotation.set(0, c.h, 0); d.position.set(c.x - Math.cos(c.h) * c.lat, 0, c.z + Math.sin(c.h) * c.lat); d.scale.set(s, s, s); d.updateMatrix();
+        d.rotation.set(0, c.h, 0); d.position.set(c.x - Math.cos(c.h) * c.lat, 0.02, c.z + Math.sin(c.h) * c.lat); d.scale.set(s, s, s); d.updateMatrix();
         this.real[c.kit].inst.set(c.slot, d.matrix);
       });
       for (const k of this.real) k.inst.commit(k.n);

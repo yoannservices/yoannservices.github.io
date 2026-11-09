@@ -6,6 +6,7 @@ import { loadGLB, fitGLB } from '../../../../assets/glb.js';
 import { WaterSupply } from '../firefighter/water.js';
 import { Ladder } from './Ladder.js';
 import { Cockpit } from './Cockpit.js';
+import { groundY } from '../city/grid.js';
 
 // Le pack npc marque la carrosserie et les autocollants « transparents » (opacité 1, sans écriture de profondeur) :
 // on voyait à travers (roues, sol, tracé GPS). Opaques avec découpe alpha ; seules les vitres restent transparentes.
@@ -23,18 +24,18 @@ export function fixMaterials(root) {
 export const FPT = {
   name: 'FPT', length: 8.2, width: 2.5, height: 3.2, wheelbase: 4.3, frontOverhang: 1.5, cabH: 3.15,
   mass: 15000, power: 250, maxSpeed: 25, maxAccel: 1.5, brake: 6.5, turnRadius: 9.5, rollGain: 0.012,
-  model: '../../assets/models/npc/veh-fire_truck.glb', color: '#b3121b',
+  model: '../../assets/models/npc/veh-fire_truck.glb', color: '#b3121b', barZ: 1.3,
 };
 // EPA : même porteur que le FPT, grande échelle en primitives (Ladder.js)
 export const EPA = {
   name: 'EPA', length: 9.4, width: 2.5, height: 3.4, wheelbase: 4.9, frontOverhang: 1.5, cabH: 3.15, deckH: 2.75,
   mass: 16500, power: 240, maxSpeed: 24, maxAccel: 1.3, brake: 6.2, turnRadius: 10.5, rollGain: 0.011,
-  model: '../../assets/models/npc/veh-fire_truck.glb', color: '#b3121b', ladder: true,
+  model: '../../assets/models/npc/veh-fire_truck.glb', color: '#b3121b', ladder: true, barZ: 1.5,
 };
 export const VSAV = {
   name: 'VSAV', length: 6.4, width: 2.2, height: 2.8, wheelbase: 3.7, frontOverhang: 1.0, cabH: 2.75,
   mass: 4500, power: 130, maxSpeed: 31, maxAccel: 2.2, brake: 7.5, turnRadius: 7, rollGain: 0.016,
-  model: '../../assets/models/npc/veh-ambulance.glb', color: '#e8e8e8',
+  model: '../../assets/models/npc/veh-ambulance.glb', color: '#e8e8e8', barZ: 2.0,
 };
 
 export class Truck {
@@ -71,17 +72,19 @@ export class Truck {
       f.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
       this.tilt.remove(this.temp); this.tilt.add(f);
       this.model = f;
-      // gyrophares calés sur le vrai modèle : avant réel, toit de la cabine (sommets des 2 premiers mètres)
+      // boîte de collision = emprise exacte du modèle (repère de l'engin)
       this.tilt.updateMatrixWorld(true);
       const inv = this.tilt.matrixWorld.clone().invert(), v = new THREE.Vector3();
-      let front = -Infinity, roof = 0;
-      const pts = [], bx = { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity, top: 0 };
-      f.traverse((o) => { if (!o.isMesh) return; const p = o.geometry.attributes.position, m = inv.clone().multiply(o.matrixWorld); for (let i = 0; i < p.count; i += 3) { v.fromBufferAttribute(p, i).applyMatrix4(m); pts.push(v.y, v.z); if (v.z > front) front = v.z; bx.x0 = Math.min(bx.x0, v.x); bx.x1 = Math.max(bx.x1, v.x); bx.z0 = Math.min(bx.z0, v.z); bx.z1 = Math.max(bx.z1, v.z); bx.top = Math.max(bx.top, v.y); } });
+      const bx = { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity, top: 0 };
+      f.traverse((o) => { if (!o.isMesh) return; const p = o.geometry.attributes.position, m = inv.clone().multiply(o.matrixWorld); for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(m); bx.x0 = Math.min(bx.x0, v.x); bx.x1 = Math.max(bx.x1, v.x); bx.z0 = Math.min(bx.z0, v.z); bx.z1 = Math.max(bx.z1, v.z); bx.top = Math.max(bx.top, v.y); } });
       this.box = bx; s.width = bx.x1 - bx.x0;   // les cercles de collision (trafic, bâtiments) prennent la vraie largeur
-      for (let i = 0; i < pts.length; i += 2) if (pts[i + 1] > front - 2) roof = Math.max(roof, pts[i]);
-      this.bar[0].position.set(-0.55, roof + 0.08, front - 1.1); this.bar[1].position.set(0.55, roof + 0.08, front - 1.1);
-      this.bar[2].position.z = this.bar[3].position.z = front + 0.02;
-      for (const l of this.flash) { l.position.y = roof + 0.4; l.position.z = front - 1.1; }
+      // gyrophares posés sur la carrosserie par lancer de rayons (repère de l'engin) : rampe sur le toit de cabine, feux de calandre
+      const ray = new THREE.Raycaster(), meshes = []; f.traverse((o) => { if (o.isMesh) meshes.push(o); });
+      const hit = (o, d) => { ray.set(o.applyMatrix4(this.tilt.matrixWorld), d.transformDirection(this.tilt.matrixWorld)); const h = ray.intersectObjects(meshes, false)[0]; return h ? h.point.applyMatrix4(inv) : null; };
+      const zb = bx.z1 - s.barZ;
+      this.bar.slice(0, 2).forEach((m, k) => { const h = hit(new THREE.Vector3(k ? 0.55 : -0.55, bx.top + 1, zb), new THREE.Vector3(0, -1, 0)); m.position.set(k ? 0.55 : -0.55, (h ? h.y : bx.top) + 0.08, zb); });
+      this.bar.slice(2).forEach((m, k) => { const x = k ? 0.75 : -0.75, h = hit(new THREE.Vector3(x, 1.0, bx.z1 + 1), new THREE.Vector3(0, 0, -1)); m.position.set(x, 1.0, (h ? h.z : bx.z1) - 0.08); });   // encastrés dans la calandre
+      for (const l of this.flash) { l.position.y = this.bar[0].position.y + 0.4; l.position.z = zb; }
     }).catch((e) => console.warn(`${s.name} non chargé`, e));
   }
 
@@ -103,7 +106,7 @@ export class Truck {
   // centre de la boîte en monde
   center() { const p = this.phys, b = this.box, lx = (b.x0 + b.x1) / 2, lz = (b.z0 + b.z1) / 2; return { x: p.x + lx * Math.cos(p.heading) + lz * Math.sin(p.heading), z: p.z - lx * Math.sin(p.heading) + lz * Math.cos(p.heading) }; }
 
-  place(x, z, heading) { this.phys.reset(x, z, heading); this.sync(); }
+  place(x, z, heading) { this.phys.reset(x, z, heading); this.gy = groundY(x, z); this.sync(); }
   setSiren(on) { this.siren = on; }
 
   // points utiles en monde : arrière (lance, brancard), portière conducteur (gauche)
@@ -115,11 +118,12 @@ export class Truck {
 
   sync() {
     const p = this.phys;
-    this.root.position.set(p.x, 0, p.z); this.root.rotation.y = p.heading;
+    this.root.position.set(p.x, this.gy ?? 0, p.z); this.root.rotation.y = p.heading;   // posé sur la chaussée, le trottoir ou la cour
     this.tilt.rotation.set(p.pitch, 0, -p.roll);
   }
 
   update(dt, time, lights = true, cabin = false) {
+    this.gy += (groundY(this.phys.x, this.phys.z) - this.gy) * Math.min(1, dt * 8);   // montée de trottoir adoucie
     this.sync();
     this.cockpit.update(dt, cabin);
     const on = this.siren, a = on && Math.floor(time * 6) % 2 === 0, b = on && !a;
