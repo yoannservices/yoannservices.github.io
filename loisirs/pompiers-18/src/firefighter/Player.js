@@ -55,7 +55,7 @@ export class Player {
       const g = b.groundY(this.x, this.z, this.y);
       if (Math.abs(g - this.y) > 0.9) { this.x = ox; this.z = oz; }      // marche trop haute : on reste
       else this.y += (g - this.y) * Math.min(1, dt * 14);
-      this.floor = this.y > 1.5 ? 1 : 0;
+      this.floor = Math.min(b.floors - 1, Math.round(this.y / 3));
       this.inside = b.inside(this.x, this.z);
     } else { this.y = 0; this.floor = 0; this.inside = false; }
 

@@ -8,6 +8,7 @@ import { City } from './city/City.js';
 import { TrafficLights } from './city/TrafficLights.js';
 import { nodes, TRUCK_START, VSAV_START, EPA_START, PLAYER_START, HYDRANTS, MISSION_LOTS, IMMEUBLE_LOTS, CASERNE } from './city/grid.js';
 import { Traffic } from './traffic/Traffic.js';
+import { Pedestrians } from './traffic/Pedestrians.js';
 import { Truck, FPT, VSAV, EPA } from './truck/Truck.js';
 import { W as BW, D as BD, H as BH } from './fire/Building.js';
 import { Building } from './fire/Building.js';
@@ -63,6 +64,7 @@ class Game {
     this.env = new Environment(this.scene, this.city, 9);
     this.lightsTL = new TrafficLights(this.scene);
     this.traffic = new Traffic(this.scene, 60);
+    this.peds = new Pedestrians(this.scene);
     this.houses = MISSION_LOTS.map((l) => new Building(this.scene, l, this.city.col));
     this.immeubles = IMMEUBLE_LOTS.map((l) => new Building(this.scene, l, this.city.col, 3));
     this.buildings = [...this.houses, ...this.immeubles];
@@ -168,7 +170,8 @@ class Game {
     const collide = (p) => this.buildings.some((b) => { const lx = p.x - b.ox, lz = p.z - b.oz; return Math.abs(lx) < BW / 2 + 0.5 && Math.abs(lz) < BD / 2 + 0.5 && p.y < b.floors * BH + 1.2; });
     if (inp.reset) lad.stow();
     lad.control(dt, { yaw: -inp.strafe, pitch: inp.fwd, ext: inp.extend }, collide);
-    this.rig.ladder(dt, lad);
+    if (inp.toggleView) this.basketView = !this.basketView;
+    this.rig.ladder(dt, lad, this.basketView);
     const tip = lad.tipWorld(), dir = lad.dirWorld();
     // lance canon de la nacelle, alimentée par le FPT
     let water = 0;
@@ -329,8 +332,9 @@ class Game {
       f.color.setRGB(0.09, 0.085, 0.08); f.near = 0.1; f.far = 45 - 42 * Math.min(1, s * 1.15);
     }
     this.lightsTL.update(this.time);
+    this.peds.update(dt, this.time, this.focus);
     const dp = (this.driving ?? tr).phys;
-    this.traffic.update(dt, { t: this.time, bus: { x: this.focus.x, z: this.focus.z, h: dp.heading, circles: this.circles, nodes: this.vehNodes() }, peds: [], siren: !!this.driving?.siren });
+    this.traffic.update(dt, { t: this.time, bus: { x: this.focus.x, z: this.focus.z, h: dp.heading, circles: this.circles, nodes: this.vehNodes() }, peds: this.peds.crossing, siren: !!this.driving?.siren });
     this.mission.update(dt);
     this.crew.update(dt, this.time);
     this.route.update(dt, this.focus, this.mission.target, this.mission.state === 'retour' || this.mission.state === 'transport' ? '#4fb3ff' : '#ff8a1a');

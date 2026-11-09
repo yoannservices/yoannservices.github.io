@@ -38,8 +38,13 @@ export class CameraRig {
   }
 
   // grande échelle : derrière la nacelle, regard vers l'avant de l'échelle ; clic + glisser pour tourner
-  ladder(dt, lad) {
+  ladder(dt, lad, inBasket = false) {
     const tip = lad.tipWorld(), d = lad.dirWorld(), o = this.orb;
+    if (inBasket) {   // vue depuis la nacelle : yeux à 1,6 m du plancher, regard libre au clic + glisser
+      const a = Math.atan2(d.x, d.z) + o.yaw, pt = -o.pitch * 0.8;
+      this.camera.position.set(tip.x, tip.y + 0.6, tip.z); this.camera.lookAt(tip.x + Math.sin(a), tip.y + 0.6 + pt, tip.z + Math.cos(a));
+      this.camYaw = a; return;
+    }
     const a = Math.atan2(d.x, d.z) + o.yaw, dist = 8, up = 2.4 + o.pitch * 6;
     this.camera.position.set(tip.x - Math.sin(a) * dist, tip.y + up, tip.z - Math.cos(a) * dist);
     this.camera.lookAt(tip.x + d.x * 3, tip.y, tip.z + d.z * 3);

@@ -78,7 +78,7 @@ export class Crew {
     if (d < 0.25) { m.path.shift(); if (w.floor !== undefined) m.floor = w.floor; return !m.path.length; }
     const k = Math.min(1, (SPEED * (m.carry ? 0.6 : 1) * dt) / d);
     m.x += dx * k; m.z += dz * k; m.yaw = Math.atan2(dx, dz); m.moving = true;
-    if (b) { m.y += (b.groundY(m.x, m.z, (w.floor ?? m.floor) * 3) - m.y) * Math.min(1, dt * 12); m.floor = m.y > 1.5 ? 1 : 0; } else m.y = 0;
+    if (b) { m.y += (b.groundY(m.x, m.z, m.y) - m.y) * Math.min(1, dt * 12); m.floor = Math.round(m.y / 3); } else m.y = 0;
     if (m.task?.startsWith('hose')) { const last = m.trail[m.trail.length - 1]; if (!last || Math.hypot(last.x - m.x, last.z - m.z) > 0.8) { m.trail.push({ x: m.x, y: m.y + 0.08, z: m.z }); this.drawHose(m); } }
     return false;
   }
@@ -145,7 +145,7 @@ export class Crew {
               }
             }
             // pièce suivante non visitée la plus proche, assez froide pour y entrer
-            const left = b.rooms.filter((r) => !r.upper && !m.visited.has(r.id));
+            const left = b.rooms.filter((r) => !m.visited.has(r.id));
             const ok = left.filter((r) => sim.rooms[r.id].T < 300);
             if (!left.length) { this.say(m, 'Reconnaissance terminée, toutes les pièces sont vues.', 'ok'); m.task = 'follow'; break; }
             if (!ok.length) { this.say(m, `Trop chaud pour entrer dans ${left.map((r) => r.name).join(', ')} : il faut attaquer d'abord.`, 'warn'); m.task = 'idle'; break; }
@@ -182,7 +182,7 @@ export class Crew {
 
   // pièce en feu la plus proche de l'entrée (rez-de-chaussée d'abord)
   hoseTarget(b) {
-    const s = b.sim, burning = b.rooms.filter((r) => !r.upper && (s.rooms[r.id].fire > 0 || s.rooms[r.id].T > 200));
+    const s = b.sim, burning = b.rooms.filter((r) => (s.rooms[r.id].fire > 0 || s.rooms[r.id].T > 200));
     if (!burning.length) return -1;
     return burning.sort((p, q) => p.floor - q.floor || Math.hypot(p.cx, p.cz - 5) - Math.hypot(q.cx, q.cz - 5))[0].id;
   }

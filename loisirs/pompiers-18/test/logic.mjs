@@ -78,3 +78,16 @@ import { routePoints, nextTurn } from '../src/nav/path.js';
   assert.equal(nextTurn([{ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 100, z: 0 }, { x: 100, z: -100 }, { x: 100, z: -110 }, { x: 105, z: -110 }]).turn, 'gauche');
   console.log('itinéraire : OK');
 }
+
+// 8. escalier en lacets : chaque volée monte d'un étage, deux volées ne se superposent pas, hors volée = null
+import { stairY, LANES } from '../src/fire/stairs.js';
+{
+  const A = LANES[0], B = LANES[1], za = (A.z0 + A.z1) / 2, zb = (B.z0 + B.z1) / 2;
+  assert.ok(Math.abs(stairY(A.x0, za, 0, 4) - 0) < 0.01 && Math.abs(stairY(A.x1, za, 3, 4) - 3) < 0.01);     // volée 0 : 0 -> 3 vers +x
+  assert.ok(Math.abs(stairY(B.x1, zb, 3, 4) - 3) < 0.01 && Math.abs(stairY(B.x0, zb, 6, 4) - 6) < 0.01);     // volée 1 : 3 -> 6 vers -x
+  assert.ok(Math.abs(stairY(A.x0, za, 6, 4) - 6) < 0.01 && Math.abs(stairY(A.x1, za, 9, 4) - 9) < 0.01);     // volée 2 sur la voie A, 6 m au-dessus de la 0
+  assert.equal(stairY(0, zb, 0, 4), null);                                                                    // rez-de-chaussée, voie B : rien
+  assert.equal(stairY(0, -1, 3, 4), null);
+  assert.equal(stairY(0, za, 0, 1), stairY(0, za, 0, 4));                                                     // maison R+1 : une seule volée
+  console.log('escalier : OK');
+}

@@ -13,7 +13,7 @@ Three.js r186 par import map, modules ES, sans build ni npm. Rendu : tonalité A
 - **Collisions des engins.** Chaque engin a une boîte calée sur son vrai modèle au chargement. Le joueur s'arrête contre la carrosserie, sans y entrer.
 
 - **GPS.** Un tracé orange à chevrons au sol suit les routes sur la voie de droite (plus court chemin sur la grille, recalculé toutes les 0,5 s). Une vraie flèche en haut à gauche pointe vers le trajet 25 m devant et annonce le prochain virage (« ↱ À droite dans 120 m ») et la distance. Le tracé passe au bleu pour le transport aux urgences et le retour caserne.
-- **Feu d'immeuble** (R+4 : rez-de-chaussée et 1er visitables, 3 étages d'appartements au-dessus).
+- **Feu d'immeuble** (R+4, tous les étages visitables par un escalier en lacets : volées A et B côte à côte dans la cage ; le binôme y monte aussi).
   - Le feu part le plus souvent en étage, et des victimes attendent sur les balcons.
   - Leur santé baisse avec la fumée et la chaleur de l'appartement derrière elles.
   - Les flammes sortent par les vitres éclatées.
@@ -21,6 +21,7 @@ Three.js r186 par import map, modules ES, sans build ni npm. Rendu : tonalité A
   - **Z / S** : lever, **Q / D** : tourner, **A / E** : rentrer / sortir (9 à 30 m). Sous l'horizontale, la nacelle descend jusqu'au sol.
   - **F** près d'une victime au balcon : elle monte dans la nacelle (2 au plus). Nacelle au sol : F, et elle est confiée au SAMU.
   - **Clic gauche** : lance canon de la nacelle (1 000 L/min, alimentée par le FPT à moins de 60 m). Elle casse la vitre la plus proche devant et arrose l'appartement.
+  - **C** : vue depuis la nacelle (yeux dans la nacelle, regard libre au clic + glisser) ou vue orbitale. Les commandes marchent dans les deux vues.
   - **R** : repli automatique, obligatoire avant de reprendre la route.
   - La nacelle ne traverse pas les façades : tourne ou rentre l'échelle si elle bute.
 - **Vue cabine** (C) : planche de bord avec vitesse, sirène et niveau d'eau, et un volant qui tourne.
@@ -54,6 +55,10 @@ Three.js r186 par import map, modules ES, sans build ni npm. Rendu : tonalité A
   - Grades : de Sapeur 2e classe à Adjudant.
   - Matériel à acheter : tuyaux plus longs, bouteille ARI 9 L, lance LDV 1000.
   - La carrière est sauvegardée dans `localStorage`.
+
+## Bâtiments de la ville
+
+Chaque archétype (`ARCH` dans `src/city/City.js`) a une façade dessinée au canvas (brique, pierre, crépi, mur-rideau : cadres, appuis, bandeaux d'étage, corniche, devanture à auvent ou porte, volets, garde-corps) avec fenêtres allumées la nuit, et des pièces fusionnées instanciées : maisons à toit de tuiles et cheminée, toits-terrasses à acrotère, machinerie, citerne, couronnement et mât des tours. Caserne : portes sectionnelles relevées numérotées, marquage jaune, perron, tour de séchage rayée, drapeau, antenne à feu bleu. Hôpital : façade vitrée, héliport, équipements de toit.
 
 ## Graphismes
 
@@ -120,8 +125,10 @@ node --experimental-vm-modules test/syntax.mjs
 - **FPT** et **EPA** : `npc/veh-fire_truck.glb` (l'échelle de l'EPA est construite en primitives) ; le pack marque la carrosserie « transparente » : `fixMaterials` (`src/truck/Truck.js`) la rend opaque, et double face pour la vue cabine ; **VSAV et ambulance du SAMU** : `npc/veh-ambulance.glb` (pack de Comrade1280). Les gyrophares sont calés au chargement sur l'avant et le toit réels de la cabine.
 - **Équipiers** et **victimes** : `proportional_low_poly_man` (Robin Butler). Les équipiers sont habillés en pompiers au chargement : tenue bleu nuit, bandes jaunes, casque chromé, bouteille d'ARI. Ils n'ont pas d'animation : la marche est simulée par un balancement.
 
-## Pas encore fait (versions suivantes)
+## Fait en dernier
 
-- Équipiers dans les étages d'immeuble (ils ne vont pas au-dessus du 1er).
-- Commande de l'échelle depuis la nacelle (elle se commande depuis la tourelle).
-- Pas de piétons en ville (bus-city en a).
+- Piétons aux passages des feux (copiés de bus-city : ils traversent au rouge, les voitures les laissent passer).
+- Équipiers dans tous les étages d'immeuble, par l'escalier en lacets.
+- Vue depuis la nacelle (touche C).
+
+Rien n'est en attente pour l'instant.

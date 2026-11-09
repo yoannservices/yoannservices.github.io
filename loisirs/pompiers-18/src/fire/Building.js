@@ -7,11 +7,12 @@ import { FireSim } from './FireSim.js';
 import { tex, worldUV } from './textures.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { get } from '../settings.js';
+import { STAIR, LANES, stairY } from './stairs.js';
 
 export const W = 14, D = 10, H = 3, T = 0.2;
 const XC = [-W / 2, -W / 6, W / 6, W / 2];       // limites des colonnes
 const ZR = [-D / 2, 0, D / 2];                   // limites des rangées (0 = fond, 1 = façade)
-export const STAIR = { x0: -1.4, x1: 1.6, z0: -4.85, z1: -3.65 };   // dans la pièce du fond au centre, monte vers +x
+export { STAIR };   // escalier dans la pièce du fond au centre : volées en lacets (voir stairs.js)
 const NAMES = [
   ['Cuisine', 'Escalier', 'Salle à manger', 'Salon', 'Entrée', 'Bureau'],
   ['Chambre 2', 'Palier', 'Salle de bain', 'Chambre 1', 'Chambre 3', 'Chambre d\'enfant'],
@@ -35,7 +36,7 @@ function flameTexture() {
 }
 
 export class Building {
-  // upper : étages d'appartements au-dessus du R+1 (immeuble), accessibles seulement par l'extérieur (EPA)
+  // upper : étages d'appartements au-dessus du R+1 (immeuble), reliés par l'escalier en lacets (stairs.js) et accessibles par l'EPA
   constructor(scene, lot, cityCol, upper = 0) {
     this.upper = upper; this.floors = 2 + upper;
     this.scene = scene; this.lot = lot; this.ox = lot.x; this.oz = lot.z;
@@ -144,19 +145,30 @@ export class Building {
         slab(-W / 2, W / 2, s.z1, D / 2); slab(-W / 2, W / 2, -D / 2, s.z0); slab(-W / 2, s.x0, s.z0, s.z1); slab(s.x1, W / 2, s.z0, s.z1);
       }
     }
-    // escalier : marches, garde-corps de la trémie à l'étage, limon côté pièce au rez-de-chaussée
-    const s = STAIR, steps = 14, run = (s.x1 - s.x0) / steps;
-    for (let k = 0; k < steps; k++) this.box(run + 0.02, (k + 1) * (H / steps), s.z1 - s.z0, mat.door, s.x0 + (k + 0.5) * run, ((k + 1) * (H / steps)) / 2, (s.z0 + s.z1) / 2);
-    this.box(s.x1 - s.x0 - 0.2, 1, 0.05, mat.door, (s.x0 + s.x1) / 2 - 0.1, H + 0.5, s.z1);
-    this.solid(1, s.x0 - 0.05, s.x1 - 0.2, s.z1 - 0.05, s.z1 + 0.05); this.solid(1, s.x0 - 0.1, s.x0, s.z0, s.z1);
-    this.box(0.05, 1, s.z1 - s.z0, mat.door, s.x0 - 0.05, H + 0.5, (s.z0 + s.z1) / 2);
-    this.solid(0, s.x0 + 0.5, s.x1, s.z1 - 0.05, s.z1 + 0.05);
+    // escalier en lacets : une volée par étage (voie A vers +x, voie B vers -x), garde-corps des trémies, volées fermées côté pièce
+    const steps = 14, run = (STAIR.x1 - STAIR.x0) / steps, sh = H / steps;
+    const rail = (j, x0, x1, z0, z1) => { this.box(x1 - x0, 1, z1 - z0, mat.door, (x0 + x1) / 2, j * H + 0.5, (z0 + z1) / 2); this.solid(j, x0, x1, z0, z1); };
+    for (let k = 0; k < this.floors - 1; k++) {
+      const L = LANES[k % 2], odd = k % 2, zc = (L.z0 + L.z1) / 2;
+      for (let i = 0; i < steps; i++) this.box(run + 0.02, (i + 1) * sh, L.z1 - L.z0, mat.door, odd ? L.x1 - (i + 0.5) * run : L.x0 + (i + 0.5) * run, k * H + ((i + 1) * sh) / 2, zc);
+      if (k > 0) {   // volée posée sur l'étage k : fermée sur les côtés et en haut, ouverte à la base
+        if (odd) { this.solid(k, L.x0, L.x1, L.z0 - 0.05, L.z0 + 0.05); this.solid(k, L.x0, L.x1, L.z1 - 0.05, L.z1 + 0.05); this.solid(k, L.x0 - 0.1, L.x0, L.z0, L.z1); }
+        else { this.solid(k, L.x0, L.x1, L.z1 - 0.05, L.z1 + 0.05); this.solid(k, L.x1, L.x1 + 0.1, L.z0, L.z1); }
+      }
+    }
+    for (let j = 1; j < this.floors; j++) {   // trémie de la volée j-1 : garde-corps sauf du côté de l'arrivée
+      const L = LANES[(j - 1) % 2];
+      if ((j - 1) % 2) { rail(j, L.x0 + 0.2, L.x1 + 0.05, L.z0 - 0.05, L.z0 + 0.05); rail(j, L.x0 + 0.2, L.x1 + 0.05, L.z1 - 0.05, L.z1 + 0.05); rail(j, L.x1, L.x1 + 0.1, L.z0, L.z1); }
+      else { rail(j, L.x0 - 0.05, L.x1 - 0.2, L.z1 - 0.05, L.z1 + 0.05); rail(j, L.x0 - 0.1, L.x0, L.z0, L.z1); }
+    }
+    this.solid(0, STAIR.x0 + 0.5, STAIR.x1, STAIR.z1 - 0.05, STAIR.z1 + 0.05); this.solid(0, STAIR.x1, STAIR.x1 + 0.1, STAIR.z0, STAIR.z1);
     for (let f = 2; f < this.floors; f++) {
       for (const [a, b] of [[[0, 0], [0, 1]], [[0, 1], [0, 2]], [[1, 0], [1, 1]], [[1, 1], [1, 2]], [[0, 1], [1, 1]]]) link(roomIndex(f, ...a), roomIndex(f, ...b), 'door', true);
       link(roomIndex(f - 1, 0, 1), roomIndex(f, 0, 1), 'stair', true);
       this.wall(f, 'x', D / 2, -W / 2, W / 2, [], mat.out); this.wall(f, 'x', -D / 2, -W / 2, W / 2, [], mat.out);
       this.wall(f, 'z', -W / 2, -D / 2, D / 2, [], mat.out); this.wall(f, 'z', W / 2, -D / 2, D / 2, [], mat.out);
-      this.box(W - 0.3, 0.25, D - 0.3, mat.slab, 0, f * H - 0.12, 0);
+      { const L = LANES[(f - 1) % 2], hx = (W - 0.3) / 2, hz = (D - 0.3) / 2, sl = (x0, x1, z0, z1) => this.box(x1 - x0, 0.25, z1 - z0, mat.slab, (x0 + x1) / 2, f * H - 0.12, (z0 + z1) / 2);   // dalle percée au-dessus de la volée f-1
+        sl(-hx, hx, L.z1, hz); sl(-hx, hx, -hz, L.z0); sl(-hx, L.x0, L.z0, L.z1); sl(L.x1, hx, L.z0, L.z1); }
       this.windowsFor(f, link);
       // balcon filant en façade (les victimes y attendent la grande échelle)
       this.box(W - 1, 0.16, 1.3, mat.slab, 0, f * H + 0.08, D / 2 + 0.75);
@@ -282,9 +294,9 @@ export class Building {
   }
   // hauteur du sol sous le joueur (escalier compris) ; y = hauteur actuelle des pieds
   groundY(x, z, y) {
-    const l = this.local(x, z), s = STAIR;
-    if (l.x > s.x0 - 0.05 && l.x < s.x1 + 0.05 && l.z > s.z0 && l.z < s.z1) return H * Math.min(1, Math.max(0, (l.x - s.x0) / (s.x1 - s.x0)));
-    return this.inside(x, z) && y > H / 2 ? H : 0;
+    const l = this.local(x, z), h = stairY(l.x, l.z, y, this.floors - 1, H);
+    if (h !== null) return h;
+    return this.inside(x, z) ? H * Math.min(this.floors - 1, Math.max(0, Math.round(y / H))) : 0;
   }
   // point d'arrivée d'une lance (pas de 0,35 m jusqu'au premier mur ou porte fermée) ; renvoie { room, x, z, d, wallRoom }
   spray(x, z, dx, dz, floor, range) {
@@ -311,15 +323,21 @@ export class Building {
   buildNav() {
     const N = [], adj = [], add = (x, z, floor, extra = {}) => { N.push({ x: this.ox + x, z: this.oz + z, floor, ...extra }); adj.push([]); return N.length - 1; };
     const link = (a, b) => { const d = Math.hypot(N[a].x - N[b].x, N[a].z - N[b].z) + Math.abs(N[a].floor - N[b].floor) * 3; adj[a].push([b, d]); adj[b].push([a, d]); };
-    const roomNode = this.rooms.map((r) => add(r.cx, r.cz, r.floor, { room: r.id }));
+    // nœud d'une pièce = son centre, sauf la cage d'escalier aux étages (le centre y est sur une volée) : on la prend côté palier
+    const roomNode = this.rooms.map((r) => add(r.cx, r.floor && r.col === 1 && r.row === 0 ? -1 : r.cz, r.floor, { room: r.id }));
     const outside = add(0, D / 2 + 1.6, 0, { outside: true });
     for (const d of this.doors) {
       const n = add(d.x - this.ox, d.z - this.oz, d.floor, { door: d }), l = this.links[d.link];
       link(n, roomNode[l.a]); link(n, l.b < 0 ? outside : roomNode[l.b]);
     }
-    const s = STAIR, zm = (s.z0 + s.z1) / 2;
-    const low = add(s.x0 - 0.45, zm, 0), top = add(s.x1 + 0.4, zm, 1), exit = add(s.x1 + 0.4, s.z1 + 0.45, 1);
-    link(roomNode[roomIndex(0, 0, 1)], low); link(low, top); link(top, exit); link(exit, roomNode[roomIndex(1, 0, 1)]);
+    const phys = new Set(this.doors.map((d) => d.link));   // étages d'appartements : pièces ouvertes les unes sur les autres
+    this.links.forEach((l, i) => { if (l.kind === 'door' && !phys.has(i) && l.b >= 0) link(roomNode[l.a], roomNode[l.b]); });
+    for (let k = 0; k < this.floors - 1; k++) {   // une volée : accès à la base (par le côté libre), pied, haut, sortie vers le palier de l'étage k+1
+      const L = LANES[k % 2], sx = k % 2 ? -1 : 1, zc = (L.z0 + L.z1) / 2, xb = k % 2 ? L.x1 : L.x0, xt = k % 2 ? L.x0 : L.x1;
+      const base = add(xb - sx * 0.45, zc, k), top = add(xt + sx * 0.4, zc, k + 1), exit = add(xt + sx * 0.4, -1.6, k + 1);
+      if (k) { const side = add(xb - sx * 0.45, -1.6, k); link(roomNode[roomIndex(k, 0, 1)], side); link(side, base); } else link(roomNode[roomIndex(0, 0, 1)], base);
+      link(base, top); link(top, exit); link(exit, roomNode[roomIndex(k + 1, 0, 1)]);
+    }
     this.nav = { N, adj, roomNode, outside };
   }
   // chemin (liste de points { x, z, floor, door }) d'un point vers une pièce (id) ou l'extérieur (-1)
