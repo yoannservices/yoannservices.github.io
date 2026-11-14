@@ -29,7 +29,7 @@ Modèles téléchargés sur [Sketchfab](https://sketchfab.com), licence **Creati
 | `proportional_low_poly_man__free_download.glb` | Proportional Low Poly Man | Robin Butler | bus-city-simulator (piétons, voyageurs), rally-masters (spectateurs), parking-master (piétons PNJ), pompiers-18 (victimes, équipiers habillés en pompiers) |
 | `fairheaven_lt_80_cop_cruiser_-_low_poly_model.glb`, `lct_3000_95_-_low_poly_model.glb` | Fairheaven LT '80 Cop Cruiser, LCT 3000 '95 | Daniel Zhabotinsky | non utilisés (roues nommées, prêts pour `rigWheels`) |
 | `low_poly_car_-_chevrolet_c10_pickup_1963.glb` | Chevrolet C10 Pickup 1963 | tedpermana | non utilisé (un seul bloc, sans roues séparées) |
-| `stylized_low_poly_animated_character.glb` | Stylized Low poly Animated Character | Karthik Naidu | non utilisé (personnage animé, aucun jeu de piétons animés) |
+| `stylized_low_poly_animated_character.glb` | Stylized Low poly Animated Character | Karthik Naidu | deneigeur (joueur à pied, clips Idle / Walk / Run, mains sur la pelle par IK) |
 | `low-poly_psx_pilot_flying_a_plane_animated.glb` | Low-poly PSX Pilot flying a plane (animated) | Jungle Jim | non utilisé (blanc, sans texture) |
 | `race_car_driver_-_low_poly.glb` | Race Car Driver - Low Poly | tomkart | non utilisé (debout, 21 pièces rigides) |
 | `snowboader_with_gear.glb` | Snowboader with gear | gamedevme | non utilisé |
