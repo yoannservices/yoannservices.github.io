@@ -1,8 +1,0 @@
-# Railway construit l'application avec Nixpacks, sans conteneur Docker.
-
-[build]
-builder = "NIXPACKS"
-
-[deploy]
-healthcheckPath = "/health"
-healthcheckTimeout = 60
