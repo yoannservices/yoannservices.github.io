@@ -101,10 +101,11 @@ if (document.head && !document.querySelector('link[rel~="icon"]')) document.head
     window.requestAnimationFrame = cb => rawRaf(t => (frozen ? heldFrames.push(cb) : cb(t)));
   }
 
-  // jeux (loisirs/) : un dépôt GitHub Pages par jeu ; en local, chemins du dossier web
+  // chaque projet (jeu, outil, développement, éducation) a son dépôt GitHub Pages, nommé comme son dossier ; en local, chemins du dossier web
   const online = /github\.io$/.test(location.hostname);
+  const NO_REPO = ['pieces-detachees-tel']; // projets gardés en local
   function url(p) {
-    if (online && p.cat === 'loisirs') return `https://yoannservices.github.io/${p.path.split('/')[1]}/`;
+    if (online && !NO_REPO.includes(p.path.split('/')[1])) return `https://yoannservices.github.io/${p.path.split('/')[1]}/`;
     return new URL(p.path.endsWith('.html') ? p.path : p.path + 'index.html', root).href;
   }
   function esc(s) {
