@@ -29,7 +29,7 @@ Chaque projet a son propre `README.md` dans son dossier.
 python -m http.server 8765
 ```
 
-puis ouvrez http://localhost:8765 (c'est aussi la configuration `web` de `.claude/launch.json`). HTML, CSS et JavaScript, sans build.
+puis ouvrez http://localhost:8765. Autre façon, sur le port 5180 : lancer la configuration `web` de `Loisirs\.claude\launch.json` (depuis `Loisirs\`, `python -m http.server 5180 --directory web`), ou la configuration `site` de `web\.claude\launch.json` (`npx --yes http-server . -p 5180 -c-1`, depuis `web\`), puis ouvrez http://localhost:5180. HTML, CSS et JavaScript, sans build.
 
 ## Publier sur GitHub
 

@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="stylesheet" href="../../assets/yoann-thread.css" />
+  <script src="../../assets/project-nav.js" defer></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compte à rebours GTA VI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="countdown-page">
+    <img src="logo-gta-vi.png" alt="Logo GTA VI" class="banner">
+
+    <p class="eyebrow">Rockstar Games</p>
+    <h1>Sortie de GTA VI dans</h1>
+
+    <section id="countdown" aria-label="Compte a rebours GTA VI">
+      <div class="time-box">
+        <div id="days">0</div>
+        <div class="label">Jours</div>
+      </div>
+      <div class="time-box">
+        <div id="hours">0</div>
+        <div class="label">Heures</div>
+      </div>
+      <div class="time-box">
+        <div id="minutes">0</div>
+        <div class="label">Minutes</div>
+      </div>
+      <div class="time-box">
+        <div id="seconds">0</div>
+        <div class="label">Secondes</div>
+      </div>
+    </section>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-label">Progression depuis l'annonce</div>
+      <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+      <div id="progress-pct" class="progress-pct">0%</div>
+    </div>
+
+    <p class="note">Date cible: 19 novembre 2026 à 14:00</p>
+
+    <!-- Share -->
+    <div class="share-row">
+      <button onclick="shareCountdown('twitter')" class="share-btn" title="Twitter/X">𝕏</button>
+      <button onclick="shareCountdown('copy')" class="share-btn" id="btn-copy" title="Copier le lien">📋</button>
+    </div>
+
+    <!-- Visitor counter -->
+    <p class="visitor-count" id="visitor-count"></p>
+
+    <!-- News -->
+    <section class="news-section">
+      <h2 class="timeline-title">🗞️ Actualités récentes</h2>
+      <div class="news-grid">
+        <a class="news-card" href="https://www.rockstargames.com/newswire" target="_blank" rel="noreferrer">
+          <div class="news-source">Rockstar Newswire</div>
+          <div class="news-title">Annonces officielles de Rockstar Games</div>
+          <div class="news-date">rockstargames.com</div>
+        </a>
+        <a class="news-card" href="https://www.ign.com/articles/gta-vi" target="_blank" rel="noreferrer">
+          <div class="news-source">IGN</div>
+          <div class="news-title">GTA VI – Toutes les infos, trailers &amp; analyses</div>
+          <div class="news-date">ign.com</div>
+        </a>
+        <a class="news-card" href="https://www.eurogamer.net/gta-vi" target="_blank" rel="noreferrer">
+          <div class="news-source">Eurogamer</div>
+          <div class="news-title">GTA VI : news, rumeurs et date de sortie</div>
+          <div class="news-date">eurogamer.net</div>
+        </a>
+        <a class="news-card" href="https://www.jeuxvideo.com/jeux/jeu-1734630.htm" target="_blank" rel="noreferrer">
+          <div class="news-source">Jeuxvideo.com</div>
+          <div class="news-title">GTA VI – Dossier complet FR</div>
+          <div class="news-date">jeuxvideo.com</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="timeline">
+      <h2 class="timeline-title">Chronologie GTA VI</h2>
+      <div class="timeline-track">
+        <div class="tl-item"><span class="tl-date">4 déc 2023</span><span class="tl-event">Premier trailer officiel</span></div>
+        <div class="tl-item"><span class="tl-date">5 déc 2023</span><span class="tl-event">Annonce de la sortie en 2025</span></div>
+        <div class="tl-item"><span class="tl-date">15 mai 2024</span><span class="tl-event">Report à automne 2025</span></div>
+        <div class="tl-item"><span class="tl-date">4 nov 2024</span><span class="tl-event">Annonce d'un second trailer</span></div>
+        <div class="tl-item"><span class="tl-date">14 jan 2025</span><span class="tl-event">Deuxième trailer officiel</span></div>
+        <div class="tl-item"><span class="tl-date">3 fév 2025</span><span class="tl-event">Report au 26 mai 2026</span></div>
+        <div class="tl-item"><span class="tl-date">20 mai 2025</span><span class="tl-event">Report au 19 novembre 2026</span></div>
+        <div class="tl-item tl-target"><span class="tl-date">19 nov 2026</span><span class="tl-event">🎮 Sortie prévue</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
